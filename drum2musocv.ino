@@ -11,6 +11,14 @@ enum envelope_types {
 
 #define CONFIG_THROTTLE_MS 5
 
+
+void NOISY_DEBUG(long t, int d) {
+  for (int i = 0 ; i < t; i++) {
+    MIDI.sendControlChange(7, i%127, 1);
+    delay(d);
+  }
+}
+
 // -----------------------------------------------------------------------------
 
 // This function will be automatically called when a NoteOn is received.
@@ -89,10 +97,12 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
     byte p = pitch;
     byte v = velocity;
 
-    p = convert_drum_pitch(pitch);
+    p = convert_drum_pitch(pitch);   
 
-    if (!process_triggers_for_pitch(pitch, velocity, false))
+    if (!process_triggers_for_pitch(pitch, velocity, false)) {
       MIDI.sendNoteOff(p,v,16); //channel);
+      //MIDI.sendControlChange(7, 0, 1);
+    } 
 }
 
 void handleControlChange(byte channel, byte number, byte value) {
@@ -127,6 +137,7 @@ void setup()
 
     MIDI.setHandleControlChange(handleControlChange);
 
+    NOISY_DEBUG(1000,1);
 }
 
 unsigned long time_last;
