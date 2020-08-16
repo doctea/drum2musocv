@@ -19,6 +19,10 @@ void NOISY_DEBUG(long t, int d) {
   }
 }
 
+void NUMBER_DEBUG(byte channel, byte data1, byte data2) {
+  MIDI.sendControlChange(data1, data2, channel);
+}
+
 // -----------------------------------------------------------------------------
 
 // This function will be automatically called when a NoteOn is received.
@@ -84,7 +88,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity)
     p = convert_drum_pitch(pitch);
 
     if (!process_triggers_for_pitch(pitch, velocity, true))
-      if (v>0) // alt note off?
+      //if (v>0) // alt note off?
         MIDI.sendNoteOn(p,v,16); //channel);
 }
 
