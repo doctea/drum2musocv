@@ -2,6 +2,15 @@
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
+
+enum envelope_types {
+  ENV_CRASH = 0,
+  ENV_WOBBLE = 1,
+  // TODO: more envelope types...
+};
+
+#define CONFIG_THROTTLE_MS 5
+
 // -----------------------------------------------------------------------------
 
 // This function will be automatically called when a NoteOn is received.
@@ -9,16 +18,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // see documentation here:
 // https://github.com/FortySevenEffects/arduino_midi_library/wiki/Using-Callbacks
 
-
-float decay_1 = 0.0;
-unsigned long decay_triggered = 0;
-bool decay_1_active = false;
-unsigned long last_sent = 0;
-int decay_1_level = 127; // initial level of decay
-
-#define decay_length 1000
-
-byte convert_drum_pitch(byte pitch, bool triggers) {
+byte convert_drum_pitch(byte pitch) {
       byte p;
       if (pitch>35 && pitch < 94) {
         p = 0;
@@ -35,22 +35,30 @@ byte convert_drum_pitch(byte pitch, bool triggers) {
           case 50: p = 80; break; //High Tom - G#5/Ab5
           case 53: p = 83; break; //Ride Bell - B5
           case 54: p = 81; break; //Tambourine - A5
-          case 57: 
-          case 67:
-              if (triggers) {
-                // trigger envelope? 
-                decay_1 = 0.0f;
-                decay_triggered = millis();
-                decay_1_active = true;
-                decay_1_level = MIDI.getData2(); //// need to know velocity here to handle this...
-              }
-              break;
-          
           //default: p = pitch + 12; //itch = 72; break;
         }
         p = p - 12;
       }
       return p;
+}
+
+
+bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
+  byte p;
+  switch (pitch) {
+    case 44:  // pedal hihat -- choke?
+      break;
+    case 57:  // cymbal crash 2
+      break;
+    case 55:  // splash cymbal
+      break;
+    case 67:
+      // trigger envelope
+      update_envelope(ENV_CRASH, velocity, state);
+      return true;
+      break;
+  }
+  return false;
 }
 
 void handleNoteOn(byte channel, byte pitch, byte velocity)
@@ -65,11 +73,11 @@ void handleNoteOn(byte channel, byte pitch, byte velocity)
     byte p = pitch;
     byte v = velocity;
 
-    //if (channel==10) {
-      p = convert_drum_pitch(pitch,true);
-    //}
-    if (v>0) // alt note off?
-      MIDI.sendNoteOn(p,v,16); //channel);
+    p = convert_drum_pitch(pitch);
+
+    if (!process_triggers_for_pitch(pitch, velocity, true))
+      if (v>0) // alt note off?
+        MIDI.sendNoteOn(p,v,16); //channel);
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
@@ -81,15 +89,14 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
     byte p = pitch;
     byte v = velocity;
 
-    //if (channel==10) {
-      p = convert_drum_pitch(pitch,false);
-    //}
-    
-    MIDI.sendNoteOff(p,v,16); //channel);
+    p = convert_drum_pitch(pitch);
+
+    if (!process_triggers_for_pitch(pitch, velocity, false))
+      MIDI.sendNoteOff(p,v,16); //channel);
 }
 
 void handleControlChange(byte channel, byte number, byte value) {
-    //MIDI.sendControlChange(number, value, 1);
+    MIDI.sendControlChange(number, value, 1);
 }
 
 void handleSongPosition(unsigned int beats) {
@@ -133,7 +140,7 @@ void loop()
     unsigned long delta = now - time_last;
     
     // update envelope by time elapsed
-    unsigned long elapsed = now - decay_triggered;
+    //unsigned long elapsed = now - decay_triggered;
 
     //decay_1 = ((now/1000)%127) / 127;
     //decay_1 += 0.1f;
@@ -141,21 +148,7 @@ void loop()
       decay_1 = 0.0f;
     }*/
     //if (decay_triggered > (now-decay_length))
-    if (decay_1_active) {
-      if (last_sent==0 || abs(now - last_sent)>=5) { // only update every 10 ms
-        if (elapsed <= (decay_length/10)) {
-          MIDI.sendControlChange(7, decay_1_level, 1);
-        } else if (elapsed <= decay_length) {
-          decay_1 = 1.0f - (float)elapsed / (float)decay_length; /// decay_length; // reversing this gives cool effect?
-          MIDI.sendControlChange(7, (byte)((float)decay_1_level * decay_1), 1); //decay_1 * 127, 1);
-          //MIDI.sendControlChange(7, 127, 1); //(byte)random(0,127), 1); //decay_1 * 127, 1);
-        } else {
-          decay_1_active = false;
-          MIDI.sendControlChange(7, 0, 1);
-        }
-        last_sent = millis();
-      }
-    }
+    process_envelopes(now, delta);
 
     time_last = millis();
     // There is no need to check if there are messages incoming
