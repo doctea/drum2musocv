@@ -5,7 +5,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 enum envelope_types {
   ENV_CRASH = 0,
-  ENV_WOBBLE = 1,
+  ENV_SPLASH = 1,
   // TODO: more envelope types...
 };
 
@@ -61,13 +61,16 @@ bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
     case 44:  // pedal hihat -- choke?
       break;
     case 57:  // cymbal crash 2
-      break;
-    case 55:  // splash cymbal
-      break;
-    case 67:
       // trigger envelope
       update_envelope(ENV_CRASH, velocity, state);
       return true;
+      break;
+      break;
+    case 55:  // splash cymbal
+      update_envelope(ENV_SPLASH, velocity, state);
+      return true;
+      break;
+    case 67:  // aguiro ?
       break;
   }
   return false;
@@ -127,6 +130,9 @@ void setup()
 {
 
     randomSeed(analogRead(0));
+
+    initialise_envelopes();
+    
     // Initiate MIDI communications, listen to all channels
     MIDI.begin(10); //MIDI_CHANNEL_OMNI);
 
