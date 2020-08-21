@@ -1,5 +1,5 @@
 # drum2musocv
-Arduino sketch to be used in conjunction with USBMidiKlik (to provide USB MIDI connection) to adapt the MidiMuso CV-12 to use General Midi note numbers.
+Arduino sketch to be used in conjunction with USBMidiKlik (to provide USB MIDI connection) to adapt the MidiMuso CV-12 to use General Midi note numbers on MIDI Channel 10, for use as a drum machine.
 
 Also generates triggerable envelopes (works for two envelopes, in progress...)
 
