@@ -52,7 +52,7 @@ unsigned long clock_millis() {
 // https://github.com/FortySevenEffects/arduino_midi_library/wiki/Using-Callbacks
 
 byte convert_drum_pitch(byte pitch) {
-  // in mode 0x0b (i think, need to theck this) there are 12 triggers available
+  // in mode 0x0b (i think, need to theck this) there are 11 triggers available and a pitch out
   // TODO: make handy #defines for the different midimuso outputs + config
   byte p;
   if (pitch > 35 && pitch < 94) {
