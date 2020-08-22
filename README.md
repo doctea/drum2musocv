@@ -24,3 +24,5 @@ MIDI clock, envelope length sync and LFOs
 LED indicators of trigger received etc
 
 Trigger other devices with CV via relays (ie circuit bent stuff).  Route MIDI to other devices?  Extra CVs/triggers direct from the Arduino?  Shitty sample recorder/player?!
+
+Dedicated CCs to modulate the envelopes

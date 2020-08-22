@@ -21,10 +21,10 @@ typedef struct envelope_state {
 
   // TODO: int delay_length = 5;  //  D - delay before atack starts
   unsigned int  attack_length = 0;     //  A - attack  - length of stage
-  unsigned int  hold_length = 64;  //  H - hold    - length to hold at end of attack before decay
-  unsigned int  decay_length = 512;     //  D - decay   - length of stage
-  float sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
-  unsigned int  release_length = 1024;   //  R - release - length (time to drop to 0)
+  unsigned int  hold_length = PPQN * 2; //48;  //  H - hold    - length to hold at end of attack before decay
+  unsigned int  decay_length = PPQN * 4; //384; //512;     //  D - decay   - length of stage
+  float         sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
+  unsigned int  release_length = PPQN * 16; //768;   //  R - release - length (time to drop to 0)
 
   unsigned long stage_triggered_at = 0;
   unsigned long triggered_at = 0; 
@@ -38,10 +38,10 @@ typedef struct envelope_state {
 envelope_state envelopes[3];
 
 void initialise_envelopes() {
-  envelopes[ENV_SPLASH].attack_length = 10;
-  envelopes[ENV_SPLASH].decay_length = 00;
+  envelopes[ENV_SPLASH].attack_length = PPQN / 2; //12;
+  envelopes[ENV_SPLASH].decay_length = 0;
   envelopes[ENV_SPLASH].sustain_ratio = 1.0f; //.3f;
-  envelopes[ENV_SPLASH].release_length = 64;
+  envelopes[ENV_SPLASH].release_length = PPQN * 3; //72;
   envelopes[ENV_SPLASH].midi_cc = 11; //release_length = 50;
 
   envelopes[ENV_CRASH].midi_cc = 7;

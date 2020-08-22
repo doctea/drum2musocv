@@ -14,8 +14,10 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
 
 #define CONFIG_THROTTLE_MS 5
 
-
+//TODO: make these CC values sensible and map them in FL
 #define CC_SYNC_MOD 73
+
+#define PPQN 24
 
 enum envelope_types : byte {
   ENV_CRASH = 0,
@@ -32,7 +34,8 @@ byte cc_sync_modifier = 127;
 float estimated_ticks_per_ms = 1.0f;
 
 // for handling clock
-unsigned long ticks = 0;
+//unsigned long 
+float ticks = 0;  // store ticks as float, so can update by fractional ticks
 unsigned long last_tick_at = 0;
 unsigned long clock_millis() {
   //return millis();
@@ -41,7 +44,7 @@ unsigned long clock_millis() {
       //(estimated_ticks_per_ms * 
       ((float)cc_sync_modifier/127.0f);
   }
-  return ticks * (16 * ((float)cc_sync_modifier/127.0f));   // TODO: need to experiment to find a good tradeoff between allowing very short and very long stages at all tempos?  tempo-sync this basically?  
+  return ticks * PPQN; // * ((float)(cc_sync_modifier^2)/127.0f);   // TODO: need to experiment to find a good tradeoff between allowing very short and very long stages at all tempos?  tempo-sync this basically?  
 }
 
 // -----------------------------------------------------------------------------
@@ -63,7 +66,7 @@ byte convert_drum_pitch(byte pitch) {
       case GM_NOTE_HAND_CLAP:           p = 74; break; //Hand Clap - D5
       case GM_NOTE_ELECTRIC_SNARE:      p = 75; break; //Electric Snare - D#5/Eb5
       case GM_NOTE_CLOSED_HI_HAT:       p = 76; break; //Closed Hi-hat - E5
-      case GM_NOTE_PEDAL_HI_HAT: p = 82; break; //Pedal Hi-hat - A#5/Bb5
+      case GM_NOTE_PEDAL_HI_HAT:        p = 82; break; //Pedal Hi-hat - A#5/Bb5
       case GM_NOTE_LOW_TOM:             p = 79; break; //Low Tom - G5
       case GM_NOTE_OPEN_HI_HAT:         p = 77; break; //Open Hi-hat - F5
       case GM_NOTE_CRASH_CYMBAL_1:      p = 78; break; //Crash Cymbal 1 - F#5/Gb5
@@ -160,7 +163,8 @@ void handleClock() {
   MIDI.sendClock();
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
-  ticks++;
+  //ticks++;
+  ticks+=((float)(cc_sync_modifier^2)/127.0f);
   //estimated_ticks_per_ms = ((millis() - last_tick_at))/1.0;
   last_tick_at = millis();
 }
