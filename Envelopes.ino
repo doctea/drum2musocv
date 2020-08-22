@@ -1,8 +1,11 @@
+
+#include "SinTables.h"
+
 enum stage : byte {
   OFF = 0,
   //DELAY,  // time
   ATTACK,
-  //HOLD, // time
+  HOLD, // time
   DECAY,
   SUSTAIN,
   RELEASE,
@@ -12,19 +15,19 @@ enum stage : byte {
 typedef struct envelope_state {
   byte stage = OFF;
 
-  byte initial_level; // initial level during attack (todo: attack ramp)
+  byte initial_level;         // triggered velocity
   byte actual_level;          // right now, the level
   byte stage_start_level;     // level at start of current stage
 
   // TODO: int delay_length = 5;  //  D - delay before atack starts
-  long attack_length = 200;     //  A - attack  - length of stage
-  // TODO: int hold_length = 50;  //  H - hold    - length to hold at end of attack before decay
-  long decay_length = 500;     //  D - decay   - length of stage
+  unsigned int  attack_length = 0;     //  A - attack  - length of stage
+  unsigned int  hold_length = 64;  //  H - hold    - length to hold at end of attack before decay
+  unsigned int  decay_length = 512;     //  D - decay   - length of stage
   float sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
-  long release_length = 1000;   //  R - release - length (time to drop to 0)
+  unsigned int  release_length = 1024;   //  R - release - length (time to drop to 0)
 
   unsigned long stage_triggered_at = 0;
-  unsigned long triggered_at = 0;
+  unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
 
   byte midi_cc;
@@ -32,19 +35,28 @@ typedef struct envelope_state {
   byte last_sent_lvl;
 };
 
-envelope_state envelopes[2];
+envelope_state envelopes[3];
 
 void initialise_envelopes() {
-  envelopes[ENV_SPLASH].attack_length = 50;
+  envelopes[ENV_SPLASH].attack_length = 10;
   envelopes[ENV_SPLASH].decay_length = 00;
-  envelopes[ENV_SPLASH].sustain_ratio = 0.0f; //.3f;
-  envelopes[ENV_SPLASH].release_length = 50;
-  envelopes[ENV_CRASH].midi_cc = 7;
+  envelopes[ENV_SPLASH].sustain_ratio = 1.0f; //.3f;
+  envelopes[ENV_SPLASH].release_length = 64;
   envelopes[ENV_SPLASH].midi_cc = 11; //release_length = 50;
+
+  envelopes[ENV_CRASH].midi_cc = 7;
+
+  envelopes[ENV_WOBBLY].midi_cc = 71;
+}
+
+void kill_envelopes() {
+  for (byte i = 0 ; i < 3/*sizeof(envelopes)-1*/ ; i++) {
+    envelopes[i].stage = OFF;
+  }
 }
 
 void update_envelope (byte env_num, byte velocity, bool state) {
-  unsigned long now = millis();
+  unsigned long now = clock_millis(); 
   if (state == true) { //&& envelopes[env_num].stage==OFF) {
     envelopes[env_num].initial_level = velocity;
     envelopes[env_num].actual_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
@@ -61,6 +73,7 @@ void update_envelope (byte env_num, byte velocity, bool state) {
     switch (envelopes[env_num].stage) {
       // don't do anything if we're in this stage and we receive note off, since we're already meant to be stopping by now
       case RELEASE:
+        envelopes[env_num].stage_start_level = 0; // received note off while releasing -- cut note short
       case OFF:
         /*NUMBER_DEBUG(15, 15, 15);
         NUMBER_DEBUG(15, 15, 15);
@@ -70,8 +83,11 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 
       // if in any other stage, jump straight to RELEASE
       case ATTACK:
+      case HOLD:
+        // TODO: continue to HOLD , but leap straight to RELEASE when reached end
       case DECAY:
       case SUSTAIN:
+      default:
         //NOISY_DEBUG(500, 2);
         //NUMBER_DEBUG(13, 13, 13);
 
@@ -85,7 +101,7 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 }
 
 void process_envelopes(unsigned long now, unsigned long delta) {
-  for (int i = 0 ; i < 2 ; i++) {
+  for (int i = 0 ; i < 3 ; i++) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -100,13 +116,24 @@ void process_envelopes(unsigned long now, unsigned long delta) {
         //MIDI.sendControlChange(7, envelopes[i].level, 1);
         //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
 
-        lvl = envelopes[i].initial_level;
+        if (envelopes[i].attack_length==0) 
+          lvl = envelopes[i].initial_level; // immediately start at desired velocity
+        else
+          lvl = (byte) ((float)envelopes[i].initial_level * ((float)elapsed / (float)envelopes[i].attack_length));
+          
         if (elapsed >= envelopes[i].attack_length) {
           NUMBER_DEBUG(9, envelopes[i].stage, 1);
           envelopes[i].stage = DECAY;
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage_start_level = lvl;
-        } 
+        }
+    } else if (s==HOLD) {
+        lvl = envelopes[i].initial_level;
+        if (elapsed >= envelopes[i].hold_length) {
+          envelopes[i].stage = DECAY;
+          envelopes[i].stage_triggered_at = now;
+          envelopes[i].stage_start_level = lvl;
+        }
     } else if (s==DECAY) {
         //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
         // length of time to decay down to sustain_level
@@ -161,10 +188,16 @@ void process_envelopes(unsigned long now, unsigned long delta) {
           envelopes[i].stage = OFF;
         }
         //break;
-    } else if (s==OFF) { // wont be reached?
+    } else if (s==OFF) {  // may have stopped or something so mute
         lvl = 0;
     }
     //NUMBER_DEBUG(12, envelopes[i].stage, 0);
+
+    if (i==ENV_WOBBLY && envelopes[i].stage!=OFF) {
+      // modulate the level
+      lvl = (lvl*(0.5+isin(elapsed)));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
+    }
+    
     envelopes[i].actual_level = lvl;
     if (envelopes[i].last_sent_lvl != lvl) {
       //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
