@@ -25,6 +25,7 @@ enum envelope_types : byte {
   ENV_WOBBLY = 2,
   // TODO: more envelope types...
 };
+#define NUM_ENVELOPES 3
 
 // handling last time main loop was run, for calculating elapsed
 unsigned long time_last;
@@ -145,8 +146,9 @@ void handleControlChange(byte channel, byte number, byte value) {
      *        float old_factor = ticks / cc_sync_modifier;
     ticks = old_factor * value;  // reset the clock to position according to the old scale, so we can vary this dynamically...
     time_last = (time_last * old_factor) * millis();*/
-    cc_value_sync_modifier = value;
-  } else {
+    cc_value_sync_modifier = constrain(value,1,127); //1 + (value-1); // minimum of 1
+    
+  } else if (!handle_envelope_ccs(channel, number, value)) {
     MIDI.sendControlChange(number, value, 1);
   }
 }
