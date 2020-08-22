@@ -29,7 +29,7 @@ enum envelope_types : byte {
 // handling last time main loop was run, for calculating elapsed
 unsigned long time_last;
 
-byte cc_sync_modifier = 127;
+byte cc_value_sync_modifier = 127;
 
 float estimated_ticks_per_ms = 1.0f;
 
@@ -40,9 +40,9 @@ unsigned long last_tick_at = 0;
 unsigned long clock_millis() {
   //return millis();
   if (millis() - last_tick_at > 500) { // if we haven't received a clock for 100ms, fall back to internal millis clock
-    return millis() * 
-      //(estimated_ticks_per_ms * 
-      ((float)cc_sync_modifier/127.0f);
+    return (millis() * 
+      estimated_ticks_per_ms) * PPQN *
+      ((float)(cc_value_sync_modifier^2)/127.0f);
   }
   return ticks * PPQN; // * ((float)(cc_sync_modifier^2)/127.0f);   // TODO: need to experiment to find a good tradeoff between allowing very short and very long stages at all tempos?  tempo-sync this basically?  
 }
@@ -145,7 +145,7 @@ void handleControlChange(byte channel, byte number, byte value) {
      *        float old_factor = ticks / cc_sync_modifier;
     ticks = old_factor * value;  // reset the clock to position according to the old scale, so we can vary this dynamically...
     time_last = (time_last * old_factor) * millis();*/
-    cc_sync_modifier = value;
+    cc_value_sync_modifier = value;
   } else {
     MIDI.sendControlChange(number, value, 1);
   }
@@ -164,8 +164,8 @@ void handleClock() {
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
   //ticks++;
-  ticks+=((float)(cc_sync_modifier^2)/127.0f);
-  //estimated_ticks_per_ms = ((millis() - last_tick_at))/1.0;
+  ticks+=((float)(cc_value_sync_modifier^2)/127.0f);
+  estimated_ticks_per_ms = 1.0/((millis() - last_tick_at));
   last_tick_at = millis();
 }
 

@@ -195,7 +195,8 @@ void process_envelopes(unsigned long now, unsigned long delta) {
 
     if (i==ENV_WOBBLY && envelopes[i].stage!=OFF) {
       // modulate the level
-      lvl = (lvl*(0.5+isin(elapsed)));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
+      //lvl = (lvl*(0.5+isin(elapsed * PPQN))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
+      lvl = lvl + (127-lvl) * (isin(elapsed));
     }
     
     envelopes[i].actual_level = lvl;
