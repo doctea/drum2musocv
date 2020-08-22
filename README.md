@@ -7,7 +7,9 @@ Based on the example from the FortySevenEffects MIDI library https://github.com/
 
 # TODO
 
-Pass Sysex, Clock etc through to midimuso-cv
+Figure out how to properly sync the MIDI clock to the envelopes/LFOs
+
+Improve the existing envelopes + add a few more
 
 ## Future plans
 
