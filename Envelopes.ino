@@ -16,6 +16,9 @@ enum stage : byte {
   RELEASE,
   //END = 0
 };
+// above enums also used as the envelope CC offsets
+
+#define LFO_SYNC_RATIO (RELEASE+1)
 
 typedef struct envelope_state {
   byte stage = OFF;
@@ -31,6 +34,8 @@ typedef struct envelope_state {
   float         sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
   unsigned int  release_length = PPQN * 16; //768;   //  R - release - length (time to drop to 0)
 
+  byte lfo_sync_ratio = 0;
+
   unsigned long stage_triggered_at = 0;
   unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
@@ -41,7 +46,7 @@ typedef struct envelope_state {
 };
 
 #define ENV_CC_SPAN 8
-#define ENV_CC_START 63
+#define ENV_CC_START 64
 
 envelope_state envelopes[3];
 
@@ -58,8 +63,10 @@ void initialise_envelopes() {
 }
 
 void kill_envelopes() {
-  for (byte i = 0 ; i < 3/*sizeof(envelopes)-1*/ ; i++) {
+  for (byte i = 0 ; i < 3; i++) {
     envelopes[i].stage = OFF;
+    envelopes[i].stage_start_level = (byte)0;
+    MIDI.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
   }
 }
 
@@ -72,23 +79,33 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     int env_num = number / ENV_CC_SPAN;
     number = number % ENV_CC_SPAN;
     //NOISY_DEBUG(env_num*100 , number);
-    if (number==ATTACK) {
+    NUMBER_DEBUG(6, env_num, number);
+    if (number==ATTACK-1) {
       envelopes[env_num].attack_length  = (PPQN * ENV_MAX_ATTACK) * ((float)value/127.0f);
-    } else if (number==HOLD) {
+    } else if (number==HOLD-1) {
       envelopes[env_num].hold_length    = (PPQN * ENV_MAX_HOLD) * ((float)value/127.0f);
-    } else if (number==DECAY) {
+    } else if (number==DECAY-1) {
       envelopes[env_num].decay_length   = (PPQN * ENV_MAX_DECAY) * ((float)value/127.0f);
-    } else if (number==SUSTAIN) {
+    } else if (number==SUSTAIN-1) {
       //envelopes[env_num].sustain_ratio = 1.0f; //SUSTAIN_RATIO_MINIMUM;// + ((float)value/127.0f) * (SUSTAIN_RATIO_MINIMUM); ///127.0f));
       //envelopes[env_num].sustain_ratio = (log(((float)value))*127.0f)/127.0f; ///127.0f));
       //envelopes[env_num].sustain_ratio = 0.5 + ((value/127.0f)/2.0);
       //envelopes[env_num].sustain_ratio = (64 + (value/2))/127.0f;
-      envelopes[env_num].sustain_ratio = (((float)value/127.0)*(float)(128-SUSTAIN_MINIMUM)) /127.0f;   // converted to range 0-96 so can use minimum
-    } else if (number==RELEASE) {
+      envelopes[env_num].sustain_ratio = (((float)value/127.0f)*(float)(128-SUSTAIN_MINIMUM)) /127.0f;   // converted to range 0-96 so can use minimum
+    } else if (number==RELEASE-1) {
       envelopes[env_num].release_length = (PPQN * ENV_MAX_RELEASE) * ((float)value/127.0f);
+    } else if (number==LFO_SYNC_RATIO-1) {
+      envelopes[env_num].lfo_sync_ratio = value;
     }
     return true;
   }
+  if (number==0x7B || // intercept 'all notes off', 
+      number==0x65 || // RPN MSB
+      number==0x07) { // volume messages ..  this is the fucker !
+    kill_envelopes();
+    return true;
+  }
+  
   return false;
 }
 
@@ -141,7 +158,12 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 }
 
 void process_envelopes(unsigned long now, unsigned long delta) {
-  for (int i = 0 ; i < 3 ; i++) {
+  for (byte i = 0 ; i < 3 ; i++) {
+    process_envelope(i, now, delta);
+  }
+}
+
+void process_envelope(byte i, unsigned long now, unsigned long delta) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -204,6 +226,8 @@ void process_envelopes(unsigned long now, unsigned long delta) {
   
           //lvl = (byte) (f_sustain_level + (diff * decay_position));
           lvl = f_original_level - (diff *decay_position);
+        } else {
+          lvl = f_sustain_level; //envelopes[i].stage_start_level;
         }
           
         if (elapsed >= envelopes[i].decay_length) {// || envelopes[i].decay_length==0 || lvl < f_sustain_level) {
@@ -245,7 +269,7 @@ void process_envelopes(unsigned long now, unsigned long delta) {
 
         if (elapsed > envelopes[i].release_length || envelopes[i].release_length==0) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
-          lvl = 0;
+          //lvl = 0;
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage = OFF;
         }
@@ -254,14 +278,19 @@ void process_envelopes(unsigned long now, unsigned long delta) {
         lvl = 0;
     }
 
-    if (i==ENV_WOBBLY && envelopes[i].stage!=OFF) {
+    if (envelopes[i].lfo_sync_ratio>=16 && envelopes[i].stage!=OFF) {
       // modulate the level
-      //lvl = (lvl*(0.5+isin(elapsed * PPQN))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
-      lvl = lvl + (127-lvl) * (isin(elapsed));
+      //lvl = (lvl*(0.5+isin(elapsed * ((envelopes[i].lfo_sync_ratio / 16) * PPQN)))); 
+      //lvl = (lvl * (0.5 + isin(elapsed * (((envelopes[i].lfo_sync_ratio) / 16 ))))); // * PPQN)))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
+
+      //NUMBER_DEBUG(12, 0, 127 * isin(elapsed 
+      lvl = constrain(/*lvl + */((127-lvl) * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed))), 0, 127);
+
     }
-    
+
     envelopes[i].actual_level = lvl;
     if (envelopes[i].last_sent_lvl != lvl) {
+      if (envelopes[i].stage==OFF) lvl = 0;
       NUMBER_DEBUG(12, envelopes[i].stage, lvl);
 
       //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
@@ -269,7 +298,5 @@ void process_envelopes(unsigned long now, unsigned long delta) {
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
     }
-    //}
-    //}
-  }
+
 }

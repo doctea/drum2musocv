@@ -15,7 +15,7 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
 #define CONFIG_THROTTLE_MS 5
 
 //TODO: make these CC values sensible and map them in FL
-#define CC_SYNC_MOD 73
+#define CC_SYNC_RATIO   100
 
 #define PPQN 24
 
@@ -139,7 +139,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 void handleControlChange(byte channel, byte number, byte value) {
   // pass thru control changes, shifted to channel 1
   // TODO: intercept our own control messages to do things like set envelope settings, LFO settings, trigger targets/choke linking..
-  if (number==CC_SYNC_MOD) {
+  if (number==CC_SYNC_RATIO) {
     /*
      * TODO: reset the clock, so that can change sync amount without killing channels
      *        do i need need to move to a delta approach to do this ?
@@ -218,6 +218,8 @@ void setup()
   MIDI.setHandleClock(handleClock);
 
   NOISY_DEBUG(1000, 1);
+
+  kill_envelopes();
 }
 
 
