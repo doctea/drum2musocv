@@ -1,28 +1,33 @@
 # drum2musocv
+
 Arduino sketch to be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK, to provide USB MIDI connection) to adapt the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-12/) to use General Midi note numbers on MIDI Channel 10, for use as a drum machine.
 
-Also generates triggerable envelopes (works for two envelopes, in progress...)
+This allows you to play the modular drum machine using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-Based on the example from the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library
+Also generates triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash' and 'Vibra-slap' GM drum notes, outputting on the muso's CV outs #2, #3 and #4 respectively (midimuso CC 7, 11 and 71).
+
+Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library
 
 # TODO
 
-Figure out how to properly sync the MIDI clock to the envelopes/LFOs
+Add more envelopes, configurable to enable/disable so the CV outputs can be used as CC->CV, envelopes or LFOs
 
-Improve the existing envelopes + add a few more
+Better syncing of the MIDI clock to the envelopes
 
-## Future plans
+LFOs
 
-More envelope types
+TODO: make this actually more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
 
-Adjustable envelope parameters
+## Future plans / ideas
 
-Modulation per-stage or overall
+More envelope stages (delay?)
 
-MIDI clock, envelope length sync and LFOs
+Make modulation configurable per-stage
 
 LED indicators of trigger received etc
 
-Trigger other devices with CV via relays (ie circuit bent stuff).  Route MIDI to other devices?  Extra CVs/triggers direct from the Arduino?  Shitty sample recorder/player?!
+Trigger other devices with CV via relays (ie circuit bent stuff).  Route MIDI/signals to other devices?  Extra CVs/triggers direct from the Arduino?  Shitty sample recorder/player?!
 
 Dedicated CCs to modulate the envelopes
+
+Hi-hat/crash choke 
