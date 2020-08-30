@@ -1,8 +1,8 @@
+// from https://forum.arduino.cc/index.php?topic=69723.0 with thanks
+// only skimmed before i yoinked, might be a faster/more accurate version in the thread
+
 #ifndef SINTABLES_INCLUDED
 #define SINTABLES_INCLUDED TRUE
-
-// from https://forum.arduino.cc/index.php?topic=69723.0
-// only skimmed before i yoinked, might be a faster/more accurate version in the thread
 
 // 91 x 2 bytes ==> 182 bytes
 unsigned int isinTable16[] = {

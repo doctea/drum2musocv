@@ -1,3 +1,6 @@
+#define GM_CHANNEL_DRUMS 10
+
+#define GM_NOTE_MINIMUM 35
 #define GM_NOTE_ACOUSTIC_BASS_DRUM 35
 #define GM_NOTE_ELECTRIC_BASS_DRUM 36
 #define GM_NOTE_SIDE_STICK 37
@@ -45,3 +48,26 @@
 #define GM_NOTE_OPEN_CUICA 79
 #define GM_NOTE_MUTE_TRIANGLE 80
 #define GM_NOTE_OPEN_TRIANGLE 81
+#define GM_NOTE_MAXIMUM 81
+
+
+// the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
+#define MUSO_GATE_CHANNEL   16
+#define MUSO_NOTE_GATE_1    60
+#define MUSO_NOTE_GATE_2    61
+#define MUSO_NOTE_GATE_3    62
+#define MUSO_NOTE_GATE_4    63
+#define MUSO_NOTE_GATE_5    64
+#define MUSO_NOTE_GATE_6    65
+#define MUSO_NOTE_GATE_7    66
+#define MUSO_NOTE_GATE_8    67
+#define MUSO_NOTE_GATE_9    68
+#define MUSO_NOTE_GATE_10   69
+#define MUSO_NOTE_GATE_11   70
+
+// the CC values that the midimuso translates into the CV outputs
+#define MUSO_CC_CV_1  1
+#define MUSO_CC_CV_2  7
+#define MUSO_CC_CV_3  11
+#define MUSO_CC_CV_4  71
+#define MUSO_CC_CV_5  74
