@@ -84,6 +84,14 @@ byte convert_drum_pitch(byte pitch) {
 }
 
 
+void kill_notes() {
+  // turn off the triggers
+  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
+    trigger_status[i] = TRIGGER_IS_OFF;
+  }
+}
+
+
 bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
   // in the 0x0b midimuso-cv mode, there are 5 CV outputs and a clock output
   // the mapping is currently all hardcoded here and in Drums.h
@@ -191,7 +199,9 @@ void handleStop() {
   MIDI.sendStop();
   // TODO: stop+reset LFOs
   kill_envelopes();
+#ifdef ENABLE_PIXELS
   kill_notes();
+#endif
   ticks = 0;
   //update_pixels_position((int)ticks);
 }
@@ -253,7 +263,10 @@ void loop() {
   // update envelopes by time elapsed
   process_envelopes(now, delta);
 
-  update_pixels();
+#ifdef ENABLE_PIXELS
+  if (millis()%50==0) 
+    update_pixels();
+#endif
 
   time_last = clock_millis();
 }

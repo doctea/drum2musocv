@@ -1,3 +1,5 @@
+#ifdef ENABLE_PIXELS
+
 #include <FastLED.h>
 
 // How many leds in your strip?
@@ -15,7 +17,7 @@ CRGB leds[NUM_LEDS];
 void setup_pixels() {
   // todo: different modes?
   LEDS.addLeds<NEOPIXEL,DATA_PIN>(leds,NUM_LEDS);
-  LEDS.setBrightness(84);
+  LEDS.setBrightness(255);
 
   FastLED.clear(true);
 
@@ -27,7 +29,7 @@ void setup_pixels() {
     leds[i] = CHSV(hue++,255,255);
 
     // now, let's first 20 leds to the top 20 leds, 
-    delay(100);
+    //delay(100);
     FastLED.show();
   }  
 }
@@ -60,12 +62,6 @@ void setup_pixels() {
   FastLED.show();
 }*/
 
-void kill_notes() {
-  // turn off the triggers
-  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
-    trigger_status[i] = TRIGGER_IS_OFF;
-  }
-}
 
 void update_pixels() {
   update_pixels_triggers();
@@ -104,26 +100,46 @@ void update_pixels_triggers() {
       layer_1 = true;
     }
 
-    NUMBER_DEBUG(9, 1, NUM_TRIGGERS);
+    //NUMBER_DEBUG(9, 1, NUM_TRIGGERS);
     int trig = NUM_LEDS + i;  // second layer trigger number  // 8 + 3
-    if (trig < NUM_TRIGGERS && trigger_status[trig]) {
+
+    bool is_envelope = false;
+    
+    if (trig > NUM_LEDS && trig < NUM_TRIGGERS && trigger_status[trig]) {
       layer_2 = true;
       //NUMBER_DEBUG(1, i, trig);
     } else if (trig < NUM_TRIGGERS) {
       //NUMBER_DEBUG(8, i, trig);
-    } 
+    }
+    /*if ( trig >= NUM_TRIGGERS && trig < (NUM_TRIGGERS + NUM_ENVELOPES) && i < NUM_ENVELOPES && envelopes[i].stage!=OFF) {
+      // is an envelope playin'! 
+      layer_2 = true;
+      //mega = true;
+    }*/
+#define PX_ENV 3
+    if (i>=PX_ENV && i < (PX_ENV+NUM_ENVELOPES) && envelopes[i - PX_ENV].stage!=OFF) {
+      layer_2 = true;
+      is_envelope = true;
+    }
 
     if (layer_1 && layer_2) {
-      colour = CRGB::Red;
+      colour = CRGB::Yellow;
     } else if (layer_1 && !layer_2) { // only first layer
-      colour = CRGB::Blue;
+      colour = CRGB::Red;
     } else if (layer_2 && !layer_1) { // only second layer
       colour = CRGB::Green;
+      if (is_envelope) { // fade envelopes
+        colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[i - PX_ENV].actual_level / (float)envelopes[i - PX_ENV].velocity)));
+      }
     } else if (!layer_1 && !layer_2) {  // no layers
-      colour = leds[i]/8; //CRGB::Black;
-    }
+      colour = leds[i]/4; //CRGB::Black;
+    } 
+    //if (mega==true) colour = CRGB::White;
     
     leds[i] = colour;
   }
   FastLED.show();
 }
+
+
+#endif
