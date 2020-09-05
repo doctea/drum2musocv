@@ -1,3 +1,6 @@
+#define TRIGGER_IS_ON   true
+#define TRIGGER_IS_OFF  false
+
 #define GM_CHANNEL_DRUMS 10
 
 #define GM_NOTE_MINIMUM 35
@@ -53,6 +56,7 @@
 
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
 #define MUSO_GATE_CHANNEL   16
+#define MUSO_NOTE_MINIMUM   60
 #define MUSO_NOTE_GATE_1    60
 #define MUSO_NOTE_GATE_2    61
 #define MUSO_NOTE_GATE_3    62
@@ -64,6 +68,9 @@
 #define MUSO_NOTE_GATE_9    68
 #define MUSO_NOTE_GATE_10   69
 #define MUSO_NOTE_GATE_11   70
+
+#define NUM_TRIGGERS        (MUSO_NOTE_GATE_11 - MUSO_NOTE_MINIMUM + 1)
+#define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM  + NUM_TRIGGERS)
 
 // the CC values that the midimuso translates into the CV outputs
 #define MUSO_CC_CV_1  1

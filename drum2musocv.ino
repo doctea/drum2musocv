@@ -2,6 +2,8 @@
 
 #include "drums.h"
 
+#define ENABLE_PIXELS
+
 MIDI_CREATE_DEFAULT_INSTANCE();
 
 // override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
@@ -47,6 +49,9 @@ unsigned long clock_millis() {
 }
 
 // -----------------------------------------------------------------------------
+
+// tracking what triggers are currently active for the sake of pixel output 
+int trigger_status[NUM_TRIGGERS];
 
 byte convert_drum_pitch(byte pitch) {
   // in mode 0x0b (i think, need to theck this) there are 11 triggers available and a pitch out
@@ -110,10 +115,15 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
   byte p = pitch;
   byte v = velocity;
 
-  if (!process_triggers_for_pitch(pitch, velocity, true))  
+  if (!process_triggers_for_pitch(pitch, velocity, true)) {
+    
     p = convert_drum_pitch(pitch);
-    //if (v>0) // alt note off?
+    if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
+      trigger_status[p - MUSO_NOTE_MINIMUM] = velocity>0; // TRIGGER_IS_ON;
+    }
+    
     MIDI.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
+  }
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity) {
@@ -122,6 +132,10 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
 
   if (!process_triggers_for_pitch(pitch, velocity, false)) {
     p = convert_drum_pitch(pitch);
+    if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
+      trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
+    }
+    
     MIDI.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
   }
 }
@@ -136,8 +150,16 @@ void handleControlChange(byte channel, byte number, byte value) {
   }
 }
 
+unsigned int song_position;
+
 void handleSongPosition(unsigned int beats) {
   // TODO: put LFO / envelope timer into correct phase, if that is possible?
+
+  // hmm this doesnt get called?
+  //update_pixels_position(beats);
+  //NOISY_DEBUG(1, beats);
+
+  song_position = beats/4;
 }
 
 void handleClock() {
@@ -149,9 +171,10 @@ void handleClock() {
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
   //ticks++;
-  ticks+=((float)(cc_value_sync_modifier^2)/127.0f);
+  ticks += ((float)(cc_value_sync_modifier^2)/127.0f);
   estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
   last_tick_at = millis();
+  //update_pixels_position((int)ticks);
 }
 
 void handleStart() {
@@ -168,6 +191,9 @@ void handleStop() {
   MIDI.sendStop();
   // TODO: stop+reset LFOs
   kill_envelopes();
+  kill_notes();
+  ticks = 0;
+  //update_pixels_position((int)ticks);
 }
 
 void handleSystemExclusive(byte* array, unsigned size) {
@@ -181,6 +207,10 @@ void handleSystemExclusive(byte* array, unsigned size) {
 
 void setup() {
   randomSeed(analogRead(0));
+
+#ifdef ENABLE_PIXELS
+  setup_pixels();
+#endif
 
   initialise_envelopes();
 
@@ -199,6 +229,8 @@ void setup() {
   MIDI.setHandleStart(handleContinue);
 
   MIDI.setHandleClock(handleClock);
+
+  MIDI.setHandleSongPosition(handleSongPosition);
 
   //NOISY_DEBUG(1000, 1);
 
@@ -220,6 +252,8 @@ void loop() {
 
   // update envelopes by time elapsed
   process_envelopes(now, delta);
+
+  update_pixels();
 
   time_last = clock_millis();
 }
