@@ -179,7 +179,7 @@ void handleClock() {
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
   //ticks++;
-  ticks += ((float)(cc_value_sync_modifier^2)/127.0f);
+  ticks += 1; //((float)(cc_value_sync_modifier^2)/127.0f);  // += 1
   estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
   last_tick_at = millis();
   //update_pixels_position((int)ticks);

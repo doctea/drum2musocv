@@ -135,6 +135,19 @@ void update_pixels_triggers() {
       colour = leds[i]/4; //CRGB::Black;
     } 
     //if (mega==true) colour = CRGB::White;
+
+    int beats;
+    if (millis() - last_tick_at > 250) {
+      beats = (int)((clock_millis()*estimated_ticks_per_ms)/PPQN) % NUM_LEDS;  // runs based on last estimated clock
+    } else {
+      beats = (((int)ticks)/PPQN) % NUM_LEDS;  //only runs when real clock is running
+    }
+    if (i==beats && (int)ticks%PPQN<6) {  // only display for first sixteenth note 
+      if (beats == 0 || beats == 4)
+        colour = CRGB::Aqua;
+      else
+        colour = CRGB::White;
+    }
     
     leds[i] = colour;
   }
