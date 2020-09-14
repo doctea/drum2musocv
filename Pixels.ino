@@ -82,11 +82,11 @@ void update_pixels() {
 
 // 0-4 inclusive: first 5 triggers, kick -> crash
 // 10-16 inclusive: second 6 triggers, tamb -> ch
-// leaving 6, 7, 8 for envelopes?
-
+// leaving 5, 6, 7, 8, 9 for envelopes
 #define TRIGGER_BANK_1_SIZE   5
 #define TRIGGER_BANK_2_SIZE   6
 
+// determine which trigger this pixel address is for
 int get_trigger_for_pixel(int p) {
   if (p < TRIGGER_BANK_1_SIZE) {  // first bank
     return p;
@@ -99,6 +99,7 @@ int get_trigger_for_pixel(int p) {
   }
 }
 
+// determine which envelope this pixel address is for
 int get_envelope_for_pixel(int i) {
   if (i >= TRIGGER_BANK_1_SIZE && i < TRIGGER_BANK_1_SIZE + NUM_ENVELOPES) { // envelopes
     return NUM_ENVELOPES - (i - TRIGGER_BANK_1_SIZE) - 1; // offset and invert
@@ -125,28 +126,10 @@ void update_pixels_triggers() {
       if (p >= STRIP_LENGTH) {
         // reverse for the second strip
         p = STRIP_LENGTH + (p % STRIP_LENGTH);
-      } /*else {
-        p = STRIP_LENGTH - p - 1;
-      }*/
+      } 
 #endif
 
-      //int p = i;
-      
-      /*if (i >= STRIP_LENGTH) {
-        //p = NUM_LEDS/2 + (NUM_LEDS - i);
-        //p = (NUM_LEDS - (i%(NUM_LEDS/2)));
-        //p = NUM_LEDS - ((NUM_LEDS/2)%i);
-        // so we want i=8 to become p=16 = 
-        p = NUM_LEDS - (i%STRIP_LENGTH) - 1;
-        // 9 to become 15 = 16/2 + 9
-        // 10 to become 14    = NUM_LEDS - 6 (NUM_LEDS 16 - i = 6)
-        // 11 to become 13
-        // 12 to become 12
-        // 13 to become 11  16 - (16 - (13
-        // 16 to become 8   i - NUM_LEDS + (NUM_LEDS/2)
-        //p = NUM_LEDS - (NUM_LEDS - i); // + NUM_LEDS/2;
-      }*/
-
+      // determine if this pixel is active and what type, and set 't' to the trigger or envelope
       int t = get_trigger_for_pixel(i);
       if (t>=0) {
         pixel_type = PIX_TRIGGER;
@@ -158,31 +141,23 @@ void update_pixels_triggers() {
           active = envelopes[t].stage != OFF;
         }
       }
-      /*} else {
-        active = false;
-      }*/
 
-      /*if (i < NUM_TRIGGERS) {
-        pixel_type = PIX_TRIGGER;
-        active = trigger_status[i];
-      } else if (i >= NUM_TRIGGERS && i - NUM_TRIGGERS < NUM_ENVELOPES) {
-        pixel_type = PIX_ENVELOPE;
-        active = envelopes[i - NUM_TRIGGERS].stage != OFF;
-      }*/
-      
+      // pick the colour to use for this pixel based on if we are active and the type
       CRGB colour;
       if (active) {
         if (pixel_type==PIX_TRIGGER) {
           colour = CRGB::Red;
         } else if (pixel_type==PIX_ENVELOPE) {
-          if (envelopes[t].stage==RELEASE) {
+          if (envelopes[t].stage==ATTACK) {
+            colour = CRGB::Red;
+          } else if (envelopes[t].stage==RELEASE) {
             colour = CRGB::Aqua;
           } else {
             colour = CRGB::Green;
           }
+          // fade by envelope level
           colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));
         }
-        //leds[i] = colour;
       } else {
         //colour = CRGB::Black;
         colour = leds[p]/4; //CRGB::Black;
@@ -194,12 +169,14 @@ void update_pixels_triggers() {
       ) {
 #endif
         int beats;
+        int t_ticks;
         if (millis() - last_tick_at > 250) {
           beats = (int)((clock_millis()*estimated_ticks_per_ms)/PPQN) % NUM_LEDS;  // runs based on last estimated clock
         } else {
           beats = (((int)ticks)/PPQN) % NUM_LEDS;  //only runs when real clock is running
         }
-        if ((i==beats && (int)ticks%PPQN<3)) {  // only display for first tick / (6 = sixteenth note ?)
+        t_ticks = clock_millis()*estimated_ticks_per_ms;
+        if ((i==beats && (int)t_ticks%PPQN<6)) {  // only display for first tick / (6 = sixteenth note ?)
           if (beats % 4) 
             colour += CRGB::Blue;
           else
