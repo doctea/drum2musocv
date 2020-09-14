@@ -3,7 +3,8 @@
 
 #define GM_CHANNEL_DRUMS 10
 
-#define GM_NOTE_MINIMUM 35
+#define GM_NOTE_MINIMUM 28
+#define GM_NOTE_SLAP 28   // extended?
 #define GM_NOTE_ACOUSTIC_BASS_DRUM 35
 #define GM_NOTE_ELECTRIC_BASS_DRUM 36
 #define GM_NOTE_SIDE_STICK 37
@@ -70,7 +71,7 @@
 #define MUSO_NOTE_GATE_11   70
 
 #define NUM_TRIGGERS        (MUSO_NOTE_GATE_11 - MUSO_NOTE_MINIMUM + 1)
-#define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM  + NUM_TRIGGERS)
+#define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
 
 // the CC values that the midimuso translates into the CV outputs
 #define MUSO_CC_CV_1  1

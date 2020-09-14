@@ -1,9 +1,16 @@
 #ifdef ENABLE_PIXELS
 
+#define ENABLE_PIXEL_POSITION
+//#define NO_IDLE_PIXEL_POSITION // unused
+//#define REVERSE_LEDS           // if pixel strips should be reversed
+#define NO_ACTIVE_PIXEL_POSITION
+
+#define IDLE_PIXEL_TIMEOUT 5000 // five second timeout
+
 #include <FastLED.h>
 
 // How many leds in your strip?
-#define NUM_LEDS 8
+#define NUM_LEDS 16
 
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -29,7 +36,7 @@ void setup_pixels() {
     leds[i] = CHSV(hue++,255,255);
 
     // now, let's first 20 leds to the top 20 leds, 
-    //delay(100);
+    delay(100);
     FastLED.show();
   }  
 }
@@ -65,94 +72,151 @@ void setup_pixels() {
 
 void update_pixels() {
   update_pixels_triggers();
+} 
+
+#define STRIP_LENGTH  (NUM_LEDS/2)
+
+#define PIX_NONE      0
+#define PIX_TRIGGER   1
+#define PIX_ENVELOPE  2
+
+// 0-4 inclusive: first 5 triggers, kick -> crash
+// 10-16 inclusive: second 6 triggers, tamb -> ch
+// leaving 6, 7, 8 for envelopes?
+
+#define TRIGGER_BANK_1_SIZE   5
+#define TRIGGER_BANK_2_SIZE   6
+
+int get_trigger_for_pixel(int p) {
+  if (p < TRIGGER_BANK_1_SIZE) {  // first bank
+    return p;
+  } else if (p >= NUM_LEDS - TRIGGER_BANK_2_SIZE) { // second bank  = 10
+    // we want a number between 5-11 inclusive
+    p = NUM_TRIGGERS - (TRIGGER_BANK_2_SIZE - (NUM_LEDS-p)) - 1;
+    return p;
+  } else {
+    return -1;
+  }
+}
+
+int get_envelope_for_pixel(int i) {
+  if (i >= TRIGGER_BANK_1_SIZE && i < TRIGGER_BANK_1_SIZE + NUM_ENVELOPES) { // envelopes
+    return NUM_ENVELOPES - (i - TRIGGER_BANK_1_SIZE) - 1; // offset and invert
+  } else {
+    return -1;
+  }
 }
 
 void update_pixels_triggers() {
-  /*for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
-    int bank = i / NUM_LEDS;
-    int pix = i % NUM_LEDS;  
+    for (int i = 0 ; i < NUM_LEDS ; i++) {
+      int pixel_type = PIX_NONE; //PIX_TRIGGER;
+      bool active = false;
 
-    CRGB colour = bank==0 ? CRGB::Blue : CRGB::Yellow;
-    leds[pix] = trigger_status[i] ? colour : CRGB::Black;
-    //leds[NUM_LEDS-1] = colour;
-  } 
-  FastLED.show();*/
-
-  for (int i = 0 ; i < NUM_LEDS ; i++) {
-    /*CRGB colour_bank_1 = trigger_status[i] ? CRGB::Blue : CRGB::Black;  // cover triggers 1-8
-    // trigger number for second bank of LEDs - triggers 9 - 11
-    
-    CRGB colour_bank_2;
-    if (trig < NUM_TRIGGERS) {
-      colour_bank_2 = trigger_status[trig] ? CRGB::Green : CRGB::Black;
-    } else {
-      colour_bank_2 = CRGB::Black;
-    }
-    CRGB colour = blend(colour_bank_1, colour_bank_2, 10.0);
-    */
-    leds[i] = CRGB::Black;
-    
-    bool layer_1 = false;
-    bool layer_2 = false;
-    
-    CRGB colour;
-    if (trigger_status[i]) {
-      layer_1 = true;
-    }
-
-    //NUMBER_DEBUG(9, 1, NUM_TRIGGERS);
-    int trig = NUM_LEDS + i;  // second layer trigger number  // 8 + 3
-
-    bool is_envelope = false;
-    
-    if (trig > NUM_LEDS && trig < NUM_TRIGGERS && trigger_status[trig]) {
-      layer_2 = true;
-      //NUMBER_DEBUG(1, i, trig);
-    } else if (trig < NUM_TRIGGERS) {
-      //NUMBER_DEBUG(8, i, trig);
-    }
-    /*if ( trig >= NUM_TRIGGERS && trig < (NUM_TRIGGERS + NUM_ENVELOPES) && i < NUM_ENVELOPES && envelopes[i].stage!=OFF) {
-      // is an envelope playin'! 
-      layer_2 = true;
-      //mega = true;
-    }*/
-#define PX_ENV 3
-    if (i>=PX_ENV && i < (PX_ENV+NUM_ENVELOPES) && envelopes[i - PX_ENV].stage!=OFF) {
-      layer_2 = true;
-      is_envelope = true;
-    }
-
-    if (layer_1 && layer_2) {
-      colour = CRGB::Yellow;
-    } else if (layer_1 && !layer_2) { // only first layer
-      colour = CRGB::Red;
-    } else if (layer_2 && !layer_1) { // only second layer
-      colour = CRGB::Green;
-      if (is_envelope) { // fade envelopes
-        colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[i - PX_ENV].actual_level / (float)envelopes[i - PX_ENV].velocity)));
+#ifdef REVERSE_LEDS
+      int p = NUM_LEDS - i - 1;
+      if (p >= STRIP_LENGTH) {
+        // reverse for the second strip
+        p = NUM_LEDS - (p % STRIP_LENGTH) - 1;
+      } else {
+        p = STRIP_LENGTH - p - 1;
       }
-    } else if (!layer_1 && !layer_2) {  // no layers
-      colour = leds[i]/4; //CRGB::Black;
-    } 
-    //if (mega==true) colour = CRGB::White;
+#else
+      int p = i;
+      if (p >= STRIP_LENGTH) {
+        // reverse for the second strip
+        p = STRIP_LENGTH + (p % STRIP_LENGTH);
+      } /*else {
+        p = STRIP_LENGTH - p - 1;
+      }*/
+#endif
 
-    int beats;
-    if (millis() - last_tick_at > 250) {
-      beats = (int)((clock_millis()*estimated_ticks_per_ms)/PPQN) % NUM_LEDS;  // runs based on last estimated clock
-    } else {
-      beats = (((int)ticks)/PPQN) % NUM_LEDS;  //only runs when real clock is running
+      //int p = i;
+      
+      /*if (i >= STRIP_LENGTH) {
+        //p = NUM_LEDS/2 + (NUM_LEDS - i);
+        //p = (NUM_LEDS - (i%(NUM_LEDS/2)));
+        //p = NUM_LEDS - ((NUM_LEDS/2)%i);
+        // so we want i=8 to become p=16 = 
+        p = NUM_LEDS - (i%STRIP_LENGTH) - 1;
+        // 9 to become 15 = 16/2 + 9
+        // 10 to become 14    = NUM_LEDS - 6 (NUM_LEDS 16 - i = 6)
+        // 11 to become 13
+        // 12 to become 12
+        // 13 to become 11  16 - (16 - (13
+        // 16 to become 8   i - NUM_LEDS + (NUM_LEDS/2)
+        //p = NUM_LEDS - (NUM_LEDS - i); // + NUM_LEDS/2;
+      }*/
+
+      int t = get_trigger_for_pixel(i);
+      if (t>=0) {
+        pixel_type = PIX_TRIGGER;
+        active = trigger_status[t];
+      } else {
+        t = get_envelope_for_pixel(i);
+        if (t>=0) {
+          pixel_type = PIX_ENVELOPE;
+          active = envelopes[t].stage != OFF;
+        }
+      }
+      /*} else {
+        active = false;
+      }*/
+
+      /*if (i < NUM_TRIGGERS) {
+        pixel_type = PIX_TRIGGER;
+        active = trigger_status[i];
+      } else if (i >= NUM_TRIGGERS && i - NUM_TRIGGERS < NUM_ENVELOPES) {
+        pixel_type = PIX_ENVELOPE;
+        active = envelopes[i - NUM_TRIGGERS].stage != OFF;
+      }*/
+      
+      CRGB colour;
+      if (active) {
+        if (pixel_type==PIX_TRIGGER) {
+          colour = CRGB::Red;
+        } else if (pixel_type==PIX_ENVELOPE) {
+          if (envelopes[t].stage==RELEASE) {
+            colour = CRGB::Aqua;
+          } else {
+            colour = CRGB::Green;
+          }
+          colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));
+        }
+        //leds[i] = colour;
+      } else {
+        //colour = CRGB::Black;
+        colour = leds[p]/4; //CRGB::Black;
+      }
+
+#ifdef ENABLE_PIXEL_POSITION
+#ifdef NO_ACTIVE_PIXEL_POSITION
+      if (millis() - last_input_at > IDLE_PIXEL_TIMEOUT
+      ) {
+#endif
+        int beats;
+        if (millis() - last_tick_at > 250) {
+          beats = (int)((clock_millis()*estimated_ticks_per_ms)/PPQN) % NUM_LEDS;  // runs based on last estimated clock
+        } else {
+          beats = (((int)ticks)/PPQN) % NUM_LEDS;  //only runs when real clock is running
+        }
+        if ((i==beats && (int)ticks%PPQN<3)) {  // only display for first tick / (6 = sixteenth note ?)
+          if (beats % 4) 
+            colour += CRGB::Blue;
+          else
+            colour += CRGB::White;
+        } /*else {
+          colour = CRGB::Black;
+        }*/
+#ifdef NO_ACTIVE_PIXEL_POSITION
+      }
+#endif
+#endif
+      
+      leds[p] = colour;
     }
-    if (i==beats && (int)ticks%PPQN<6) {  // only display for first sixteenth note 
-      if (beats == 0 || beats == 4)
-        colour = CRGB::Aqua;
-      else
-        colour = CRGB::White;
-    }
-    
-    leds[i] = colour;
-  }
-  FastLED.show();
+    FastLED.show();
 }
+
 
 
 #endif

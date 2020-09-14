@@ -15,7 +15,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
 
 //TODO: make these CC values sensible and map them in FL
-#define CC_SYNC_RATIO   100
+#define CC_SYNC_RATIO   110
 
 #define PPQN 24
 
@@ -23,9 +23,11 @@ enum envelope_types : byte {
   ENV_CRASH = 0,
   ENV_SPLASH = 1,
   ENV_WOBBLY = 2,
+  ENV_RIDE_BELL = 3,
+  ENV_RIDE_CYMBAL = 4
   // TODO: more envelope types...
 };
-#define NUM_ENVELOPES 3
+#define NUM_ENVELOPES 5
 
 unsigned long time_last; // handling last time main loop was run, for calculating elapsed
 
@@ -33,10 +35,11 @@ byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
 
 // for handling clock ---------------------------------------------------------
 
-float estimated_ticks_per_ms = 1.0f;
+float estimated_ticks_per_ms = 0.5f;
 
 float ticks = 0;  // store ticks as float, so can update by fractional ticks
 unsigned long last_tick_at = 0;
+unsigned long last_input_at = 0;
 
 unsigned long clock_millis() {
   // if external clock is running, use external clock, otherwise use an internal clock based on the last-known speed
@@ -115,6 +118,12 @@ bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
     case GM_NOTE_VIBRA_SLAP:    
       update_envelope(ENV_WOBBLY, velocity, state);
       return true;
+    case GM_NOTE_RIDE_BELL:
+      update_envelope(ENV_RIDE_BELL, velocity, state);
+      return true;
+    case GM_NOTE_RIDE_CYMBAL_1:
+      update_envelope(ENV_RIDE_CYMBAL, velocity, state);
+      return true;
   }
   return false;
 }
@@ -124,13 +133,13 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
   byte v = velocity;
 
   if (!process_triggers_for_pitch(pitch, velocity, true)) {
-    
     p = convert_drum_pitch(pitch);
     if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
       trigger_status[p - MUSO_NOTE_MINIMUM] = velocity>0; // TRIGGER_IS_ON;
     }
     
     MIDI.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
+    last_input_at = millis();
   }
 }
 
@@ -146,6 +155,8 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
     
     MIDI.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
   }
+
+  last_input_at = millis();
 }
 
 void handleControlChange(byte channel, byte number, byte value) {
@@ -156,6 +167,7 @@ void handleControlChange(byte channel, byte number, byte value) {
   } else if (!handle_envelope_ccs(channel, number, value)) {
     MIDI.sendControlChange(number, value, 1); // pass thru CV
   }
+  last_input_at = millis();
 }
 
 unsigned int song_position;

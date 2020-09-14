@@ -57,13 +57,15 @@ void initialise_envelopes() {
   envelopes[ENV_SPLASH].sustain_ratio = 1.0f;
   envelopes[ENV_SPLASH].release_length = PPQN * 3;
   
-  envelopes[ENV_SPLASH].midi_cc = MUSO_CC_CV_3;
-  envelopes[ENV_CRASH].midi_cc = MUSO_CC_CV_2;
-  envelopes[ENV_WOBBLY].midi_cc = MUSO_CC_CV_4;
+  envelopes[ENV_CRASH].midi_cc      = MUSO_CC_CV_2;
+  envelopes[ENV_SPLASH].midi_cc     = MUSO_CC_CV_3;
+  envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
+  envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
+  envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
 }
 
 void kill_envelopes() {
-  for (byte i = 0 ; i < 3; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES; i++) {
     envelopes[i].stage = OFF;
     envelopes[i].stage_start_level = (byte)0;
     MIDI.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
@@ -161,7 +163,7 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 
 // process all the envelopes
 void process_envelopes(unsigned long now, unsigned long delta) {
-  for (byte i = 0 ; i < 3 ; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES ; i++) {
     process_envelope(i, now, delta);
   }
 }
