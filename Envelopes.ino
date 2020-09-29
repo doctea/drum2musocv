@@ -6,6 +6,8 @@
 #define ENV_MAX_DECAY  32
 #define ENV_MAX_RELEASE 64
 
+//#define TEST_LFOS
+
 enum stage : byte {
   OFF = 0,
   //DELAY,  // time
@@ -15,13 +17,18 @@ enum stage : byte {
   SUSTAIN,
   RELEASE,
   //END = 0
+  LFO_SYNC_RATIO
 };
 // above enums also used as the envelope CC offsets
 
-#define LFO_SYNC_RATIO (RELEASE+1)
+//#define LFO_SYNC_RATIO (RELEASE+1)
 
 typedef struct envelope_state {
+//#ifndef TEST_LFOS
   byte stage = OFF;
+/*#else
+  byte stage = LFO_SYNC_RATIO;
+#endif*/
 
   byte velocity;         // triggered velocity
   byte actual_level;          // right now, the level
@@ -104,6 +111,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
   if (/*number==0x7B || // intercept 'all notes off', 
       number==0x65 || // RPN MSB*/
       number==0x07) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
+            // TODO: have i commented out the wrong lines here? ^^^
         kill_envelopes();
         return true;
   }
@@ -179,6 +187,9 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
 
     byte s = envelopes[i].stage ;
     // TODO: switch() would be nicer than if-else blocks, but ran into weird problems (like breakpoints never being hit) when approached it that way?!
+    /*if (s==LFO_SYNC_RATIO) {
+      lvl = random(0,127); //(int) (127.0 * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed)));
+    } else */
     if (s==ATTACK) {
         //NUMBER_DEBUG(8, envelopes[i].stage, elapsed/16);
         // length of time to ramp up to level

@@ -2,6 +2,8 @@
 
 #include "drums.h"
 
+//#define TEST_TRIGGERS
+
 #define ENABLE_PIXELS
 
 MIDI_CREATE_DEFAULT_INSTANCE();
@@ -35,7 +37,7 @@ byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
 
 // for handling clock ---------------------------------------------------------
 
-float estimated_ticks_per_ms = 0.5f;
+float estimated_ticks_per_ms = 0.1f;
 
 float ticks = 0;  // store ticks as float, so can update by fractional ticks
 unsigned long last_tick_at = 0;
@@ -259,6 +261,7 @@ void setup() {
   kill_envelopes();
 }
 
+int last_played_pitch = 0;
 
 void loop() {
   // Call MIDI.read the fastest you can for real-time performance.
@@ -271,6 +274,18 @@ void loop() {
 
   unsigned long now = clock_millis();
   unsigned long delta = now - time_last;
+
+#ifdef TEST_TRIGGERS
+  if (random(0,5000)<10) {
+    if (last_played_pitch>0) {
+      handleNoteOff(10, last_played_pitch, 0);
+      last_played_pitch = 0;
+    } else {
+      last_played_pitch = random(GM_NOTE_MINIMUM,GM_NOTE_MAXIMUM);
+      handleNoteOn(10, last_played_pitch, random(1,127));
+    }
+  }
+#endif
 
   // update envelopes by time elapsed
   process_envelopes(now, delta);

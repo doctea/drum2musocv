@@ -3,8 +3,8 @@
 
 #define GM_CHANNEL_DRUMS 10
 
-#define GM_NOTE_MINIMUM 28
-#define GM_NOTE_SLAP 28   // extended?
+#define GM_NOTE_MINIMUM 35
+//#define GM_NOTE_SLAP 28   // extended?
 #define GM_NOTE_ACOUSTIC_BASS_DRUM 35
 #define GM_NOTE_ELECTRIC_BASS_DRUM 36
 #define GM_NOTE_SIDE_STICK 37
