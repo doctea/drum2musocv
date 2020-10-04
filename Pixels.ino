@@ -15,7 +15,7 @@
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
-#define DATA_PIN 7
+#define DATA_PIN 9
 //#define CLOCK_PIN 13
 
 // Define the array of leds
@@ -109,6 +109,7 @@ int get_envelope_for_pixel(int i) {
 }
 
 void update_pixels_triggers() {
+    bool changed = false;
     for (int i = 0 ; i < NUM_LEDS ; i++) {
       int pixel_type = PIX_NONE; //PIX_TRIGGER;
       bool active = false;
@@ -188,10 +189,13 @@ void update_pixels_triggers() {
       }
 #endif
 #endif
-      
+
+      if (leds[p] != colour)
+        changed = true;
       leds[p] = colour;
     }
-    FastLED.show();
+    if (changed)
+      FastLED.show();
 }
 
 

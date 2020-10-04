@@ -2,9 +2,14 @@
 
 #include "drums.h"
 
+//#include <DebounceEvent.h>
+
+#define BUTTON_PIN A0
+
 //#define TEST_TRIGGERS
 
 #define ENABLE_PIXELS
+#define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
@@ -15,6 +20,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
     const bool HandleNullVelocityNoteOnAsNoteOff = false;
 };
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
+
+bool demo_mode = false;
 
 //TODO: make these CC values sensible and map them in FL
 #define CC_SYNC_RATIO   110
@@ -134,6 +141,9 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
   byte p = pitch;
   byte v = velocity;
 
+  if (velocity==0) 
+    handleNoteOff(channel, pitch, velocity);
+
   if (!process_triggers_for_pitch(pitch, velocity, true)) {
     p = convert_drum_pitch(pitch);
     if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
@@ -167,7 +177,7 @@ void handleControlChange(byte channel, byte number, byte value) {
   if (number==CC_SYNC_RATIO) {
     cc_value_sync_modifier = constrain(value,1,127); //1 + (value-1); // minimum of 1    
   } else if (!handle_envelope_ccs(channel, number, value)) {
-    MIDI.sendControlChange(number, value, 1); // pass thru CV
+    //MIDI.sendControlChange(number, value, 1); // pass thru CV
   }
   last_input_at = millis();
 }
@@ -227,6 +237,26 @@ void handleSystemExclusive(byte* array, unsigned size) {
 }
 
 
+
+
+void callback(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
+    /*Serial.print("Event : "); Serial.print(event);
+    Serial.print(" Count : "); Serial.print(count);
+    Serial.print(" Length: "); Serial.print(length);
+    Serial.println();*/
+    handleNoteOn(10, GM_NOTE_MINIMUM+count, 127); //random(1,127));
+    //demo_mode = !demo_mode;
+}
+
+
+//DebounceEvent button = DebounceEvent(BUTTON_PIN, callback, BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);
+
+
+#ifdef ENABLE_PIXELS
+long last_updated_pixels_at = 0;
+#endif
+
+
 // -----------------------------------------------------------------------------
 
 void setup() {
@@ -235,6 +265,8 @@ void setup() {
 #ifdef ENABLE_PIXELS
   setup_pixels();
 #endif
+
+  //pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   initialise_envelopes();
 
@@ -266,6 +298,8 @@ int last_played_pitch = 0;
 void loop() {
   // Call MIDI.read the fastest you can for real-time performance.
   MIDI.read();
+  
+  //button.loop();
 
   // There is no need to check if there are messages incoming
   // if they are bound to a Callback function.
@@ -275,24 +309,26 @@ void loop() {
   unsigned long now = clock_millis();
   unsigned long delta = now - time_last;
 
-#ifdef TEST_TRIGGERS
-  if (random(0,5000)<10) {
-    if (last_played_pitch>0) {
-      handleNoteOff(10, last_played_pitch, 0);
-      last_played_pitch = 0;
-    } else {
-      last_played_pitch = random(GM_NOTE_MINIMUM,GM_NOTE_MAXIMUM);
-      handleNoteOn(10, last_played_pitch, random(1,127));
+  if (demo_mode) {
+    if (random(0,5000)<10) {
+      if (last_played_pitch>0) {
+        handleNoteOff(10, last_played_pitch, 0);
+        last_played_pitch = 0;
+      } else {
+        last_played_pitch = random(GM_NOTE_MINIMUM+1,GM_NOTE_MAXIMUM);
+        handleNoteOn(10, last_played_pitch, random(1,127));
+      }
     }
   }
-#endif
 
   // update envelopes by time elapsed
   process_envelopes(now, delta);
 
 #ifdef ENABLE_PIXELS
-  if (millis()%50==0) 
+  if (last_updated_pixels_at - millis() >= PIXEL_REFRESH) {
+    last_updated_pixels_at = millis();
     update_pixels();
+  }
 #endif
 
   time_last = clock_millis();

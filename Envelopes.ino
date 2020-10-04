@@ -79,6 +79,7 @@ void kill_envelopes() {
   }
 }
 
+// change to an envelope setting
 bool handle_envelope_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
 
@@ -272,7 +273,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
           envelopes[i].stage = OFF;
         }
     } else if (s==OFF) {  // may have stopped or something so mute
-        lvl = 0;
+        lvl = 0; //64;
     }
 
     // if lfo_sync_ratio is >=16 for this envelope then apply lfo modulation to the level
@@ -284,7 +285,8 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
 
       //NUMBER_DEBUG(12, 0, 127 * isin(elapsed 
       lvl = constrain(
-        ((127-lvl) * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed))), 
+        //((127-lvl) * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed))), 
+        lvl + (32 * isin( PI*(envelopes[i].lfo_sync_ratio/PPQN) * elapsed)),
         0,
         127
       );
@@ -293,7 +295,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
     envelopes[i].actual_level = lvl;
     
     if (envelopes[i].last_sent_lvl != lvl) {  // only send a new value if its different to the last value sent for this envelope
-      if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
+      //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
       //NUMBER_DEBUG(12, envelopes[i].stage, lvl);
       //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
       
