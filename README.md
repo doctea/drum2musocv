@@ -4,7 +4,7 @@ Arduino sketch adapting the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-1
 
 This allows you to play the modular drum machine using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash' and 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (midimuso CC 0, 7, 11, 71 and 74).
+Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash' and 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (midimuso CC 1, 7, 11, 71 and 74).
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
@@ -15,6 +15,8 @@ Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/ard
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
 
 # TODO
+
+Not convinced the envelopes are entirely working as intended so need to check & fix this
 
 Make CC config options to able to enable/disable so the CV outputs can be used as CC, envelopes or LFOs per-project
 
@@ -28,12 +30,12 @@ TODO: make modulation sync more useful... set upper/lower limits to modulation, 
 
 More envelope stages (delay?)
 
-Make modulation configurable per-stage
+Make modulation configurable per-stage, eg only wobble during release
 
 Other 'modules' to trigger other devices with CV via relays (ie circuit bent stuff).  Route MIDI/signals to other devices?  Extra CVs/triggers direct from the Arduino?  Shitty sample recorder/player?!
 
-Hi-hat/crash choke 
+Hi-hat/crash choke (cut open hat gate when pedal hat is triggered?)
 
-Funkier colours / colour blending fx
+Funkier colours / colour blending fx for the pixels
 
 Save config options (RGB settings, envelope settings etc) to the flash memory and allow configuration via sysex / CCs.
