@@ -1,15 +1,45 @@
+// config settings
+//#define TEST_TRIGGERS
+#define ENABLE_PIXELS
+#define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
+#define BUTTON_PIN A0
+
+//TODO: make these CC values sensible and map them in FL
+#define CC_SYNC_RATIO   110
+
+#define PPQN  24  // midi clock ticks per quarter-note
+
 #include <MIDI.h>
 
 #include "drums.h"
 
-//#include <DebounceEvent.h>
+#ifdef BUTTON_PIN
+#include <DebounceEvent.h>
+#endif
 
-#define BUTTON_PIN A0
+// GLOBALS
 
-//#define TEST_TRIGGERS
+// for demo mode
+bool demo_mode = false;
+int last_played_pitch = 0;
 
-#define ENABLE_PIXELS
-#define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
+// for handling clock ---------------------------------------------------------
+float estimated_ticks_per_ms = 0.1f;  // initial estimated speed
+unsigned long time_last; // last time main loop was run, for calculating elapsed time
+
+float ticks = 0;  // store ticks as float, so can update by fractional ticks
+unsigned long last_tick_at = 0;
+unsigned long last_input_at = 0;
+
+unsigned int song_position;
+
+byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
+
+// tracking what triggers are currently active, for the sake of pixel output 
+int trigger_status[NUM_TRIGGERS];
+
+
+// MIDI library setup
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
@@ -21,13 +51,6 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 };
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
 
-bool demo_mode = false;
-
-//TODO: make these CC values sensible and map them in FL
-#define CC_SYNC_RATIO   110
-
-#define PPQN 24
-
 enum envelope_types : byte {
   ENV_CRASH = 0,
   ENV_SPLASH = 1,
@@ -37,18 +60,6 @@ enum envelope_types : byte {
   // TODO: more envelope types...
 };
 #define NUM_ENVELOPES 5
-
-unsigned long time_last; // handling last time main loop was run, for calculating elapsed
-
-byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
-
-// for handling clock ---------------------------------------------------------
-
-float estimated_ticks_per_ms = 0.1f;
-
-float ticks = 0;  // store ticks as float, so can update by fractional ticks
-unsigned long last_tick_at = 0;
-unsigned long last_input_at = 0;
 
 unsigned long clock_millis() {
   // if external clock is running, use external clock, otherwise use an internal clock based on the last-known speed
@@ -62,12 +73,8 @@ unsigned long clock_millis() {
 
 // -----------------------------------------------------------------------------
 
-// tracking what triggers are currently active for the sake of pixel output 
-int trigger_status[NUM_TRIGGERS];
-
 byte convert_drum_pitch(byte pitch) {
-  // in mode 0x0b (i think, need to theck this) there are 11 triggers available and a pitch out
-  // TODO: make handy #defines for the different midimuso outputs + config
+  // in mode 0x0b there are 11 triggers available and a pitch out
   byte p;
   if (pitch >= GM_NOTE_MINIMUM && pitch <= GM_NOTE_MAXIMUM) {   // only process notes within GM drumkit range
     p = pitch;
@@ -95,9 +102,8 @@ byte convert_drum_pitch(byte pitch) {
   return p;
 }
 
-
 void kill_notes() {
-  // turn off the triggers
+  // forget which triggers are active (doesn't actually send stop notes)
   for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
     trigger_status[i] = TRIGGER_IS_OFF;
   }
@@ -177,12 +183,10 @@ void handleControlChange(byte channel, byte number, byte value) {
   if (number==CC_SYNC_RATIO) {
     cc_value_sync_modifier = constrain(value,1,127); //1 + (value-1); // minimum of 1    
   } else if (!handle_envelope_ccs(channel, number, value)) {
-    //MIDI.sendControlChange(number, value, 1); // pass thru CV
+    //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
   }
   last_input_at = millis();
 }
-
-unsigned int song_position;
 
 void handleSongPosition(unsigned int beats) {
   // TODO: put LFO / envelope timer into correct phase, if that is possible?
@@ -239,17 +243,24 @@ void handleSystemExclusive(byte* array, unsigned size) {
 
 
 
-void callback(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
+void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
     /*Serial.print("Event : "); Serial.print(event);
     Serial.print(" Count : "); Serial.print(count);
     Serial.print(" Length: "); Serial.print(length);
     Serial.println();*/
-    handleNoteOn(10, GM_NOTE_MINIMUM+count, 127); //random(1,127));
-    //demo_mode = !demo_mode;
+    //handleNoteOn(10, GM_NOTE_MINIMUM+count, 127); //random(1,127));
+    if (event == EVENT_RELEASED) {
+      demo_mode = !demo_mode;
+      if (last_played_pitch>0)
+        handleNoteOff(10, last_played_pitch, 0);
+      kill_notes();
+    }
 }
 
 
-//DebounceEvent button = DebounceEvent(BUTTON_PIN, callback, BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);
+#ifdef BUTTON_PIN
+DebounceEvent button = DebounceEvent(BUTTON_PIN, handleButtonPressed, BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);
+#endif
 
 
 #ifdef ENABLE_PIXELS
@@ -266,7 +277,9 @@ void setup() {
   setup_pixels();
 #endif
 
+#ifdef BUTTON_PIN
   //pinMode(BUTTON_PIN, INPUT_PULLUP);
+#endif
 
   initialise_envelopes();
 
@@ -293,13 +306,13 @@ void setup() {
   kill_envelopes();
 }
 
-int last_played_pitch = 0;
-
 void loop() {
   // Call MIDI.read the fastest you can for real-time performance.
   MIDI.read();
-  
-  //button.loop();
+
+#ifdef BUTTON_PIN
+  button.loop();
+#endif
 
   // There is no need to check if there are messages incoming
   // if they are bound to a Callback function.

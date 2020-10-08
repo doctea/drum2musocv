@@ -109,14 +109,17 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     }
     return true;
   }
-  if (/*number==0x7B || // intercept 'all notes off', 
-      number==0x65 || // RPN MSB*/
-      number==0x07) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
-            // TODO: have i commented out the wrong lines here? ^^^
+  if (number==0x7B) {// || // intercept 'all notes off', 
+        // TODO: have i commented out the wrong lines here? ^^^
         kill_envelopes();
         return true;
-  }
-  
+  } else if (number==0x07) {
+      //number==0x65 || // RPN MSB
+      //number==0x07*/) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
+      //TODO: do i need to also ignore the others (1,7,11,71,74)?
+      //TODO: or... use them as offsets so can modulate...?
+      return true;
+  }  
   return false;
 }
 
