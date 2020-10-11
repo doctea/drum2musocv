@@ -147,16 +147,20 @@ void update_pixels_triggers() {
       CRGB colour;
       if (active) {
         if (pixel_type==PIX_TRIGGER) {
+          // handling a trigger pixel that is on
           colour = CRGB::Red;
         } else if (pixel_type==PIX_ENVELOPE) {
+          // handling an envelope pixel that is active
           if (envelopes[t].stage==ATTACK) {
             colour = CRGB::Red;
+          } else if (envelopes[t].stage==DECAY) {
+            colour = CRGB::Yellow;
           } else if (envelopes[t].stage==RELEASE) {
             colour = CRGB::Aqua;
           } else {
             colour = CRGB::Green;
           }
-          // fade by envelope level
+          // fade by envelope level relative to velocity
           colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));
         }
       } else {
@@ -166,7 +170,8 @@ void update_pixels_triggers() {
 
 #ifdef ENABLE_PIXEL_POSITION
 #ifdef NO_ACTIVE_PIXEL_POSITION
-      if (millis() - last_input_at > IDLE_PIXEL_TIMEOUT
+      if (millis() - last_input_at > IDLE_PIXEL_TIMEOUT && millis() - last_tick_at > IDLE_PIXEL_TIMEOUT
+          && activeNotes==0
       ) {
 #endif
         int beats;

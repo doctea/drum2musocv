@@ -19,6 +19,8 @@
 
 // GLOBALS
 
+byte activeNotes = 0;
+
 // for demo mode
 bool demo_mode = false;
 int last_played_pitch = 0;
@@ -150,6 +152,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
   if (velocity==0) 
     handleNoteOff(channel, pitch, velocity);
 
+  activeNotes++;
   if (!process_triggers_for_pitch(pitch, velocity, true)) {
     p = convert_drum_pitch(pitch);
     if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
@@ -165,6 +168,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
   byte p = pitch;
   byte v = velocity;
 
+  activeNotes--;
   if (!process_triggers_for_pitch(pitch, velocity, false)) {
     p = convert_drum_pitch(pitch);
     if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
@@ -196,6 +200,7 @@ void handleSongPosition(unsigned int beats) {
   //NOISY_DEBUG(1, beats);
 
   song_position = beats/4;
+  last_input_at = millis();
 }
 
 void handleClock() {
