@@ -6,7 +6,7 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 //#define BUTTON_PIN A0
 
-#define USB_NATIVE
+#define USB_NATIVE  // enable native usb support
 #define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
 
 #ifdef USB_NATIVE  // use native usb version, eg for seeduino or (presumably) other boards with Native USB support
