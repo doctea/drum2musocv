@@ -8,9 +8,11 @@ Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain,
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
-Used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI.
+Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
 
-Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library.
+Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
+
+Now also supports the Seeeduino Cortex M0+ board, presumably also works with Arduino Zero etc.
 
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
 
