@@ -1,8 +1,32 @@
 // config settings
 //#define TEST_TRIGGERS
 #define ENABLE_PIXELS
+//#define ENABLE_PIXELS_ADA // choose this or ENABLE_PIXELS_FASTLED
+#define ENABLE_PIXELS_FASTLED
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
-#define BUTTON_PIN A0
+//#define BUTTON_PIN A0
+
+#define USB_NATIVE
+#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
+
+#ifdef USB_NATIVE  // use native usb version, eg for seeduino or (presumably) other boards with Native USB support
+
+#include <USB-MIDI.h> 
+typedef USBMIDI_NAMESPACE::usbMidiTransport __umt;
+typedef MIDI_NAMESPACE::MidiInterface<__umt> __ss;
+__umt usbMIDI(0); // cableNr
+__ss MIDICoreUSB((__umt&)usbMIDI);
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, midiB);
+
+#define MIDIOUT midiB
+#define MIDIIN  MIDICoreUSB
+
+#else              // arduino uno / serial midi version (for USBMidiKlik)
+
+#define MIDIOUT MIDI
+MIDI_CREATE_DEFAULT_INSTANCE();
+
+#endif
 
 //TODO: make these CC values sensible and map them in FL
 #define CC_SYNC_RATIO   110
@@ -39,11 +63,6 @@ byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
 
 // tracking what triggers are currently active, for the sake of pixel output 
 int trigger_status[NUM_TRIGGERS];
-
-
-// MIDI library setup
-
-MIDI_CREATE_DEFAULT_INSTANCE();
 
 // override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
 // however this doesn't work like i need it to
@@ -159,7 +178,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
       trigger_status[p - MUSO_NOTE_MINIMUM] = velocity>0; // TRIGGER_IS_ON;
     }
     
-    MIDI.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
+    MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
     last_input_at = millis();
   }
 }
@@ -175,7 +194,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
       trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
     }
     
-    MIDI.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+    MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
   }
 
   last_input_at = millis();
@@ -208,7 +227,7 @@ void handleClock() {
   // would it be enough just to replace calls to millis() with a call to eg get_clock_count()
   // and reset the clock_count on song start/stop?
   // and set the clock_count to an appropriate value in handle SongPosition ? clock_count = beats * 24 or somesuch, if its 24pqn ? beat is a 16th note i think tho so would it be * 96 ? need to check this
-  MIDI.sendClock();
+  MIDIOUT.sendClock();
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
   //ticks++;
@@ -220,16 +239,16 @@ void handleClock() {
 
 void handleStart() {
   // TODO: start LFOs?
-  MIDI.sendStart();
+  MIDIOUT.sendStart();
   ticks = 0;
 }
 void handleContinue() {
   // TODO: continue LFOs
-  MIDI.sendContinue();
+  MIDIOUT.sendContinue();
   kill_envelopes();
 }
 void handleStop() {
-  MIDI.sendStop();
+  MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
   kill_envelopes();
 #ifdef ENABLE_PIXELS
@@ -242,12 +261,12 @@ void handleStop() {
 void handleSystemExclusive(byte* array, unsigned size) {
   // pass sysex messages through to the midimuso
   // TODO: configuration of drum2musocv via sysex?
-  MIDI.sendSysEx(size, array, false); // true/false means "array contains start/stop padding" -- think what we receive here is without padding..?
+  MIDIOUT.sendSysEx(size, array, false); // true/false means "array contains start/stop padding" -- think what we receive here is without padding..?
 }
 
 
 
-
+#ifdef BUTTON_PIN
 void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
     /*Serial.print("Event : "); Serial.print(event);
     Serial.print(" Count : "); Serial.print(count);
@@ -262,8 +281,6 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
     }
 }
 
-
-#ifdef BUTTON_PIN
 DebounceEvent button = DebounceEvent(BUTTON_PIN, handleButtonPressed, BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);
 #endif
 
@@ -278,6 +295,12 @@ long last_updated_pixels_at = 0;
 void setup() {
   randomSeed(analogRead(0));
 
+#ifdef USB_NATIVE
+  Serial.begin(115200);   // usb serial debug port
+  MIDIOUT.begin(GM_CHANNEL_DRUMS);
+#endif
+MIDIIN.begin(GM_CHANNEL_DRUMS);
+
 #ifdef ENABLE_PIXELS
   setup_pixels();
 #endif
@@ -289,22 +312,22 @@ void setup() {
   initialise_envelopes();
 
   // Initiate MIDI communications, listen to all channels
-  MIDI.begin(GM_CHANNEL_DRUMS); //MIDI_CHANNEL_OMNI);
+  //MIDIIN.begin(GM_CHANNEL_DRUMS); //MIDI_CHANNEL_OMNI);
 
-  MIDI.turnThruOff();
+  MIDIIN.turnThruOff();
 
-  MIDI.setHandleNoteOn(handleNoteOn);
-  MIDI.setHandleNoteOff(handleNoteOff);
+  MIDIIN.setHandleNoteOn(handleNoteOn);
+  MIDIIN.setHandleNoteOff(handleNoteOff);
 
-  MIDI.setHandleControlChange(handleControlChange);
+  MIDIIN.setHandleControlChange(handleControlChange);
 
-  MIDI.setHandleStop(handleStop);
-  MIDI.setHandleStart(handleStart);
-  MIDI.setHandleStart(handleContinue);
+  MIDIIN.setHandleStop(handleStop);
+  MIDIIN.setHandleStart(handleStart);
+  MIDIIN.setHandleStart(handleContinue);
 
-  MIDI.setHandleClock(handleClock);
+  MIDIIN.setHandleClock(handleClock);
 
-  MIDI.setHandleSongPosition(handleSongPosition);
+  MIDIIN.setHandleSongPosition(handleSongPosition);
 
   //NOISY_DEBUG(1000, 1);
 
@@ -313,7 +336,7 @@ void setup() {
 
 void loop() {
   // Call MIDI.read the fastest you can for real-time performance.
-  MIDI.read();
+  MIDIIN.read();
 
 #ifdef BUTTON_PIN
   button.loop();

@@ -77,7 +77,7 @@ void kill_envelopes() {
   for (byte i = 0 ; i < NUM_ENVELOPES; i++) {
     envelopes[i].stage = OFF;
     envelopes[i].stage_start_level = (byte)0;
-    MIDI.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
+    MIDIOUT.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
   }
 }
 
@@ -322,7 +322,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
       //NUMBER_DEBUG(12, envelopes[i].stage, lvl);
       //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
       
-      MIDI.sendControlChange(envelopes[i].midi_cc, lvl, 1); // send message to midimuso
+      MIDIOUT.sendControlChange(envelopes[i].midi_cc, lvl, 1); // send message to midimuso
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
     }
