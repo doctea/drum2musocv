@@ -207,7 +207,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
         if (envelopes[i].attack_length==0) 
           lvl = envelopes[i].velocity; // immediately start at desired velocity
         else
-          lvl = (byte) ((float)envelopes[i].velocity * ((float)elapsed / (float)envelopes[i].attack_length));
+          lvl = (byte) ((float)envelopes[i].velocity * ((float)elapsed / (0.1+(float)envelopes[i].attack_length )));
           
         if (elapsed >= envelopes[i].attack_length) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
@@ -229,7 +229,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
         float f_original_level = envelopes[i].stage_start_level;
 
         if (envelopes[i].decay_length>0) {
-          float decay_position = ((float)elapsed / (float)(envelopes[i].decay_length));
+          float decay_position = ((float)elapsed / (float)(0.1+envelopes[i].decay_length));
   
           // we start at stage_start_level
           float diff = (f_original_level - (f_sustain_level));
@@ -272,12 +272,16 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
 
         // the length of time to decay down to 0
         // immediately jump here if note off during any other stage (than OFF)
-        float eR = (float)elapsed / (float)envelopes[i].release_length; 
-
-        //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
-
-        lvl = (byte)((float)envelopes[i].stage_start_level * (1.0f-eR));
-
+        if (envelopes[i].release_length>0) {
+          float eR = (float)elapsed / (float)(0.1+envelopes[i].release_length); 
+  
+          //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
+  
+          lvl = (byte)((float)envelopes[i].stage_start_level * (1.0f-eR));
+        } else {
+          lvl = 0;
+        }
+  
         if (elapsed > envelopes[i].release_length || envelopes[i].release_length==0) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
           envelopes[i].stage_triggered_at = now;
