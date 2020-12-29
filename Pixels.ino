@@ -1,3 +1,4 @@
+#ifdef ENABLE_PIXELS
 #ifdef ENABLE_PIXELS_FASTLED
 
 #ifdef SEEEDUINO
@@ -6,7 +7,7 @@
 
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused
-//#define REVERSE_LEDS           // if pixel strips should be reversed
+#define REVERSE_LEDS           // if pixel strips should be reversed
 #define NO_ACTIVE_PIXEL_POSITION
 
 #define IDLE_PIXEL_TIMEOUT 5000 // five second timeout
@@ -19,7 +20,7 @@
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
-#define DATA_PIN D9
+#define DATA_PIN 9
 //#define CLOCK_PIN 13
 
 // Define the array of leds
@@ -188,12 +189,15 @@ void update_pixels_triggers() {
         t_ticks = clock_millis()*estimated_ticks_per_ms;
         if ((i==beats && (int)t_ticks%PPQN<6)) {  // only display for first tick / (6 = sixteenth note ?)
           if (beats % 4) 
-            colour += CRGB::Blue;
+            colour += CRGB::Yellow;
           else
             colour += CRGB::White;
         } /*else {
           colour = CRGB::Black;
         }*/
+        if (p==0) {
+          //Serial.println("loop");
+        }
 #ifdef NO_ACTIVE_PIXEL_POSITION
       }
 #endif
@@ -209,4 +213,5 @@ void update_pixels_triggers() {
 
 
 
+#endif
 #endif
