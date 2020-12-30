@@ -4,7 +4,7 @@ Arduino sketch adapting the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-1
 
 This allows you to play the modular drum machine using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash' and 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (midimuso CC 1, 7, 11, 71 and 74).
+Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (midimuso CC 1, 7, 11, 71 and 74).
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
@@ -15,6 +15,8 @@ Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/ard
 Now also supports the Seeeduino Cortex M0+ board, presumably also works with Arduino Zero etc.
 
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
+
+NEW: experimental generative euclidian rhythm generator
 
 # TODO
 
@@ -27,6 +29,10 @@ Better syncing of the MIDI clock to the envelopes (?)
 LFOs
 
 TODO: make modulation sync more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
+
+Make euclidian sequences work off midi clock, fix any bpm issues.
+
+Make euclidian sequences changeable on the fly
 
 ## Future plans / ideas
 

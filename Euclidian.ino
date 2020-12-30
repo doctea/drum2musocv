@@ -67,33 +67,45 @@ void process_euclidian(int ticks) {
   //ticks /= (PPQN);      // step = bar ?
   //ticks /= (PPQN/(24/2));      // step = half-beat
 
+  ticks; //*= 4; // 
+ 
+  //int current_step = (ticks/TICKS_PER_STEP)%16;
+  //int current_beat = current_step / 4; //(ticks/24);//%16;
+
   if (ticks==last_processed) return;
   //if (0==(ticks * (16))) {
-  if (ticks%PPQN==0) {
-    
-    if ((ticks/PPQN)%16 == 0) {
+  if (0==ticks%TICKS_PER_STEP) {
+    /*if ((ticks/PPQN)%16 == 0) {
       mutate_euclidian(&patterns[random(1,NUM_PATTERNS)]);
       Serial.println("mutated!");
       debug_patterns();
-    }
+    }*/
     
     // its a beat!
-    Serial.println(">>>>BEAT");
-    Serial.print("Got a beat, ticks = "); Serial.print(ticks); Serial.print(" which makes beat "); Serial.print(ticks/24)%16; Serial.print (" or step "); Serial.println((ticks/24)%16);
+    Serial.printf(">>>>STEP %2.2u", current_step); 
+    Serial.printf(" >> BEAT %1.1u", current_beat); 
+    Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
+    Serial.print("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      if (query_pattern(&patterns[i], ticks/24)) {
-        Serial.print("Triggering pattern "); Serial.println(i);
+      if (query_pattern(&patterns[i], current_step)) {
         //if (i<5) update_envelope(i, 127, true);
+        Serial.printf("%01X", i); Serial.print(" ");
         if (i > 11) { // trigger envelope
           //handleNoteOn(10, i, random(1,127));
           update_envelope(i-11, 127, true);
         } else {
           fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
         }
+      } else {
+          Serial.printf("  ");
       }
     }
-    Serial.println("<<<<BEAT");
-  } else if (ticks%PPQN==12) {
+    Serial.print("]  <<<<BEAT");
+    if (current_beat==0) {
+      Serial.print(" (first beat of bar)");
+    }
+    Serial.println("");
+  } else if ((TICKS_PER_STEP/2)==ticks%TICKS_PER_STEP) {
     // its between a beat!
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
@@ -105,31 +117,33 @@ void process_euclidian(int ticks) {
       }
     }
   }
+  //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
 
 void initialise_euclidian() {
+  const int LEN = SEQUENCE_LENGTH_STEPS;
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
     //make_euclid(&patterns[i], 16, 16-(i+1), 1);
-    make_euclid(&patterns[i], 16, 0, 1); // initialise patterns to empty
+    make_euclid(&patterns[i], LEN, 0, 1); // initialise patterns to empty
   }
   Serial.println("initialise_euclidian():");
-  make_euclid(&patterns[0], 16, 4); // kick
-  make_euclid(&patterns[1], 16, 5, 0); // stick
-  make_euclid(&patterns[2], 16, 2, 5);  // clap
-  //make_euclid(&patterns[3], 4, 16);
-  make_euclid(&patterns[4], 16, 3, 3);
-  make_euclid(&patterns[5], 16, 7);  // tamb?
-  make_euclid(&patterns[6], 16, 9);  
-  make_euclid(&patterns[7], 4, 2, 3);  // tamb?
-  make_euclid(&patterns[8], 8, 2, 3); 
-  make_euclid(&patterns[9], 16, 4, 3);  // open hat
-  make_euclid(&patterns[10], 16, 16);   // closed hat
-  make_euclid(&patterns[11], 16, 1, 1); // crash ?
-  make_euclid(&patterns[12], 16, 1, 5);    // splash?
-  make_euclid(&patterns[13], 16, 1, 9);    // 
-  make_euclid(&patterns[14], 16, 1, 13);    
-  make_euclid(&patterns[15], 16, 5, 13);    
+  make_euclid(&patterns[0],   LEN,    4);       // kick
+  make_euclid(&patterns[1],   LEN,    5, 0);    // stick
+  make_euclid(&patterns[2],   LEN,    2, 5);    // clap
+  make_euclid(&patterns[3],   LEN/4,  16);     // snare
+  make_euclid(&patterns[4],   LEN,    3, 3);    // crash 1
+  make_euclid(&patterns[5],   LEN,    7);       // tamb
+  make_euclid(&patterns[6],   LEN,    9);       // hi tom!
+  make_euclid(&patterns[7],   LEN/4,  2, 3);   // low tom
+  make_euclid(&patterns[8],   LEN/2,  2, 3);   // pedal hat
+  make_euclid(&patterns[9],   LEN,    4, 3);    // open hat
+  make_euclid(&patterns[10],  LEN,    16);      // closed hat
+  make_euclid(&patterns[11],  LEN,    1 , 1);    // crash 2
+  make_euclid(&patterns[12],  LEN,    1 , 5);    // splash
+  make_euclid(&patterns[13],  LEN,    1, 9);    // vibra
+  make_euclid(&patterns[14],  LEN,    1, 13);   // bell
+  make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal
 
   /*make_euclid(&patterns[0], 16, 16, 0);
   make_euclid(&patterns[1], 13, 8, 0);

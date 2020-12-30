@@ -6,6 +6,8 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 #define BUTTON_PIN A0
 
+#define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
+
 #define USB_NATIVE  // enable native usb support
 #define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
 
@@ -36,7 +38,11 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 //TODO: make these CC values sensible and map them in FL
 #define CC_SYNC_RATIO   110
 
-#define PPQN  24  // midi clock ticks per quarter-note
+#define SEQUENCE_LENGTH_STEPS   16
+#define STEPS_PER_BEAT          4
+
+#define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
+#define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
 
 #include "drums.h"
 #include "Euclidian.h"
@@ -56,6 +62,7 @@ bool demo_mode = false;
 int last_played_pitch = 0;
 
 // for handling clock ---------------------------------------------------------
+// At 120 BPM, 24 clock ticks will last 0.02083 seconds. = 200ms
 float estimated_ticks_per_ms = 0.1f;  // initial estimated speed
 unsigned long time_last; // last time main loop was run, for calculating elapsed time
 
@@ -89,6 +96,7 @@ enum envelope_types : byte {
 #define NUM_ENVELOPES 5
 
 unsigned long clock_millis() {
+  // At 120 BPM, 24 clock ticks will last 0.02083 seconds.
   // if external clock is running, use external clock, otherwise use an internal clock based on the last-known speed
   if (millis() - last_tick_at > 100) { // if we haven't received a clock for 100ms, fall back to internal millis clock
     return  (millis() * estimated_ticks_per_ms) * 
@@ -255,8 +263,9 @@ void handleClock() {
   //NOISY_DEBUG(250,1);
   //ticks++;
   ticks += 1; //((float)(cc_value_sync_modifier^2)/127.0f);  // += 1
-  estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
+  //estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
   last_tick_at = millis();
+  bpm_receive_clock_tick();
   //update_pixels_position((int)ticks);
 }
 
@@ -264,6 +273,7 @@ void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
   ticks = 0;
+  bpm_reset_clock();
 }
 void handleContinue() {
   // TODO: continue LFOs
@@ -274,6 +284,7 @@ void handleStop() {
   MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
   kill_envelopes();
+  bpm_reset_clock();
 #ifdef ENABLE_PIXELS
   kill_notes();
 #endif
@@ -379,7 +390,8 @@ void loop() {
   // The attached method will be called automatically
   // when the corresponding message has been received.
 
-  unsigned long now = clock_millis();
+  //unsigned long now = clock_millis();
+  unsigned long now = bpm_clock();
   unsigned long delta = now - time_last;
 
   if (demo_mode) {

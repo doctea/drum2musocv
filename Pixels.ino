@@ -10,7 +10,7 @@
 #define REVERSE_LEDS           // if pixel strips should be reversed
 #define NO_ACTIVE_PIXEL_POSITION
 
-#define IDLE_PIXEL_TIMEOUT 5000 // five second timeout
+#define IDLE_PIXEL_TIMEOUT IDLE_TIMEOUT // five second timeout
 
 #include <FastLED.h>
 
@@ -179,15 +179,9 @@ void update_pixels_triggers() {
           && activeNotes==0
       ) {
 #endif
-        int beats;
-        int t_ticks;
-        if (millis() - last_tick_at > 250) {
-          beats = (int)((clock_millis()*estimated_ticks_per_ms)/PPQN) % NUM_LEDS;  // runs based on last estimated clock
-        } else {
-          beats = (((int)ticks)/PPQN) % NUM_LEDS;  //only runs when real clock is running
-        }
-        t_ticks = clock_millis()*estimated_ticks_per_ms;
-        if ((i==beats && (int)t_ticks%PPQN<6)) {  // only display for first tick / (6 = sixteenth note ?)
+        int beats = current_beat;
+        int steps = current_step;
+        if ((i==beats && steps%STEPS_PER_BEAT<2)) {  // only display for first tick / (6 = sixteenth note ?)
           if (beats % 4) 
             colour += CRGB::Yellow;
           else
