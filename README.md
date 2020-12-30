@@ -30,9 +30,13 @@ LFOs
 
 TODO: make modulation sync more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
 
-Make euclidian sequences work off midi clock, fix any bpm issues.
+ Make euclidian sequences work off midi clock, fix any bpm issues.
+	make BPM guesser only work off the last 4 beats, to handle live changes of tempo
+	fix problem where BPM guesser doesn't reset when stopped?
+	fix problem with lights staying on when sequencer stopped?
+	first beat is missing when starting playback.. seems to think it starts from step 1?.
 
-Make euclidian sequences changeable on the fly
+TODO: Make euclidian sequences changeable on the fly
 
 ## Future plans / ideas
 
@@ -47,3 +51,11 @@ Hi-hat/crash choke (cut open hat gate when pedal hat is triggered?)
 Funkier colours / colour blending fx for the pixels
 
 Save config options (RGB settings, envelope settings etc) to the flash memory and allow configuration via sysex / CCs.
+
+### Done list
+
+Make euclidian sequences work off midi clock, fix any bpm issues.
+Make BPM guesser only work off the last 4 steps, to handle live changes of tempo better (done, but still needs 3 beats before it becomes accurate...?)
+Fix problem where BPM guesser doesn't reset when stopped? - done i think
+Fix problem with lights staying on when sequencer stopped? - seems to be resolved
+first beat is missing when starting playback.. seems to think it starts from step 1?. -done for both playback and internal, i think !

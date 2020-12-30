@@ -74,6 +74,8 @@ unsigned int song_position;
 
 byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
 
+#include "BPM.h"
+
 // tracking what triggers are currently active, for the sake of pixel output 
 int trigger_status[NUM_TRIGGERS];
 
@@ -283,8 +285,10 @@ void handleContinue() {
 void handleStop() {
   MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
+  Serial.println("Received STOP -- killing envelopes / resetting clock !");
   kill_envelopes();
-  bpm_reset_clock();
+  bpm_reset_clock(-1);
+  
 #ifdef ENABLE_PIXELS
   kill_notes();
 #endif

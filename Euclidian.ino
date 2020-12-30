@@ -82,17 +82,18 @@ void process_euclidian(int ticks) {
     }*/
     
     // its a beat!
-    Serial.printf(">>>>STEP %2.2u", current_step); 
-    Serial.printf(" >> BEAT %1.1u", current_beat); 
+    //Serial.printf(" >>STEP %2.2u", current_step); 
+    //Serial.printf(" >>BEAT %1.1u", current_beat); 
+    Serial.printf(">>BPM %3.3f >>STEP %2.2u.%1.2u ", bpm_current, current_beat, current_step);
     Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
     Serial.print("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       if (query_pattern(&patterns[i], current_step)) {
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
-        if (i > 11) { // trigger envelope
+        if (i >= NUM_TRIGGERS) { // trigger envelope
           //handleNoteOn(10, i, random(1,127));
-          update_envelope(i-11, 127, true);
+          update_envelope(i-NUM_TRIGGERS, 127, true);
         } else {
           fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
         }
@@ -100,7 +101,8 @@ void process_euclidian(int ticks) {
           Serial.printf("  ");
       }
     }
-    Serial.print("]  <<<<BEAT");
+    Serial.print("]  ");
+    Serial.print (is_bpm_on_beat ? "<<<<BEAT" : "<<  STEP");
     if (current_beat==0) {
       Serial.print(" (first beat of bar)");
     }
@@ -110,8 +112,8 @@ void process_euclidian(int ticks) {
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       //if (i<5) update_envelope(i, 127, false);
-      if (i > 11) { // trigger envelope
-        update_envelope(i-11, 127, false);
+      if (i >= NUM_TRIGGERS) { // trigger envelope
+        update_envelope(i-NUM_TRIGGERS, 127, false);
       } else {
         douse_trigger(MUSO_NOTE_MINIMUM + i, 127);
       }
