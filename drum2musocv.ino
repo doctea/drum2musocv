@@ -222,12 +222,11 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
   activeNotes--;
   if (!process_triggers_for_pitch(pitch, velocity, false)) {
     p = convert_drum_pitch(pitch);
-    /*if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
+    if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
       trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
     }
     
     MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
-    */
   }
 
   last_input_at = millis();
