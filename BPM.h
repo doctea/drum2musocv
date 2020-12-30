@@ -7,6 +7,7 @@ unsigned long first_tick_received_at = 0;
 // for telling the rest of the program about what step and beat we're on
 int current_step = 0; 
 int current_beat = 0; 
+int current_song_position = 0;
 
 bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
@@ -28,6 +29,10 @@ void bpm_update_status( unsigned int received_ticks ) {
   current_beat = current_step / STEPS_PER_BEAT; //(ticks/24);//%16;
   is_bpm_on_beat = (0==received_ticks%PPQN);
   is_bpm_on_step = (0==received_ticks%TICKS_PER_STEP);
+  if (is_bpm_on_beat) {
+    current_song_position = received_ticks/PPQN;
+    //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
+  }
 }
 
 
@@ -60,7 +65,7 @@ unsigned int bpm_clock() {
     double delta_ticks = (double)delta_ms / (1000.0d*ms_per_tick);
     if ((int)delta_ticks>0) {
       received_ticks += delta_ticks;
-      Serial.printf("got delta_ms %i and ms_per_tick %3.3f, delta_ticks is %3.3f\n", delta_ms, ms_per_tick, delta_ticks);
+      //Serial.printf("got delta_ms %i and ms_per_tick %3.3f, delta_ticks is %3.3f\n", delta_ms, ms_per_tick, delta_ticks);
       // calculate what current ticks, beat and step should be based on internal BPM represention
       // so all we know is millis()
       // so we need to know how many ticks to update received_ticks by since the last time bpm_clock was called

@@ -305,7 +305,12 @@ void handleSystemExclusive(byte* array, unsigned size) {
 
 
 #ifdef BUTTON_PIN
+bool first_ignored = false;
 void handleButtonPressed(int state) { //uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
+    if (!first_ignored) {
+      first_ignored = true;
+      return;
+    }
     /*Serial.print("Event : "); Serial.print(event);
     Serial.print(" Count : "); Serial.print(count);
     Serial.print(" Length: "); Serial.print(length);
