@@ -29,11 +29,12 @@ unsigned int bpm_clock() {
     bpm_internal_mode = true;
 
     int delta_ms = (now - last_ticked);
-    float ms_per_tick = (60.0 / (bpm_current * PPQN));
-    float delta_ticks = delta_ms * ms_per_tick;
+    //float ms_per_tick = (60.0 / (bpm_current * PPQN));
+    double ms_per_tick = (60.0f / (bpm_current * (double)PPQN));
+    double delta_ticks = (float)delta_ms / (1000.0f*ms_per_tick);
     if ((int)delta_ticks>0) {
       received_ticks += delta_ticks;
-      Serial.printf("got delta_ms %i and ms_per_tick %f, delta_ticks is %f\n", delta_ms, ms_per_tick, delta_ticks);
+      Serial.printf("got delta_ms %i and ms_per_tick %3.3f, delta_ticks is %3.3f\n", delta_ms, ms_per_tick, delta_ticks);
       // calculate what current ticks, beat and step should be based on internal BPM represention
       // so all we know is millis()
       // so we need to know how many ticks to update received_ticks by since the last time bpm_clock was called
