@@ -67,7 +67,7 @@ void process_euclidian(int ticks) {
   //ticks /= (PPQN);      // step = bar ?
   //ticks /= (PPQN/(24/2));      // step = half-beat
 
-  ticks; //*= 4; // 
+  //ticks; //*= 4; // 
  
   //int current_step = (ticks/TICKS_PER_STEP)%16;
   //int current_beat = current_step / 4; //(ticks/24);//%16;
@@ -86,25 +86,26 @@ void process_euclidian(int ticks) {
     // its a beat!
     //Serial.printf(" >>STEP %2.2u", current_step); 
     //Serial.printf(" >>BEAT %1.1u", current_beat); 
-    Serial.printf(">>BPM %3.3f >>STEP %2.2u.%1.2u ", bpm_current, current_beat, current_step);
+    Serial.printf("[EUC] >>BPM %3.3f >>STEP %2.2u.%1.2u ", bpm_current, current_beat, current_step);
     Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
     Serial.print("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       if (query_pattern(&patterns[i], current_step)) {
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
-        if (i >= NUM_TRIGGERS) { // trigger envelope
+        fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
+        /*if (i >= NUM_TRIGGERS) { // trigger envelope
           //handleNoteOn(10, i, random(1,127));
           update_envelope(i-NUM_TRIGGERS, 127, true);
         } else {
-          fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
-        }
+          
+        }*/
       } else {
           Serial.printf("  ");
       }
     }
     Serial.print("]  ");
-    Serial.print (is_bpm_on_beat ? "<<<<BEAT" : "<<  STEP");
+    Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
     if (current_beat==0) {
       Serial.print(" (first beat of bar)");
     }
@@ -114,11 +115,11 @@ void process_euclidian(int ticks) {
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       //if (i<5) update_envelope(i, 127, false);
-      if (i >= NUM_TRIGGERS) { // trigger envelope
+      /*if (i >= NUM_TRIGGERS) { // trigger envelope
         update_envelope(i-NUM_TRIGGERS, 127, false);
-      } else {
-        douse_trigger(MUSO_NOTE_MINIMUM + i, 127);
-      }
+      } else {*/
+      douse_trigger(MUSO_NOTE_MINIMUM + i, 127);
+      //}
     }
   }
   //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);

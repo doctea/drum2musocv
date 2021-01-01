@@ -13,6 +13,7 @@ bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
 
 double bpm_current = 120.0f; //120.0f;
+double last_bpm = bpm_current;
 
 bool bpm_internal_mode = false;
 
@@ -47,42 +48,56 @@ void bpm_reset_clock (int offset = 0) {
   bpm_update_status(received_ticks - offset);
 
   Serial.printf("After reset, received_ticks is %i, current beat is %i, current step is %i\n", received_ticks, current_beat, current_step); 
-  
+}
+
+void debug_print_step_info(char *mode) {
+    Serial.printf("[%s] >>BPM %3.3f >>STEP %2.2u.%1.2u ", mode, bpm_current, current_beat, current_step);
+    Serial.printf(" (received_ticks = %.4u", received_ticks); Serial.print(") ");
+    Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
+    if (current_beat==0) {
+      Serial.print(" (first beat of bar)");
+    }
+    Serial.println("");
 }
 
 unsigned int bpm_clock() {
   unsigned long now = millis();
   if (now - last_input_at > IDLE_TIMEOUT && now - last_tick_at > IDLE_TIMEOUT && activeNotes==0) {
+    // internal mode branch
     if (!bpm_internal_mode) {
-      // we just switched from external to internal mode, so need to reset clock?
+      // we only just switched from external to internal mode, so need to reset clock?
       bpm_reset_clock();
     }
     bpm_internal_mode = true;
 
     int delta_ms = (now - last_ticked);
-    //float ms_per_tick = (60.0 / (bpm_current * PPQN));
     double ms_per_tick = (60.0d / (bpm_current * (double)PPQN));
     double delta_ticks = (double)delta_ms / (1000.0d*ms_per_tick);
     if ((int)delta_ticks>0) {
       received_ticks += delta_ticks;
-      //Serial.printf("got delta_ms %i and ms_per_tick %3.3f, delta_ticks is %3.3f\n", delta_ms, ms_per_tick, delta_ticks);
-      // calculate what current ticks, beat and step should be based on internal BPM represention
-      // so all we know is millis()
-      // so we need to know how many ticks to update received_ticks by since the last time bpm_clock was called
-      //      need to know ms per pulse at specified bpm
   
       bpm_update_status(received_ticks);
-      //Serial.println("ticked!");
       last_ticked = now;
+
+      if (is_bpm_on_step) {
+        debug_print_step_info("INT");
+      }
     }
   } else {
+    // external clock branched
     if (bpm_internal_mode) {
-      // we just switched from internal to external, so need to reset clock?
+      // we only just switched from internal to external, so need to reset clock?
       bpm_reset_clock(-1);
-      //received_ticks-=1;
-      bpm_update_status(received_ticks);
     }
     bpm_internal_mode = false;
+    static int last_tick;
+    if (last_tick!=received_ticks) {
+      bpm_update_status(received_ticks);
+      last_tick = received_ticks;
+      if (is_bpm_on_step) {
+        debug_print_step_info("EXT");
+      }
+    }
   }
   return received_ticks;
 }
@@ -95,18 +110,25 @@ void push_beat(unsigned long duration) {
   if (ph>=last_beat_sample_size) ph = 0;
 }
 
-double average (int * array, int len)  // assuming array is int.
+// pinched from interwebs and modified
+double average_step_length (int len)  // assuming array is int.
 {
   long sum = 0L ;  // sum will be larger than an item, long for safety.
   int counted = 0;
-  for (int i = 0 ; i < len ; i++) {
+  for (int i = 0 ; i < last_beat_sample_size ; i++) {
     //Serial.printf("%i: got duration %u", i, array[i]);
-    if (array[i]==0) continue;
-    sum += array [i] ;
+    if (last_beat_stamp[i]==0l) continue;
+    sum += last_beat_stamp [i] ;
     counted++;
   }
-  //Serial.printf("returning %3.3f\n", ((float) sum) / counted );
-  return  ((double) sum) / (double)counted ;  // average will be fractional, so float may be appropriate.
+  
+  if (counted >= len) {
+    //Serial.printf("counted %i with sum %u, returning %3.3f \r\n", counted, sum, ((double) sum) / (double)counted );
+    return  ((double) sum) / (double)counted ;  // average will be fractional, so float may be appropriate.
+  } else {
+    //Serial.printf("returning last value %3.3f\r\n", last_bpm);
+    return last_bpm;
+  }
 }
 
 
@@ -120,7 +142,7 @@ double bpm_calculate_current () {
   /* this version uses average of the last 4 received beats (actually steps) to calculate BPM so it tracks to changes better */
   double beats = 1.0d / (double)last_beat_sample_size; //0.25; //1;
   
-  double elapsed_ms = average(last_beat_stamp, 4);
+  double elapsed_ms = average_step_length(4);
 
   double elapsed_minutes = (elapsed_ms / 60000.0d);
   double bpm = (beats / elapsed_minutes);
@@ -141,14 +163,17 @@ void bpm_receive_clock_tick () {
     first_tick_received_at = now;
   }
 
+  bpm_update_status(received_ticks);
+
+
   if (is_bpm_on_step) {
     push_beat(now - last_beat_at);
     last_beat_at = now;
   }
 
-  bpm_update_status(received_ticks);
-
-  if (is_bpm_on_beat)
+  if (is_bpm_on_beat) {
     bpm_current = bpm_calculate_current();
+    last_bpm = bpm_current;
+  }
 
 }

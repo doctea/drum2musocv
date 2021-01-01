@@ -178,14 +178,14 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 }
 
 // process all the envelopes
-void process_envelopes(unsigned long now, unsigned long delta) {
+void process_envelopes(unsigned long now) {
   for (byte i = 0 ; i < NUM_ENVELOPES ; i++) {
-    process_envelope(i, now, delta);
+    process_envelope(i, now);
   }
 }
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
-void process_envelope(byte i, unsigned long now, unsigned long delta) {
+void process_envelope(byte i, unsigned long now) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;

@@ -6,6 +6,8 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 #define BUTTON_PIN A0
 
+#define NUM_DEMO_MODES  3
+
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 
 #define USB_NATIVE  // enable native usb support
@@ -23,12 +25,8 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, midiB);
 #define MIDIOUT midiB
 #define MIDIIN  MIDICoreUSB
 
-//#else              // arduino uno / serial midi version (for USBMidiKlik)
-#endif
+#else              // arduino uno / serial midi version (for USBMidiKlik)
 
-//#include <MIDI.h>
-
-#ifndef USB_NATIVE
 MIDI_CREATE_DEFAULT_INSTANCE();
 #define MIDIOUT MIDI
 #define MIDIIN  MIDI
@@ -49,17 +47,15 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include "Euclidian.h"
 
 #ifdef BUTTON_PIN
-#include <ButtonDebounce.h>
-ButtonDebounce button(BUTTON_PIN, 250);
+#include <DebounceEvent.h>
 #endif
+
 // GLOBALS
-
-
 
 byte activeNotes = 0;
 
 // for demo mode
-bool demo_mode = false;
+short demo_mode = 0;
 int last_played_pitch = 0;
 
 // for handling clock ---------------------------------------------------------
@@ -98,17 +94,6 @@ enum envelope_types : byte {
 };
 #define NUM_ENVELOPES 5
 
-/*unsigned long clock_millis() {
-  // At 120 BPM, 24 clock ticks will last 0.02083 seconds.
-  // if external clock is running, use external clock, otherwise use an internal clock based on the last-known speed
-  if (millis() - last_tick_at > 100) { // if we haven't received a clock for 100ms, fall back to internal millis clock
-    return  (millis() * estimated_ticks_per_ms) * 
-            //PPQN *
-            ((float)(cc_value_sync_modifier^2)/127.0f);
-  }
-  return ticks; // * PPQN; // * ((float)(cc_sync_modifier^2)/127.0f);   // TODO: need to experiment to find a good tradeoff between allowing very short and very long stages at all tempos?  tempo-sync this basically?  
-}*/
-
 // -----------------------------------------------------------------------------
 
 byte convert_drum_pitch(byte pitch) {
@@ -145,6 +130,7 @@ void kill_notes() {
   for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
     trigger_status[i] = TRIGGER_IS_OFF;
   }
+  activeNotes = 0;
 }
 
 
@@ -181,39 +167,49 @@ bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
   return false;
 }
 
+
+
+void fire_trigger(byte p, byte v) { // p = keyboard note
+  //Serial.printf("firing trigger %i\r\n", p);
+    if (
+      p>=MUSO_NOTE_MINIMUM && 
+      p<=MUSO_NOTE_MAXIMUM) {
+        trigger_status[p - MUSO_NOTE_MINIMUM] = v>0; // TRIGGER_IS_ON;
+        MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
+    } else if (
+      //Serial.printf("is an envelope trigger!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      p>MUSO_NOTE_MAXIMUM && 
+      p<=MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+        update_envelope (p - (MUSO_NOTE_MAXIMUM), 127, true);
+    }
+}
+void douse_trigger(byte p, byte v) {
+    if (
+      p>=MUSO_NOTE_MINIMUM && 
+      p<=MUSO_NOTE_MAXIMUM) {
+        trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
+        MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+    } else if (
+      p>MUSO_NOTE_MAXIMUM && 
+      p<=MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+        update_envelope (p - (MUSO_NOTE_MAXIMUM), 127, false);
+    }
+}
+
+
 void handleNoteOn(byte channel, byte pitch, byte velocity) {
   byte p = pitch;
   byte v = velocity;
 
-  if (velocity==0) 
-    handleNoteOff(channel, pitch, v);
+  if (v==0) 
+    handleNoteOff(channel, p, v);
 
   activeNotes++;
   if (!process_triggers_for_pitch(p, v, true)) {
     p = convert_drum_pitch(p);
     fire_trigger(p, v);
-    /*if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
-      trigger_status[p - MUSO_NOTE_MINIMUM] = v>0; // TRIGGER_IS_ON;
-    }
-    
-    MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on*/
-    last_input_at = millis();
   }
-}
-
-void fire_trigger(byte p, byte v) {
-    if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
-      trigger_status[p - MUSO_NOTE_MINIMUM] = v>0; // TRIGGER_IS_ON;
-    }
-    
-    MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL); //CHANNEL_DRUMS);  // output channel that the midimuso expects its triggers on
-}
-void douse_trigger(byte p, byte v) {
-    if (p>=MUSO_NOTE_MINIMUM && p<=MUSO_NOTE_MAXIMUM) {
-      trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
-    }
-    
-    MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+  last_input_at = millis();
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity) {
@@ -221,11 +217,10 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
   byte v = velocity;
 
   activeNotes--;
-  if (!process_triggers_for_pitch(pitch, velocity, false)) {
-    p = convert_drum_pitch(pitch);
+  if (!process_triggers_for_pitch(p, v, false)) {
+    p = convert_drum_pitch(p);
     douse_trigger(p, 0);
   }
-
   last_input_at = millis();
 }
 
@@ -243,34 +238,26 @@ void handleControlChange(byte channel, byte number, byte value) {
 void handleSongPosition(unsigned int beats) {
   // TODO: put LFO / envelope timer into correct phase, if that is possible?
 
-  // hmm this doesnt get called?
-  //update_pixels_position(beats);
-  //NOISY_DEBUG(1, beats);
-
+  // TODO: reset position to align with incoming clock...
+  //    ticks_received = beats * PPQN ?
+  // set the clock_count to an appropriate value in handle SongPosition ? clock_count = beats * 24 or somesuch, if its 24pqn ? beat is a 16th note i think tho so would it be * 96 ? need to check this
   song_position = beats/4;
   last_input_at = millis();
+  
 }
 
 void handleClock() {
-  // TODO: increment LFO / envelope timer by sync ratio..?
-  // would it be enough just to replace calls to millis() with a call to eg get_clock_count()
-  // and reset the clock_count on song start/stop?
-  // and set the clock_count to an appropriate value in handle SongPosition ? clock_count = beats * 24 or somesuch, if its 24pqn ? beat is a 16th note i think tho so would it be * 96 ? need to check this
   MIDIOUT.sendClock();
-  //NOISY_DEBUG(ticks,10);
-  //NOISY_DEBUG(250,1);
-  //ticks++;
-  //ticks += 1; //((float)(cc_value_sync_modifier^2)/127.0f);  // += 1
-  //estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
+  
   last_tick_at = millis();
+  
   bpm_receive_clock_tick();
-  //update_pixels_position((int)ticks);
 }
 
 void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
-  //ticks = 0;
+  
   bpm_reset_clock();
 }
 void handleContinue() {
@@ -283,13 +270,12 @@ void handleStop() {
   // TODO: stop+reset LFOs
   Serial.println("Received STOP -- killing envelopes / resetting clock !");
   kill_envelopes();
-  bpm_reset_clock(-1);
+  bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   
 #ifdef ENABLE_PIXELS
   kill_notes();
 #endif
-  //ticks = 0;
-  //update_pixels_position((int)ticks);
+
 }
 
 void handleSystemExclusive(byte* array, unsigned size) {
@@ -298,30 +284,6 @@ void handleSystemExclusive(byte* array, unsigned size) {
   MIDIOUT.sendSysEx(size, array, false); // true/false means "array contains start/stop padding" -- think what we receive here is without padding..?
 }
 
-
-
-#ifdef BUTTON_PIN
-bool first_ignored = false;
-void handleButtonPressed(int state) { //uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
-    if (!first_ignored) {
-      first_ignored = true;
-      return;
-    }
-    /*Serial.print("Event : "); Serial.print(event);
-    Serial.print(" Count : "); Serial.print(count);
-    Serial.print(" Length: "); Serial.print(length);
-    Serial.println();*/
-    //handleNoteOn(10, GM_NOTE_MINIMUM+count, 127); //random(1,127));
-    Serial.print("Button ");
-    Serial.println(String(state));
-    if (!state) { //event == EVENT_RELEASED) {
-      demo_mode = !demo_mode;
-      if (last_played_pitch>0)
-        handleNoteOff(10, last_played_pitch, 0);
-      kill_notes();
-    }
-}
-#endif
 
 
 #ifdef ENABLE_PIXELS
@@ -350,7 +312,9 @@ void setup() {
 
 #ifdef BUTTON_PIN
   //pinMode(BUTTON_PIN, INPUT_PULLUP);
-  button.setCallback(handleButtonPressed);
+  //button.setCallback(handleButtonPressed);
+  //DebounceEvent button = DebounceEvent(BUTTON_PIN, handleButtonPressed, BUTTON_PUSHBUTTON);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit
+  setup_buttons();
 #endif
 
   bpm_reset_clock();
@@ -358,9 +322,6 @@ void setup() {
   initialise_euclidian();
 
   initialise_envelopes();
-
-  // Initiate MIDI communications, listen to all channels
-  //MIDIIN.begin(GM_CHANNEL_DRUMS); //MIDI_CHANNEL_OMNI);
 
   MIDIIN.turnThruOff();
 
@@ -387,9 +348,7 @@ void loop() {
   MIDIIN.read();
 
 #ifdef BUTTON_PIN
-  //Serial.print("updating button - demo state is ");
-  //Serial.println(String(demo_mode));
-  button.update();
+  update_buttons();
 #endif
 
   // There is no need to check if there are messages incoming
@@ -399,32 +358,37 @@ void loop() {
 
   //unsigned long now = clock_millis();
   unsigned long now = bpm_clock();
-  unsigned long delta = now - time_last;
-
-  if (demo_mode) {
+  unsigned long now_ms = millis();
+  unsigned long delta_ms = now_ms - time_last;
+  //Serial.print("now is "); Serial.println(now);
+  
+  if (demo_mode==1) {
+    //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
     process_euclidian(now);
-    /*if (random(0,5000)<10) {
+  } else if (demo_mode==2) {
+    //Serial.printf("looping in demo_mode = %i"\r, demo_mode);
+    if (random(0,5000)<10) {
       if (last_played_pitch>0) {
-        handleNoteOff(10, last_played_pitch, 0);
+        //Serial.printf("noteoff = %i\r\n", last_played_pitch);
+        douse_trigger(MUSO_NOTE_MINIMUM+last_played_pitch, 0);
         last_played_pitch = 0;
       } else {
-        last_played_pitch = random(GM_NOTE_MINIMUM+1,GM_NOTE_MAXIMUM);
-        handleNoteOn(10, last_played_pitch, random(1,127));
+        last_played_pitch = random(0,NUM_TRIGGERS); //_NOTE_MINIMUM+1,GM_NOTE_MAXIMUM);
+        //Serial.printf("noteon = %i\r\n", last_played_pitch);
+        fire_trigger(MUSO_NOTE_MINIMUM+last_played_pitch,random(1,127));
       }
-    }*/
+    }
   }
 
   // update envelopes by time elapsed
-  process_envelopes(now, delta);
-
-  //Serial.print("now is "); Serial.println(now);
+  process_envelopes(now);
 
 #ifdef ENABLE_PIXELS
-  if (last_updated_pixels_at - millis() >= PIXEL_REFRESH) {
-    last_updated_pixels_at = millis();
+  if (last_updated_pixels_at - now_ms >= PIXEL_REFRESH) {
+    last_updated_pixels_at = now_ms;
     update_pixels();
   }
 #endif
 
-  time_last = now; //clock_millis();
+  time_last = now_ms;
 }
