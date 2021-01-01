@@ -40,6 +40,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 #define SEQUENCE_LENGTH_STEPS   16
 #define STEPS_PER_BEAT          4
+#define SEQUENCE_LENGTH_BEATS   SEQUENCE_LENGTH_STEPS / STEPS_PER_BEAT
 
 #define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
 #define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
@@ -66,7 +67,7 @@ int last_played_pitch = 0;
 float estimated_ticks_per_ms = 0.1f;  // initial estimated speed
 unsigned long time_last; // last time main loop was run, for calculating elapsed time
 
-float ticks = 0;  // store ticks as float, so can update by fractional ticks
+//float ticks = 0;  // store ticks as float, so can update by fractional ticks
 unsigned long last_tick_at = 0;
 unsigned long last_input_at = 0;
 
@@ -97,7 +98,7 @@ enum envelope_types : byte {
 };
 #define NUM_ENVELOPES 5
 
-unsigned long clock_millis() {
+/*unsigned long clock_millis() {
   // At 120 BPM, 24 clock ticks will last 0.02083 seconds.
   // if external clock is running, use external clock, otherwise use an internal clock based on the last-known speed
   if (millis() - last_tick_at > 100) { // if we haven't received a clock for 100ms, fall back to internal millis clock
@@ -106,7 +107,7 @@ unsigned long clock_millis() {
             ((float)(cc_value_sync_modifier^2)/127.0f);
   }
   return ticks; // * PPQN; // * ((float)(cc_sync_modifier^2)/127.0f);   // TODO: need to experiment to find a good tradeoff between allowing very short and very long stages at all tempos?  tempo-sync this basically?  
-}
+}*/
 
 // -----------------------------------------------------------------------------
 
@@ -259,7 +260,7 @@ void handleClock() {
   //NOISY_DEBUG(ticks,10);
   //NOISY_DEBUG(250,1);
   //ticks++;
-  ticks += 1; //((float)(cc_value_sync_modifier^2)/127.0f);  // += 1
+  //ticks += 1; //((float)(cc_value_sync_modifier^2)/127.0f);  // += 1
   //estimated_ticks_per_ms = 1.0 / (millis() - last_tick_at);
   last_tick_at = millis();
   bpm_receive_clock_tick();
@@ -269,7 +270,7 @@ void handleClock() {
 void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
-  ticks = 0;
+  //ticks = 0;
   bpm_reset_clock();
 }
 void handleContinue() {
@@ -287,7 +288,7 @@ void handleStop() {
 #ifdef ENABLE_PIXELS
   kill_notes();
 #endif
-  ticks = 0;
+  //ticks = 0;
   //update_pixels_position((int)ticks);
 }
 
@@ -351,6 +352,8 @@ void setup() {
   //pinMode(BUTTON_PIN, INPUT_PULLUP);
   button.setCallback(handleButtonPressed);
 #endif
+
+  bpm_reset_clock();
 
   initialise_euclidian();
 
@@ -423,5 +426,5 @@ void loop() {
   }
 #endif
 
-  time_last = clock_millis();
+  time_last = now; //clock_millis();
 }

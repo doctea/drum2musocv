@@ -129,7 +129,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
 
 // received a message that the state of the envelope should change (note on/note off etc)
 void update_envelope (byte env_num, byte velocity, bool state) {
-  unsigned long now = clock_millis(); 
+  unsigned long now = bpm_clock(); //clock_millis(); 
   if (state == true) { //&& envelopes[env_num].stage==OFF) {  // envelope told to be in 'on' state by note on
     envelopes[env_num].velocity = velocity;
     envelopes[env_num].actual_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
@@ -189,6 +189,7 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
+    elapsed *= PPQN;
     byte lvl = envelopes[i].stage_start_level;
     //NOISY_DEBUG(100, 30);
     //NUMBER_DEBUG(13, envelopes[i].stage, elapsed/16); //lvl);
@@ -325,8 +326,13 @@ void process_envelope(byte i, unsigned long now, unsigned long delta) {
       //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
       //NUMBER_DEBUG(12, envelopes[i].stage, lvl);
       //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
-      
+      /*static int cc = 0;
+      Serial.printf("sending lvl %i to envelope %i on midi_cc %i!\r\n", lvl, i, cc); //envelopes[i].midi_cc);
+      cc++;
+      cc%=127;*/
+      //MIDIOUT.sendControlChange(cc, lvl, 1); // send message to midimuso
       MIDIOUT.sendControlChange(envelopes[i].midi_cc, lvl, 1); // send message to midimuso
+      
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
     }

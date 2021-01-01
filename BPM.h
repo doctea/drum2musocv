@@ -12,7 +12,7 @@ int current_song_position = 0;
 bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
 
-double bpm_current = 60.0f; //120.0f;
+double bpm_current = 120.0f; //120.0f;
 
 bool bpm_internal_mode = false;
 

@@ -75,11 +75,13 @@ void process_euclidian(int ticks) {
   if (ticks==last_processed) return;
   //if (0==(ticks * (16))) {
   if (0==ticks%TICKS_PER_STEP) {
-    /*if ((ticks/PPQN)%16 == 0) {
-      mutate_euclidian(&patterns[random(1,NUM_PATTERNS)]);
-      Serial.println("mutated!");
-      debug_patterns();
-    }*/
+    if (is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
+      //if ((ticks/PPQN)%16 == 0) {
+      int ran = random(1,NUM_PATTERNS);
+      mutate_euclidian(&patterns[ran]);
+      Serial.printf("mutated pattern %i!\r\n", ran);
+      //debug_patterns();
+    }
     
     // its a beat!
     //Serial.printf(" >>STEP %2.2u", current_step); 
