@@ -6,6 +6,7 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 #define BUTTON_PIN A0
 
+#define ENABLE_EEPROM
 
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 
@@ -49,6 +50,10 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 #ifdef BUTTON_PIN
 #include <DebounceEvent.h>
+#endif
+
+#ifdef ENABLE_EEPROM
+#include "Eeprom.h"
 #endif
 
 // GLOBALS
@@ -298,6 +303,10 @@ void setup() {
   //randomSeed(analogRead(1));
 
   delay(500); // give half a second grace to allow for programming
+
+#ifdef ENABLE_EEPROM
+  initialise_eeprom();
+#endif
 
 #ifdef USB_NATIVE
   Serial.begin(115200);   // usb serial debug port
