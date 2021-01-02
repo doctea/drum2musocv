@@ -1,3 +1,6 @@
+#ifndef DRUMS_INCLUDED
+#define DRUMS_INCLUDED
+
 #define TRIGGER_IS_ON   true
 #define TRIGGER_IS_OFF  false
 
@@ -79,3 +82,10 @@
 #define MUSO_CC_CV_3  11
 #define MUSO_CC_CV_4  71
 #define MUSO_CC_CV_5  74
+
+
+
+// tracking what triggers are currently active, for the sake of pixel output 
+int trigger_status[NUM_TRIGGERS];
+
+#endif

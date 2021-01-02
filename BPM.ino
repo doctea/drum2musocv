@@ -1,34 +1,7 @@
-//#define ENABLE_STEP_DEBUG // for enabling step debug output
+#include "BPM.hpp"
 
-// utility functions for calculating BPM
+#include "MidiInput.hpp"
 
-unsigned long received_ticks = 0;
-unsigned long last_tick_received_at = 0;
-unsigned long first_tick_received_at = 0;
-
-// for telling the rest of the program about what step and beat we're on
-int current_step = 0; 
-int current_beat = 0; 
-int current_bar  = 0;
-int current_phrase = 0;
-int current_song_position = 0;
-
-bool is_bpm_on_beat = false;
-bool is_bpm_on_step = false;
-bool is_bpm_on_bar  = false;
-bool is_bpm_on_phrase=false;
-
-double bpm_current = 90.0f; //120.0f;
-double last_bpm = bpm_current;
-
-bool bpm_internal_mode = false;
-
-// stuff for calculating BPM
-#define last_beat_sample_size 4
-int last_beat_stamp[last_beat_sample_size];
-int ph = 0;
-unsigned long last_beat_at = 0;
-static unsigned long last_ticked = 0;
 
 
 void bpm_update_status( unsigned int received_ticks ) {
@@ -42,13 +15,13 @@ void bpm_update_status( unsigned int received_ticks ) {
   is_bpm_on_bar = is_bpm_on_beat && current_beat == 0;
   is_bpm_on_phrase = is_bpm_on_bar && (current_phrase % BARS_PER_PHRASE) == 0;
   if (is_bpm_on_beat) {
-    current_song_position = received_ticks/PPQN;
+    current_song_position = received_ticks/PPQN;  // TODO: need to take into account that song position is set by the DAW sometimes....
     //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
   }
 }
 
 
-void bpm_reset_clock (int offset = 0) {
+void bpm_reset_clock (int offset) {
   received_ticks = 0 + offset;  // set to -1 so the next tick starts us off on beat 0 step 0 tick 0
   last_tick_received_at = 0;
   first_tick_received_at = 0;
@@ -117,7 +90,7 @@ unsigned int bpm_clock() {
   }
 
   if (received_ticks%PPQN==0) {
-    MIDIOUT.sendClock();
+    midi_send_clock();
   }
   return received_ticks;
 }
@@ -178,6 +151,9 @@ double bpm_calculate_current () {
 void bpm_receive_clock_tick () {
   received_ticks++;
   unsigned long now = millis();
+
+  last_tick_at = millis();
+  
   last_tick_received_at = now;
   if (first_tick_received_at == 0) { 
     first_tick_received_at = now;

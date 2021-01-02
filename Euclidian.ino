@@ -87,14 +87,14 @@ void process_euclidian(int ticks) {
     // its a beat!
     //Serial.printf(" >>STEP %2.2u", current_step); 
     //Serial.printf(" >>BEAT %1.1u", current_beat); 
-    Serial.printf("[EUC] >>BPM %3.3f >>STEP %2.2u.%1.2u ", bpm_current, current_beat, current_step);
+    Serial.printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %2.2u.%1.2u ", demo_mode, bpm_current, current_beat, current_step);
     Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
     Serial.print("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       if (query_pattern(&patterns[i], current_step)) {
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
-        fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
+        fire_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
       } else {
           Serial.printf("  ");
       }
@@ -113,7 +113,7 @@ void process_euclidian(int ticks) {
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     // TODO: turn off according to some other thing.. eg cut groups?
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      douse_trigger(MUSO_NOTE_MINIMUM + i, 127);
+      douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
     }
   }
   //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
