@@ -61,10 +61,10 @@ envelope_state envelopes[NUM_ENVELOPES];
 
 void initialise_envelopes() {
   // set up the default envelope states
-  envelopes[ENV_SPLASH].attack_length = PPQN / 2;
+  /*envelopes[ENV_SPLASH].attack_length = PPQN / 2;
   envelopes[ENV_SPLASH].decay_length = 0;
   envelopes[ENV_SPLASH].sustain_ratio = 1.0f;
-  envelopes[ENV_SPLASH].release_length = PPQN * 3;
+  envelopes[ENV_SPLASH].release_length = PPQN * 3;*/
   
   envelopes[ENV_CRASH].midi_cc      = MUSO_CC_CV_2;
   envelopes[ENV_SPLASH].midi_cc     = MUSO_CC_CV_3;

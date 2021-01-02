@@ -77,8 +77,8 @@ void process_euclidian(int ticks) {
   static int last_processed = 0;
   if (ticks==last_processed) return;
   
-  if (0==ticks%TICKS_PER_STEP) {
-    if (mutate_enabled && is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
+  if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
+    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
       int ran = random(1,NUM_PATTERNS);
       mutate_euclidian(ran); 
       //debug_patterns();
