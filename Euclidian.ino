@@ -1,8 +1,7 @@
 // based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) {
-  //static bool stored[steps];
-  //static pattern p;
+  // fill pattern_t according to parameters
 
   if (steps>0)    p->steps = steps;
   if (pulses>0)   p->pulses = pulses;
@@ -58,35 +57,30 @@ void mutate_euclidian(int pattern) {
   if (patterns[pattern].pulses >= patterns[pattern].original_steps || patterns[pattern].pulses<=0) {
     patterns[pattern].pulses = 1;
   }
-  make_euclid(&patterns[pattern], patterns[pattern].steps, patterns[pattern].pulses, patterns[pattern].rotation);
-  xor_patterns(&patterns[pattern], &patterns[(pattern-1)%NUM_PATTERNS]);
+  make_euclid(&patterns[pattern]); //, patterns[pattern].steps, patterns[pattern].pulses, patterns[pattern].rotation);
+  if (mask_enabled && r < random(0,100)) {
+    mask_patterns(&patterns[pattern], &patterns[(pattern-1)%NUM_PATTERNS]);
+    Serial.printf("[EUC] Mutated pattern %i (and masked against pattern %i!)!\r\n", pattern, (pattern-1)%NUM_PATTERNS);
+  } else {
+    Serial.printf("[EUC] Mutated pattern %i\r\n", pattern);
+  }
 }
 
-void xor_patterns (pattern_t *target, pattern_t *op_pattern) {
+void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
   for (int i = 0 ; i < target->steps ; i++ ) {
-    target->stored[i] = target->stored[i] == !op_pattern->stored[i%op_pattern->steps];
+    target->stored[i] = target->stored[i] && !op_pattern->stored[i%op_pattern->steps];
   }
 }
 
 void process_euclidian(int ticks) {
+  
   static int last_processed = 0;
-  //ticks /= (PPQN/4);  // step = quarter-note beat 
-  //ticks /= (PPQN);      // step = bar ?
-  //ticks /= (PPQN/(24/2));      // step = half-beat
-
-  //ticks; //*= 4; // 
- 
-  //int current_step = (ticks/TICKS_PER_STEP)%16;
-  //int current_beat = current_step / 4; //(ticks/24);//%16;
-
   if (ticks==last_processed) return;
-  //if (0==(ticks * (16))) {
+  
   if (0==ticks%TICKS_PER_STEP) {
-    if (is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
-      //if ((ticks/PPQN)%16 == 0) {
+    if (mutate_enabled && is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
       int ran = random(1,NUM_PATTERNS);
-      mutate_euclidian(ran); //&patterns[ran]);
-      Serial.printf("mutated pattern %i!\r\n", ran);
+      mutate_euclidian(ran); 
       //debug_patterns();
     }
     
@@ -110,6 +104,9 @@ void process_euclidian(int ticks) {
     if (current_beat==0) {
       Serial.print(" (first beat of bar)");
     }
+    if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
+      Serial.print(" (first beat of phrase!)");
+    }
     Serial.println("");
   } else if ((TICKS_PER_STEP/2)==ticks%TICKS_PER_STEP) {
     // its between a beat!
@@ -126,23 +123,22 @@ void process_euclidian(int ticks) {
 void initialise_euclidian() {
   const int LEN = SEQUENCE_LENGTH_STEPS;
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-    //make_euclid(&patterns[i], 16, 16-(i+1), 1);
-    make_euclid(&patterns[i], LEN, 0, 1); // initialise patterns to empty
+    make_euclid(&patterns[i], LEN, 0, 1); // initialise patterns to default length, zero pulses, and default rotation of '1'
   }
   Serial.println("initialise_euclidian():");
   make_euclid(&patterns[0],   LEN,    4);       // kick
   make_euclid(&patterns[1],   LEN,    5, 0);    // stick
   make_euclid(&patterns[2],   LEN,    2, 5);    // clap
-  make_euclid(&patterns[3],   LEN/4,  16);     // snare
+  make_euclid(&patterns[3],   LEN/4,  16);      // snare
   make_euclid(&patterns[4],   LEN,    3, 3);    // crash 1
   make_euclid(&patterns[5],   LEN,    7);       // tamb
   make_euclid(&patterns[6],   LEN,    9);       // hi tom!
-  make_euclid(&patterns[7],   LEN/4,  2, 3);   // low tom
-  make_euclid(&patterns[8],   LEN/2,  2, 3);   // pedal hat
+  make_euclid(&patterns[7],   LEN/4,  2, 3);    // low tom
+  make_euclid(&patterns[8],   LEN/2,  2, 3);    // pedal hat
   make_euclid(&patterns[9],   LEN,    4, 3);    // open hat
   make_euclid(&patterns[10],  LEN,    16);      // closed hat
-  make_euclid(&patterns[11],  LEN,    1 , 1);    // crash 2
-  make_euclid(&patterns[12],  LEN,    1 , 5);    // splash
+  make_euclid(&patterns[11],  LEN,    1 , 1);   // crash 2
+  make_euclid(&patterns[12],  LEN,    1 , 5);   // splash
   make_euclid(&patterns[13],  LEN,    1, 9);    // vibra
   make_euclid(&patterns[14],  LEN,    1, 13);   // bell
   make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal

@@ -1,5 +1,7 @@
-
 #define NUM_PATTERNS 16
+
+bool mutate_enabled = false;
+bool mask_enabled = false;
 
 typedef struct {
   int steps, pulses, rotation;

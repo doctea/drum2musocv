@@ -6,7 +6,6 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 #define BUTTON_PIN A0
 
-#define NUM_DEMO_MODES  3
 
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 
@@ -39,6 +38,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #define SEQUENCE_LENGTH_STEPS   16
 #define STEPS_PER_BEAT          4
 #define SEQUENCE_LENGTH_BEATS   SEQUENCE_LENGTH_STEPS / STEPS_PER_BEAT
+#define BEATS_PER_BAR           SEQUENCE_LENGTH_BEATS
+#define BARS_PER_PHRASE         4
 
 #define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
 #define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
@@ -362,10 +363,12 @@ void loop() {
   unsigned long delta_ms = now_ms - time_last;
   //Serial.print("now is "); Serial.println(now);
   
-  if (demo_mode==1) {
+  if (demo_mode==1 || demo_mode==2) {
     //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
+    mutate_enabled = demo_mode==2;
+       
     process_euclidian(now);
-  } else if (demo_mode==2) {
+  } else if (demo_mode==3) {
     //Serial.printf("looping in demo_mode = %i"\r, demo_mode);
     if (random(0,5000)<10) {
       if (last_played_pitch>0) {

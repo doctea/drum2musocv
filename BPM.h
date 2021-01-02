@@ -1,3 +1,5 @@
+//#define ENABLE_STEP_DEBUG // for enabling step debug output
+
 // utility functions for calculating BPM
 
 unsigned long received_ticks = 0;
@@ -7,10 +9,14 @@ unsigned long first_tick_received_at = 0;
 // for telling the rest of the program about what step and beat we're on
 int current_step = 0; 
 int current_beat = 0; 
+int current_bar  = 0;
+int current_phrase = 0;
 int current_song_position = 0;
 
 bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
+bool is_bpm_on_bar  = false;
+bool is_bpm_on_phrase=false;
 
 double bpm_current = 90.0f; //120.0f;
 double last_bpm = bpm_current;
@@ -28,8 +34,13 @@ static unsigned long last_ticked = 0;
 void bpm_update_status( unsigned int received_ticks ) {
   current_step = (received_ticks/TICKS_PER_STEP) % SEQUENCE_LENGTH_STEPS;
   current_beat = current_step / STEPS_PER_BEAT; //(ticks/24);//%16;
+  current_bar  = (received_ticks/(TICKS_PER_STEP*BEATS_PER_BAR)) % BARS_PER_PHRASE;
+  current_phrase = (received_ticks/(TICKS_PER_STEP*BEATS_PER_BAR)) / BARS_PER_PHRASE;
+
   is_bpm_on_beat = (0==received_ticks%PPQN);
   is_bpm_on_step = (0==received_ticks%TICKS_PER_STEP);
+  is_bpm_on_bar = is_bpm_on_beat && current_beat == 0;
+  is_bpm_on_phrase = is_bpm_on_bar && (current_phrase % BARS_PER_PHRASE) == 0;
   if (is_bpm_on_beat) {
     current_song_position = received_ticks/PPQN;
     //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
@@ -51,13 +62,18 @@ void bpm_reset_clock (int offset = 0) {
 }
 
 void debug_print_step_info(char *mode) {
-    Serial.printf("[%s] >>BPM %3.3f >>STEP %2.2u.%1.2u ", mode, bpm_current, current_beat, current_step);
+#ifdef ENABLE_STEP_DEBUG
+    Serial.printf("[%s] >>BPM %3.3f >>PHRASE %i >> BAR %i >>STEP %2.2u.%1.2u ", mode, bpm_current, current_phrase, current_bar, current_beat, current_step);
     Serial.printf(" (received_ticks = %.4u", received_ticks); Serial.print(") ");
-    Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
+    Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP ");
     if (current_beat==0) {
       Serial.print(" (first beat of bar)");
     }
+    if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
+      Serial.print(" (first beat of phrase!)");
+    }
     Serial.println("");
+#endif
 }
 
 unsigned int bpm_clock() {
