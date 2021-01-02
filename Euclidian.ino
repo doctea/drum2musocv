@@ -10,7 +10,7 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) 
 
   int bucket = 0;
   for (int i = 0 ; i < p->steps ; i++) {
-    bucket += pulses;
+    bucket += p->pulses;
     if (bucket >= p->steps) {
       bucket -= p->steps;
       p->stored[i] = true;
@@ -40,25 +40,32 @@ void rotate_pattern(pattern_t *p, int rotate) {
   memcpy(p->stored, stored, sizeof(stored));
 }
 
-void mutate_euclidian(pattern_t *p) {
+void mutate_euclidian(int pattern) {
   int r = random(0,100);
   if (r>50) {
     if (r>75) {
-      p->pulses+=1;
+      patterns[pattern].pulses+=1;
     } else {
-      p->pulses-=1;
+      patterns[pattern].pulses-=1;
     }
   } else if (r<25) {
-    p->rotation += 1;
+    patterns[pattern].rotation += 1;
   } else if (r>25) {
-    p->pulses *=2;
+    patterns[pattern].pulses *=2;
   } else {
-    p->pulses /=2;
+    patterns[pattern].pulses /=2;
   }
-  if (p->pulses >= p->original_steps || p->pulses<=0) {
-    p->pulses = 1;
+  if (patterns[pattern].pulses >= patterns[pattern].original_steps || patterns[pattern].pulses<=0) {
+    patterns[pattern].pulses = 1;
   }
-  make_euclid(p, p->steps, p->pulses, p->rotation);
+  make_euclid(&patterns[pattern], patterns[pattern].steps, patterns[pattern].pulses, patterns[pattern].rotation);
+  xor_patterns(&patterns[pattern], &patterns[(pattern-1)%NUM_PATTERNS]);
+}
+
+void xor_patterns (pattern_t *target, pattern_t *op_pattern) {
+  for (int i = 0 ; i < target->steps ; i++ ) {
+    target->stored[i] = target->stored[i] == !op_pattern->stored[i%op_pattern->steps];
+  }
 }
 
 void process_euclidian(int ticks) {
@@ -78,7 +85,7 @@ void process_euclidian(int ticks) {
     if (is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
       //if ((ticks/PPQN)%16 == 0) {
       int ran = random(1,NUM_PATTERNS);
-      mutate_euclidian(&patterns[ran]);
+      mutate_euclidian(ran); //&patterns[ran]);
       Serial.printf("mutated pattern %i!\r\n", ran);
       //debug_patterns();
     }
@@ -94,12 +101,6 @@ void process_euclidian(int ticks) {
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
         fire_trigger(MUSO_NOTE_MINIMUM + i, 127);
-        /*if (i >= NUM_TRIGGERS) { // trigger envelope
-          //handleNoteOn(10, i, random(1,127));
-          update_envelope(i-NUM_TRIGGERS, 127, true);
-        } else {
-          
-        }*/
       } else {
           Serial.printf("  ");
       }
@@ -113,13 +114,9 @@ void process_euclidian(int ticks) {
   } else if ((TICKS_PER_STEP/2)==ticks%TICKS_PER_STEP) {
     // its between a beat!
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
+    // TODO: turn off according to some other thing.. eg cut groups?
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      //if (i<5) update_envelope(i, 127, false);
-      /*if (i >= NUM_TRIGGERS) { // trigger envelope
-        update_envelope(i-NUM_TRIGGERS, 127, false);
-      } else {*/
       douse_trigger(MUSO_NOTE_MINIMUM + i, 127);
-      //}
     }
   }
   //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);

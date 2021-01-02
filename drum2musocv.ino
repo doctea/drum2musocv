@@ -247,7 +247,7 @@ void handleSongPosition(unsigned int beats) {
 }
 
 void handleClock() {
-  MIDIOUT.sendClock();
+  //MIDIOUT.sendClock();  // do this in clock_tick now so we can control subdivisions
   
   last_tick_at = millis();
   

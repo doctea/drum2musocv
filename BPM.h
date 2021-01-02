@@ -12,7 +12,7 @@ int current_song_position = 0;
 bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
 
-double bpm_current = 120.0f; //120.0f;
+double bpm_current = 90.0f; //120.0f;
 double last_bpm = bpm_current;
 
 bool bpm_internal_mode = false;
@@ -98,6 +98,10 @@ unsigned int bpm_clock() {
         debug_print_step_info("EXT");
       }
     }
+  }
+
+  if (received_ticks%PPQN==0) {
+    MIDIOUT.sendClock();
   }
   return received_ticks;
 }
