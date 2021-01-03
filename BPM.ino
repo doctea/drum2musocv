@@ -51,7 +51,7 @@ void debug_print_step_info(char *mode) {
 
 unsigned int bpm_clock() {
   unsigned long now = millis();
-  if (now - last_input_at > IDLE_TIMEOUT && now - last_tick_at > IDLE_TIMEOUT && activeNotes==0) {
+  if (/*now - last_input_at > IDLE_TIMEOUT && activeNotes==0 && */now - last_tick_at > IDLE_TIMEOUT ) {
     // internal mode branch
     if (!bpm_internal_mode) {
       // we only just switched from external to internal mode, so need to reset clock?
@@ -152,7 +152,7 @@ void bpm_receive_clock_tick () {
   received_ticks++;
   unsigned long now = millis();
 
-  last_tick_at = millis();
+  last_tick_at = now; //millis();
   
   last_tick_received_at = now;
   if (first_tick_received_at == 0) { 

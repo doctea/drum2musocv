@@ -193,10 +193,13 @@ void update_pixels_triggers() {
           colour = CRGB::Black;
         }*/
         if (p==0) {
-          //Serial.println("loop");
+          //Serial.println("pixel loop");
         }
 #ifdef NO_ACTIVE_PIXEL_POSITION
-      }
+      } /*else {
+        Serial.printf("isn't idle?  now is %u, last_input_at is %u, last_tick_at is %u, ", now, last_input_at, last_tick_at);
+        Serial.printf("pixel_timeout is %u, activeNotes is %i\r\n", IDLE_PIXEL_TIMEOUT, activeNotes);
+      }*/
 #endif
 #endif
 

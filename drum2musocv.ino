@@ -70,6 +70,8 @@ void setup() {
 
   delay(500); // give half a second grace to allow for programming
 
+  Serial.println("---> Bambleweeny57 starting up! <c> doctea/The Tyrell Corporation 2020+ <---");
+
   initialise_pitch_for_triggers();
 
 #ifdef ENABLE_EEPROM
@@ -83,9 +85,6 @@ void setup() {
 #endif
 
 #ifdef BUTTON_PIN
-  //pinMode(BUTTON_PIN, INPUT_PULLUP);
-  //button.setCallback(handleButtonPressed);
-  //DebounceEvent button = DebounceEvent(BUTTON_PIN, handleButtonPressed, BUTTON_PUSHBUTTON);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit
   setup_buttons();
 #endif
 
@@ -98,6 +97,8 @@ void setup() {
   //NOISY_DEBUG(1000, 1);
 
   kill_envelopes();
+
+  Serial.println("---> Bambleweeny57 setup done! <---");
 }
 
 void loop() {
@@ -125,14 +126,15 @@ void loop() {
        
     process_euclidian(now);
   } else if (demo_mode==MODE_RANDOM) {
-    //Serial.printf("looping in demo_mode = %i"\r, demo_mode);
+    Serial.printf("looping in demo_mode = %i\r\n", demo_mode);
     if (is_bpm_on_step && random(0,5000)<10) {
+      Serial.printf("should trigger random!\r\n");
       if (last_played_pitch>-1) {
         //Serial.printf("noteoff = %i\r\n", last_played_pitch);
         douse_trigger(MUSO_NOTE_MINIMUM+last_played_pitch, 0, true);
         last_played_pitch = -1;
       } else {
-        last_played_pitch = random(0,NUM_TRIGGERS+NUM_ENVELOPES); //_NOTE_MINIMUM+1,GM_NOTE_MAXIMUM);
+        last_played_pitch = random(0,NUM_TRIGGERS+NUM_ENVELOPES);
         //Serial.printf("noteon = %i\r\n", last_played_pitch);
         fire_trigger(MUSO_NOTE_MINIMUM+last_played_pitch,random(1,127), true);
       }

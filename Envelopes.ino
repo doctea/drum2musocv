@@ -1,64 +1,5 @@
 #include "SinTables.h"
 
-#define SUSTAIN_MINIMUM 32
-#define ENV_MAX_ATTACK 32
-#define ENV_MAX_HOLD   32
-#define ENV_MAX_DECAY  32
-#define ENV_MAX_RELEASE 64
-
-//#define TEST_LFOS
-
-enum stage : byte {
-  OFF = 0,
-  //DELAY,  // time
-  ATTACK,
-  HOLD, // time
-  DECAY,
-  SUSTAIN,
-  RELEASE,
-  //END = 0
-  LFO_SYNC_RATIO_HOLD_AND_DECAY,
-  LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE
-};
-// above enums also used as the envelope CC offsets
-
-//#define LFO_SYNC_RATIO (RELEASE+1)
-
-typedef struct envelope_state {
-//#ifndef TEST_LFOS
-  byte stage = OFF;
-/*#else
-  byte stage = LFO_SYNC_RATIO;
-#endif*/
-
-  byte velocity;         // triggered velocity
-  byte actual_level;          // right now, the level
-  byte stage_start_level;     // level at start of current stage
-
-  // TODO: int delay_length = 5;  //  D - delay before atack starts
-  unsigned int  attack_length = 0;     //  A - attack  - length of stage
-  unsigned int  hold_length = PPQN * 2; //48;  //  H - hold    - length to hold at end of attack before decay
-  unsigned int  decay_length = PPQN * 4; //384; //512;     //  D - decay   - length of stage
-  float         sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
-  unsigned int  release_length = PPQN * 16; //768;   //  R - release - length (time to drop to 0)
-
-  byte lfo_sync_ratio_hold_and_decay = 0;
-  byte lfo_sync_ratio_sustain_and_release = 0;
-
-  unsigned long stage_triggered_at = 0;
-  unsigned long triggered_at = 0; 
-  unsigned long last_sent_at = 0;
-
-  byte midi_cc;
-
-  byte last_sent_lvl;
-};
-
-#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
-#define ENV_CC_START  64  // what number CC the envelope controls begin at
-
-envelope_state envelopes[NUM_ENVELOPES];
-
 void initialise_envelopes() {
   // set up the default envelope states
   /*envelopes[ENV_SPLASH].attack_length = PPQN / 2;
@@ -179,9 +120,12 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 
 // process all the envelopes
 void process_envelopes(unsigned long now) {
+  static unsigned long last_processed = 0;
+  if (now==last_processed) return;
   for (byte i = 0 ; i < NUM_ENVELOPES ; i++) {
     process_envelope(i, now);
   }
+  last_processed = now;
 }
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
@@ -195,6 +139,9 @@ void process_envelope(byte i, unsigned long now) {
     //NUMBER_DEBUG(13, envelopes[i].stage, elapsed/16); //lvl);
 
     byte s = envelopes[i].stage ;
+
+    //if (s>0) Serial.printf("process_envelope(%i, %u) elapsed is %u - stage is %i\r\n", i, now, elapsed, s);
+    
     // TODO: switch() would be nicer than if-else blocks, but ran into weird problems (like breakpoints never being hit) when approached it that way?!
     /*if (s==LFO_SYNC_RATIO) {
       lvl = random(0,127); //(int) (127.0 * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed)));

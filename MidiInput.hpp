@@ -106,7 +106,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
     p = convert_drum_pitch(p);
     douse_trigger(p, 0);
   }*/
-  fire_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), 0);
+  douse_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), 0);
   last_input_at = millis();
 }
 
