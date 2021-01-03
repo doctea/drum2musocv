@@ -78,8 +78,8 @@ void douse_trigger(byte p, byte v, bool internal = false) {
 }
 
 void midi_send_envelope_level(byte envelope, byte level) {
-      Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
-      MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
+  //Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
+  MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
 }
 
 void midi_kill_notes() {
@@ -134,7 +134,9 @@ void handleControlChange(byte channel, byte number, byte value) {
   // pass thru control changes, shifted to channel 1
   // TODO: intercept our own control messages to do things like set envelope settings, LFO settings, trigger targets/choke linking..
   if (number==CC_SYNC_RATIO) {
-    cc_value_sync_modifier = constrain(value,1,127); //1 + (value-1); // minimum of 1    
+    cc_value_sync_modifier = constrain(1+value,1,128); //add 1 !
+    // "number of real ticks per 24 pseudoticks"? 24 = 1:1, 121 = 1:2, 48 = 2:1, 96 = 4:1 i think?
+    // note actual CC value is 1 less than the intended value!
   } else if (!handle_envelope_ccs(channel, number, value)) {
     //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
   }

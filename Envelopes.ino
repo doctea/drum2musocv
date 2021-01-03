@@ -34,11 +34,11 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     //NUMBER_DEBUG(6, env_num, number);
     // TODO: switch() would be better, but wasted too much time with weird problem doing it that way so this'll do for now
     if (number==ATTACK-1) {
-      envelopes[env_num].attack_length  = (PPQN * ENV_MAX_ATTACK) * ((float)value/127.0f);
+      envelopes[env_num].attack_length  = (ENV_MAX_ATTACK) * ((float)value/127.0f);
     } else if (number==HOLD-1) {
-      envelopes[env_num].hold_length    = (PPQN * ENV_MAX_HOLD) * ((float)value/127.0f);
+      envelopes[env_num].hold_length    = (ENV_MAX_HOLD) * ((float)value/127.0f);
     } else if (number==DECAY-1) {
-      envelopes[env_num].decay_length   = (PPQN * ENV_MAX_DECAY) * ((float)value/127.0f);
+      envelopes[env_num].decay_length   = (ENV_MAX_DECAY) * ((float)value/127.0f);
     } else if (number==SUSTAIN-1) {
       //envelopes[env_num].sustain_ratio = 1.0f; //SUSTAIN_RATIO_MINIMUM;// + ((float)value/127.0f) * (SUSTAIN_RATIO_MINIMUM); ///127.0f));
       //envelopes[env_num].sustain_ratio = (log(((float)value))*127.0f)/127.0f; ///127.0f));
@@ -46,7 +46,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
       //envelopes[env_num].sustain_ratio = (64 + (value/2))/127.0f;
       envelopes[env_num].sustain_ratio = (((float)value/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;   // converted to range 0-96 so can use minimum
     } else if (number==RELEASE-1) {
-      envelopes[env_num].release_length = (PPQN * ENV_MAX_RELEASE) * ((float)value/127.0f);
+      envelopes[env_num].release_length = (ENV_MAX_RELEASE) * ((float)value/127.0f);
     } else if (number==LFO_SYNC_RATIO_HOLD_AND_DECAY-1) {
       envelopes[env_num].lfo_sync_ratio_hold_and_decay = value;
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
@@ -128,29 +128,32 @@ void process_envelopes(unsigned long now) {
   last_processed = now;
 }
 
+//#define DEBUG_ENVELOPES
+
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
 void process_envelope(byte i, unsigned long now) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
-    unsigned long real_elapsed = elapsed;
-    // elapsed is currently the number of REAL ticks that have passed
-    //elapsed *= PPQN;
-    //elapsed *= ((1.0+(float)cc_value_sync_modifier)*0.75);
-    //elapsed = ((1.0+(float)cc_value_sync_modifier)*0.75)/6;
-    elapsed *= (((1.0f+(float)cc_value_sync_modifier)) / 0.75); // * PPQN);
+    unsigned long real_elapsed = elapsed;    // elapsed is currently the number of REAL ticks that have passed
+
     byte lvl = envelopes[i].stage_start_level;
-    //NOISY_DEBUG(100, 30);
-    //NUMBER_DEBUG(13, envelopes[i].stage, elapsed/16); //lvl);
-
     byte s = envelopes[i].stage ;
-
+    
+    float ratio = (float)PPQN / (float)cc_value_sync_modifier;  // calculate ratio of real ticks : pseudoticks
+    elapsed = (float)elapsed * ratio;   // convert real elapsed to pseudoelapsed
+    
+#ifdef DEBUG_ENVELOPES
     if (s>0) {
       Serial.printf("process_envelope(%i, %u) in stage %i: sync'd elapsed is %u, ", i, now, s, elapsed);
       Serial.printf("real elapsed is %u, ", real_elapsed);
       Serial.printf("cc_value_sync_modifier is %u\r\n", cc_value_sync_modifier);
-    }
-    
+
+      Serial.printf("Ratio is PPQN %u / %u = %3.3f, so therefore", PPQN, cc_value_sync_modifier, ratio);
+      Serial.printf("converting real elapsed %u to ", real_elapsed);
+      Serial.printf("%u\r\n", elapsed);
+    } 
+#endif
     
     // TODO: switch() would be nicer than if-else blocks, but ran into weird problems (like breakpoints never being hit) when approached it that way?!
     /*if (s==LFO_SYNC_RATIO) {
@@ -165,7 +168,7 @@ void process_envelope(byte i, unsigned long now) {
         if (envelopes[i].attack_length==0) 
           lvl = envelopes[i].velocity; // immediately start at desired velocity
         else
-          lvl = (byte) ((float)envelopes[i].velocity * ((float)elapsed / (0.1+(float)envelopes[i].attack_length )));
+          lvl = (byte) ((float)envelopes[i].velocity * ((float)elapsed / ((float)envelopes[i].attack_length )));
           
         if (elapsed >= envelopes[i].attack_length) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
@@ -187,7 +190,7 @@ void process_envelope(byte i, unsigned long now) {
         float f_original_level = envelopes[i].stage_start_level;
 
         if (envelopes[i].decay_length>0) {
-          float decay_position = ((float)elapsed / (float)(0.1+envelopes[i].decay_length));
+          float decay_position = ((float)elapsed / (float)(envelopes[i].decay_length));
   
           // we start at stage_start_level
           float diff = (f_original_level - (f_sustain_level));
@@ -233,13 +236,14 @@ void process_envelope(byte i, unsigned long now) {
         // immediately jump here if note off during any other stage (than OFF)
         if (envelopes[i].release_length>0) {
           //float eR = (float)elapsed / (float)(0.1+envelopes[i].release_length); 
+          //float eR = (float)elapsed / (float)(envelopes[i].release_length); 
           float eR = (float)elapsed / (float)(envelopes[i].release_length); 
           eR = constrain(eR, 0.0d, 1.0d);
   
           //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
-          Serial.printf("in RELEASE stage, eR is %3.3f, lvl is %i ....", eR, lvl);
+          //Serial.printf("in RELEASE stage, release_length is %u, elapsed is %u, eR is %3.3f, lvl is %i ....", envelopes[i].release_length, elapsed, eR, lvl);
           lvl = (byte)((float)envelopes[i].stage_start_level * (1.0f-eR));
-          Serial.printf(".... lvl changed to %i\r\n", lvl);
+          //Serial.printf(".... lvl changed to %i\r\n", lvl);
         } else {
           lvl = 0;
         }
@@ -248,10 +252,10 @@ void process_envelope(byte i, unsigned long now) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage = OFF;
-          Serial.printf("Leaving RELEASE stage with lvl at %i\r\n", lvl);
-        } else {
+          //Serial.printf("Leaving RELEASE stage with lvl at %i\r\n", lvl);
+        } /*else {
           Serial.printf("RELEASE not finished because %u is less than %i?\r\n", elapsed, envelopes[i].release_length);
-        }
+        }*/
     } else if (s==OFF) {  // may have stopped or something so mute
         lvl = 0; //64;
     }
@@ -260,10 +264,10 @@ void process_envelope(byte i, unsigned long now) {
     // TODO: make this actually more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
     if (envelopes[i].stage!=OFF) {  // this is where we would enable them for constant LFO i think?
       // modulate the level
+      // TODO: FIX THIS SO RATIO WORKS !
       //lvl = (lvl*(0.5+isin(elapsed * ((envelopes[i].lfo_sync_ratio / 16) * PPQN)))); 
       //lvl = (lvl * (0.5 + isin(elapsed * (((envelopes[i].lfo_sync_ratio) / 16 ))))); // * PPQN)))); ///((float)(cc_value_sync_modifier^2)/127.0))));  // TODO: find good parameters to use here, cc to adjust the modulation level etc
-
-      
+     
       int sync = (envelopes[i].stage==DECAY || envelopes[i].stage==HOLD) 
                     ?
                     envelopes[i].lfo_sync_ratio_hold_and_decay
@@ -281,7 +285,7 @@ void process_envelope(byte i, unsigned long now) {
           0,
           127
         );
-        Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
+        //Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
       }
     }
 
@@ -289,14 +293,8 @@ void process_envelope(byte i, unsigned long now) {
     
     if (envelopes[i].last_sent_lvl != lvl) {  // only send a new value if its different to the last value sent for this envelope
       //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
-      //NUMBER_DEBUG(12, envelopes[i].stage, lvl);
-      //NUMBER_DEBUG(3, envelopes[i].stage, elapsed/16);
-      /*static int cc = 0;
-      Serial.printf("sending lvl %i to envelope %i on midi_cc %i!\r\n", lvl, i, cc); //envelopes[i].midi_cc);
-      cc++;
-      cc%=127;*/
-      //MIDIOUT.sendControlChange(cc, lvl, 1); // send message to midimuso
-      midi_send_envelope_level(i, lvl);
+
+      midi_send_envelope_level(i, lvl); // send message to midimuso
       
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;

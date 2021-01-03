@@ -16,11 +16,11 @@ enum envelope_types : byte {
 #define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 #define ENV_CC_START  64  // what number CC the envelope controls begin at
 
-#define SUSTAIN_MINIMUM 32
-#define ENV_MAX_ATTACK 32
-#define ENV_MAX_HOLD   32
-#define ENV_MAX_DECAY  32
-#define ENV_MAX_RELEASE 64
+#define SUSTAIN_MINIMUM   32            // minimum sustain volume to use (below this becomes inaudible, so cut it off)
+#define ENV_MAX_ATTACK    (PPQN*2) //48 // maximum attack stage length in ticks
+#define ENV_MAX_HOLD      (PPQN*2) //48 // maximum hold stage length
+#define ENV_MAX_DECAY     (PPQN*2) //48 // maximum decay stage length
+#define ENV_MAX_RELEASE   (PPQN*4) //96 // maximum release stage length
 
 //#define TEST_LFOS
 
@@ -51,12 +51,12 @@ typedef struct envelope_state {
   byte actual_level;          // right now, the level
   byte stage_start_level;     // level at start of current stage
 
-  // TODO: int delay_length = 5;  //  D - delay before atack starts
-  unsigned int  attack_length = 0;     //  A - attack  - length of stage
-  unsigned int  hold_length = PPQN * 2; //48;  //  H - hold    - length to hold at end of attack before decay
-  unsigned int  decay_length = PPQN * 4; //384; //512;     //  D - decay   - length of stage
-  float         sustain_ratio = 0.90f;  //  S - sustain - level to drop to after decay phase
-  unsigned int  release_length = PPQN * 16; //768;   //  R - release - length (time to drop to 0)
+  // TODO: int delay_length = 5;                    // D - delay before atack starts
+  unsigned int  attack_length   = 0;                // A - attack  - length of stage
+  unsigned int  hold_length     = (PPQN / 4) - 1;   // H - hold    - length to hold at end of attack before decay
+  unsigned int  decay_length    = (PPQN / 2) - 1;   // D - decay   - length of stage
+  float         sustain_ratio   = 0.90f;            // S - sustain - level to drop to after decay phase
+  unsigned int  release_length  = (PPQN * 4) - 1;   // R - release - length (time to drop to 0)
 
   byte lfo_sync_ratio_hold_and_decay = 0;
   byte lfo_sync_ratio_sustain_and_release = 0;
@@ -73,7 +73,7 @@ typedef struct envelope_state {
 
 // GLOBALS 
 
-byte cc_value_sync_modifier = 31;  // initial global clock sync modifier
+byte cc_value_sync_modifier = 24;  // initial global clock sync modifier -- number of real ticks per 24 pseudoticks ?
 
 envelope_state envelopes[NUM_ENVELOPES];
 
