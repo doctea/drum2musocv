@@ -126,9 +126,9 @@ void loop() {
        
     process_euclidian(now);
   } else if (demo_mode==MODE_RANDOM) {
-    Serial.printf("looping in demo_mode = %i\r\n", demo_mode);
+    //Serial.printf("looping in demo_mode = %i\r\n", demo_mode);
     if (is_bpm_on_step && random(0,5000)<10) {
-      Serial.printf("should trigger random!\r\n");
+      //Serial.printf("should trigger random!\r\n");
       if (last_played_pitch>-1) {
         //Serial.printf("noteoff = %i\r\n", last_played_pitch);
         douse_trigger(MUSO_NOTE_MINIMUM+last_played_pitch, 0, true);

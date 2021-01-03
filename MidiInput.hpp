@@ -54,7 +54,7 @@ void fire_trigger(byte p, byte v, bool internal = false) { // p = keyboard note
       //Serial.printf("is an envelope trigger!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       p>=MUSO_NOTE_MAXIMUM && 
       p<MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-        update_envelope (p - (MUSO_NOTE_MAXIMUM), 127, true);
+        update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     }
 #ifdef ENABLE_MIDI_ECHO
     if (internal) echo_fire_trigger(p-MUSO_NOTE_MINIMUM, v);
@@ -70,7 +70,7 @@ void douse_trigger(byte p, byte v, bool internal = false) {
     } else if (
       p>=MUSO_NOTE_MAXIMUM && 
       p<MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-        update_envelope (p - (MUSO_NOTE_MAXIMUM), 127, false);
+        update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
     }
 #ifdef ENABLE_MIDI_ECHO
     if (internal) echo_douse_trigger(p-MUSO_NOTE_MINIMUM, v);

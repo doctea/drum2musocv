@@ -24,25 +24,21 @@ Not convinced the envelopes are entirely working as intended so need to check & 
 
 Make CC config options to able to enable/disable so the CV outputs can be used as CC, envelopes or LFOs per-project
 
-Better syncing of the MIDI clock to the envelopes (?)
-
 LFOs
 
 TODO: make modulation sync more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
 
- Make euclidian sequences work off midi clock, fix any bpm issues.
-	make BPM guesser only work off the last 4 beats, to handle live changes of tempo
-	fix problem where BPM guesser doesn't reset when stopped?
-	fix problem with lights staying on when sequencer stopped?
-	first beat is missing when starting playback.. seems to think it starts from step 1?.
+TODO: Make euclidian sequences changeable on the fly/configurable
 
-TODO: Make euclidian sequences changeable on the fly
+BUG: there is a 'click' at end of envelope releases
+
+TODO: find out whether an envelope is being held open or whether the ringing i'm getting is actually a problem with module
+
+TODO: find out whether my output on '74'/Ride Cymbal 1 is broken due to code, panel mislabelling, or a problem with my midimuso-cv
 
 ## Future plans / ideas
 
 More envelope stages (delay?)
-
-Make modulation configurable per-stage, eg only wobble during release
 
 Other 'modules' to trigger other devices with CV via relays (ie circuit bent stuff).  Route MIDI/signals to other devices?  Extra CVs/triggers direct from the Arduino?  Shitty sample recorder/player?!
 
@@ -51,6 +47,7 @@ Hi-hat/crash choke (cut open hat gate when pedal hat is triggered?)
 Funkier colours / colour blending fx for the pixels
 
 Save config options (RGB settings, envelope settings etc) to the flash memory and allow configuration via sysex / CCs.
+	Started adding this, but isn't supported on SAMD platforms, so aborted (untested code remains)
 
 ### Done list
 
@@ -59,3 +56,6 @@ Make BPM guesser only work off the last 4 steps, to handle live changes of tempo
 Fix problem where BPM guesser doesn't reset when stopped? - done i think
 Fix problem with lights staying on when sequencer stopped? - seems to be resolved
 first beat is missing when starting playback.. seems to think it starts from step 1?. -done for both playback and internal, i think !
+echo euclidian output back to host so that we can record the midi or reuse it on other instruments etc
+Better syncing of envelopes to midi clock ?
+Make modulation configurable per-stage, eg only wobble during release
