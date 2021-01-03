@@ -77,7 +77,10 @@ void douse_trigger(byte p, byte v, bool internal = false) {
 #endif
 }
 
-
+void midi_send_envelope_level(byte envelope, byte level) {
+      Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
+      MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
+}
 
 void midi_kill_notes() {
   MIDIOUT.sendControlChange(123,0,MUSO_GATE_CHANNEL);

@@ -133,14 +133,24 @@ void process_envelope(byte i, unsigned long now) {
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
-    elapsed *= PPQN;
+    unsigned long real_elapsed = elapsed;
+    // elapsed is currently the number of REAL ticks that have passed
+    //elapsed *= PPQN;
+    //elapsed *= ((1.0+(float)cc_value_sync_modifier)*0.75);
+    //elapsed = ((1.0+(float)cc_value_sync_modifier)*0.75)/6;
+    elapsed *= (((1.0f+(float)cc_value_sync_modifier)) / 0.75); // * PPQN);
     byte lvl = envelopes[i].stage_start_level;
     //NOISY_DEBUG(100, 30);
     //NUMBER_DEBUG(13, envelopes[i].stage, elapsed/16); //lvl);
 
     byte s = envelopes[i].stage ;
 
-    //if (s>0) Serial.printf("process_envelope(%i, %u) elapsed is %u - stage is %i\r\n", i, now, elapsed, s);
+    if (s>0) {
+      Serial.printf("process_envelope(%i, %u) in stage %i: sync'd elapsed is %u, ", i, now, s, elapsed);
+      Serial.printf("real elapsed is %u, ", real_elapsed);
+      Serial.printf("cc_value_sync_modifier is %u\r\n", cc_value_sync_modifier);
+    }
+    
     
     // TODO: switch() would be nicer than if-else blocks, but ran into weird problems (like breakpoints never being hit) when approached it that way?!
     /*if (s==LFO_SYNC_RATIO) {
@@ -211,6 +221,7 @@ void process_envelope(byte i, unsigned long now) {
         if (envelopes[i].sustain_ratio==0.0f) {
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage_start_level = lvl;
+          Serial.printf("Leaving SUSTAIN stage with lvl at %i\r\n", lvl);
           envelopes[i].stage++; // = RELEASE;
         }
     } else if (s==RELEASE) {
@@ -221,11 +232,14 @@ void process_envelope(byte i, unsigned long now) {
         // the length of time to decay down to 0
         // immediately jump here if note off during any other stage (than OFF)
         if (envelopes[i].release_length>0) {
-          float eR = (float)elapsed / (float)(0.1+envelopes[i].release_length); 
+          //float eR = (float)elapsed / (float)(0.1+envelopes[i].release_length); 
+          float eR = (float)elapsed / (float)(envelopes[i].release_length); 
+          eR = constrain(eR, 0.0d, 1.0d);
   
           //NUMBER_DEBUG(8, envelopes[i].stage, envelopes[i].stage_start_level);
-  
+          Serial.printf("in RELEASE stage, eR is %3.3f, lvl is %i ....", eR, lvl);
           lvl = (byte)((float)envelopes[i].stage_start_level * (1.0f-eR));
+          Serial.printf(".... lvl changed to %i\r\n", lvl);
         } else {
           lvl = 0;
         }
@@ -234,6 +248,9 @@ void process_envelope(byte i, unsigned long now) {
           //NUMBER_DEBUG(9, envelopes[i].stage, 1);
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage = OFF;
+          Serial.printf("Leaving RELEASE stage with lvl at %i\r\n", lvl);
+        } else {
+          Serial.printf("RELEASE not finished because %u is less than %i?\r\n", elapsed, envelopes[i].release_length);
         }
     } else if (s==OFF) {  // may have stopped or something so mute
         lvl = 0; //64;
@@ -264,6 +281,7 @@ void process_envelope(byte i, unsigned long now) {
           0,
           127
         );
+        Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
       }
     }
 
@@ -278,7 +296,7 @@ void process_envelope(byte i, unsigned long now) {
       cc++;
       cc%=127;*/
       //MIDIOUT.sendControlChange(cc, lvl, 1); // send message to midimuso
-      MIDIOUT.sendControlChange(envelopes[i].midi_cc, lvl, 1); // send message to midimuso
+      midi_send_envelope_level(i, lvl);
       
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;

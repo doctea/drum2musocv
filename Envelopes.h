@@ -73,7 +73,7 @@ typedef struct envelope_state {
 
 // GLOBALS 
 
-byte cc_value_sync_modifier = 127;  // initial global clock sync modifier
+byte cc_value_sync_modifier = 31;  // initial global clock sync modifier
 
 envelope_state envelopes[NUM_ENVELOPES];
 

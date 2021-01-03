@@ -36,7 +36,7 @@ bool is_bpm_on_step = false;
 bool is_bpm_on_bar  = false;
 bool is_bpm_on_phrase=false;
 
-double bpm_current = 90.0f; //120.0f;
+double bpm_current = 60.0f; //120.0f;
 double last_bpm = bpm_current;
 
 bool bpm_internal_mode = false;

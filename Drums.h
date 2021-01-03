@@ -83,7 +83,7 @@
 #define MUSO_CC_CV_4  71
 #define MUSO_CC_CV_5  74
 
-
+#define MUSO_CV_CHANNEL     1
 
 // tracking what triggers are currently active, for the sake of pixel output 
 int trigger_status[NUM_TRIGGERS];
