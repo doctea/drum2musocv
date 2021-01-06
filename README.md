@@ -24,8 +24,9 @@ Make CC config options to able to enable/disable so the CV outputs can be used a
 
 LFOs
 
-TODO: make modulation sync more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage
-	Make modulation sync work again
+TODO: make modulation sync more useful... set upper/lower limits to modulation, elapsed-based scaling of modulation, only modulate during eg RELEASE stage (this part kinda done)
+
+Make modulation sync work again
 
 TODO: Make euclidian sequences changeable on the fly/configurable
 
