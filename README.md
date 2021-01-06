@@ -34,6 +34,8 @@ TODO: find out whether my output on '74'/Ride Cymbal 1 is broken due to code, pa
 
 Add more physical buttons to provide greater control over modes / LED for indication of mode?
 
+KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
+
 ## Future plans / ideas
 
 More envelope stages (delay?)
