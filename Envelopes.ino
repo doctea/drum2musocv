@@ -48,9 +48,9 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==RELEASE-1) {
       envelopes[env_num].release_length = (ENV_MAX_RELEASE) * ((float)value/127.0f);
     } else if (number==LFO_SYNC_RATIO_HOLD_AND_DECAY-1) {
-      envelopes[env_num].lfo_sync_ratio_hold_and_decay = value;
+      envelopes[env_num].lfo_sync_ratio_hold_and_decay = constrain(1+value,1,128);
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
-      envelopes[env_num].lfo_sync_ratio_sustain_and_release = value;
+      envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
     }
     return true;
   }
@@ -279,9 +279,16 @@ void process_envelope(byte i, unsigned long now) {
                     
       //NUMBER_DEBUG(12, 0, 127 * isin(elapsed
       if (sync>=0) {
+        
+         sync *= 4; // multiply sync value so that it gives us possibility to modulate much faster
+
+         float mod_amp = (float)lvl/4.0f; //32.0; // modulation amplitude is a quarter of the current level
+
+         float mod_result = mod_amp * isin((float)elapsed * PPQN * ((float)sync/127.0f));
+         //Serial.printf("mod_result is %3.1f, elapsed is %i, sync is %i\r\n", mod_result, elapsed, sync);
+        
          lvl = constrain(
-          //((127-lvl) * (0.5+isin( (envelopes[i].lfo_sync_ratio/PPQN) * elapsed))), 
-          lvl + ((lvl/4.0) * isin( PI*(sync/PPQN) * elapsed)),
+          lvl + mod_result,
           0,
           127
         );
