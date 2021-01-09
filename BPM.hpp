@@ -15,6 +15,7 @@
 #define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
 #define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
 
+byte cc_value_clock_tick_ratio = PPQN;
 
 unsigned long received_ticks = 0;
 unsigned long last_tick_received_at = 0;

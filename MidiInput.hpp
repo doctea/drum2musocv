@@ -12,6 +12,7 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 
 //TODO: make these CC values sensible and map them in FL
 #define CC_SYNC_RATIO   110
+#define CC_CLOCK_TICK_RATIO   111
 
 // IMPORTS
 
@@ -137,6 +138,8 @@ void handleControlChange(byte channel, byte number, byte value) {
     cc_value_sync_modifier = constrain(1+value,1,128); //add 1 !
     // "number of real ticks per 24 pseudoticks"? 24 = 1:1, 121 = 1:2, 48 = 2:1, 96 = 4:1 i think?
     // note actual CC value is 1 less than the intended value!
+  } else if (number==CC_CLOCK_TICK_RATIO) {
+    cc_value_clock_tick_ratio = constrain(value,0,127);
   } else if (!handle_envelope_ccs(channel, number, value)) {
     //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
   }
@@ -189,8 +192,11 @@ void handleSystemExclusive(byte* array, unsigned size) {
   MIDIOUT.sendSysEx(size, array, false); // true/false means "array contains start/stop padding" -- think what we receive here is without padding..?
 }
 
-void midi_send_clock() {
-  MIDIOUT.sendClock();
+void midi_send_clock(unsigned long received_ticks) {
+  static unsigned long last_clock_ticked;
+  if (received_ticks!=last_clock_ticked)
+    MIDIOUT.sendClock();
+  last_clock_ticked = received_ticks;
 }
 
 

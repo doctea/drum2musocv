@@ -89,8 +89,8 @@ unsigned int bpm_clock() {
     }
   }
 
-  if (received_ticks%PPQN==0) {
-    midi_send_clock();
+  if (received_ticks%cc_value_clock_tick_ratio==0) {
+    midi_send_clock(received_ticks);
   }
   return received_ticks;
 }
