@@ -3,9 +3,9 @@
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) {
   // fill pattern_t according to parameters
 
-  if (steps>0)    p->steps = steps;
-  if (pulses>0)   p->pulses = pulses;
-  if (rotation>0) p->rotation = rotation;
+  if (steps > 0)    p->steps = steps;
+  if (pulses > 0)   p->pulses = pulses;
+  if (rotation > 0) p->rotation = rotation;
 
   int bucket = 0;
   for (int i = 0 ; i < p->steps ; i++) {
@@ -19,48 +19,48 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) 
   }
   p->original_steps = p->steps;
 
-  if (p->rotation>0) {
+  if (p->rotation > 0) {
     rotate_pattern(p, p->rotation);
   }
 
 }
 
 bool query_pattern(pattern_t *p, int beat) {
-    int curStep = beat % p->steps; //wraps beat around if it is higher than the number of steps
-    return p->stored[curStep];
+  int curStep = beat % p->steps; //wraps beat around if it is higher than the number of steps
+  return p->stored[curStep];
 }
 
 void rotate_pattern(pattern_t *p, int rotate) {
   bool stored[p->steps];
   int offset = p->steps - rotate;
   for (int i = 0 ; i < p->steps ; i++) {
-    stored[i] = p->stored[abs( (i+offset) % p->steps )];
+    stored[i] = p->stored[abs( (i + offset) % p->steps )];
   }
   memcpy(p->stored, stored, sizeof(stored));
 }
 
 void mutate_euclidian(int pattern) {
-  int r = random(0,100);
-  if (r>50) {
-    if (r>75) {
-      patterns[pattern].pulses+=1;
+  int r = random(0, 100);
+  if (r > 50) {
+    if (r > 75) {
+      patterns[pattern].pulses += 1;
     } else {
-      patterns[pattern].pulses-=1;
+      patterns[pattern].pulses -= 1;
     }
-  } else if (r<25) {
+  } else if (r < 25) {
     patterns[pattern].rotation += 1;
-  } else if (r>25) {
-    patterns[pattern].pulses *=2;
+  } else if (r > 25) {
+    patterns[pattern].pulses *= 2;
   } else {
-    patterns[pattern].pulses /=2;
+    patterns[pattern].pulses /= 2;
   }
-  if (patterns[pattern].pulses >= patterns[pattern].original_steps || patterns[pattern].pulses<=0) {
+  if (patterns[pattern].pulses >= patterns[pattern].original_steps || patterns[pattern].pulses <= 0) {
     patterns[pattern].pulses = 1;
   }
   make_euclid(&patterns[pattern]); //, patterns[pattern].steps, patterns[pattern].pulses, patterns[pattern].rotation);
-  if (mask_enabled && r < random(0,100)) {
-    mask_patterns(&patterns[pattern], &patterns[(pattern-1)%NUM_PATTERNS]);
-    Serial.printf("[EUC] Mutated pattern %i (and masked against pattern %i!)!\r\n", pattern, (pattern-1)%NUM_PATTERNS);
+  if (mask_enabled && r < random(0, 100)) {
+    mask_patterns(&patterns[pattern], &patterns[(pattern - 1) % NUM_PATTERNS]);
+    Serial.printf("[EUC] Mutated pattern %i (and masked against pattern %i!)!\r\n", pattern, (pattern - 1) % NUM_PATTERNS);
   } else {
     Serial.printf("[EUC] Mutated pattern %i\r\n", pattern);
   }
@@ -68,25 +68,27 @@ void mutate_euclidian(int pattern) {
 
 void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
   for (int i = 0 ; i < target->steps ; i++ ) {
-    target->stored[i] = target->stored[i] && !op_pattern->stored[i%op_pattern->steps];
+    target->stored[i] = target->stored[i] && !op_pattern->stored[i % op_pattern->steps];
   }
 }
 
 void process_euclidian(int ticks) {
-  
+
   static int last_processed = 0;
-  if (ticks==last_processed) return;
-  
+  if (ticks == last_processed) return;
+
+  if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
+
   if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
-    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks/PPQN)%(SEQUENCE_LENGTH_STEPS/2)==0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
-      int ran = random(1,NUM_PATTERNS);
-      mutate_euclidian(ran); 
+    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
+      int ran = random(1, NUM_PATTERNS);
+      mutate_euclidian(ran);
       //debug_patterns();
     }
-    
+
     // its a beat!
-    //Serial.printf(" >>STEP %2.2u", current_step); 
-    //Serial.printf(" >>BEAT %1.1u", current_beat); 
+    //Serial.printf(" >>STEP %2.2u", current_step);
+    //Serial.printf(" >>BEAT %1.1u", current_beat);
     Serial.printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %2.2u.%1.2u ", demo_mode, bpm_current, current_beat, current_step);
     Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
     Serial.print("[ ");
@@ -96,19 +98,19 @@ void process_euclidian(int ticks) {
         Serial.printf("%01X", i); Serial.print(" ");
         fire_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
       } else {
-          Serial.printf("  ");
+        Serial.printf("  ");
       }
     }
     Serial.print("]  ");
     Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
-    if (current_beat==0) {
+    if (current_beat == 0) {
       Serial.print(" (first beat of bar)");
     }
     if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
       Serial.print(" (first beat of phrase!)");
     }
     Serial.println("");
-  } else if ((TICKS_PER_STEP/2)==ticks%TICKS_PER_STEP) {
+  } else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
     // its between a beat!
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     // TODO: turn off according to some other thing.. eg cut groups?
@@ -129,12 +131,12 @@ void initialise_euclidian() {
   make_euclid(&patterns[0],   LEN,    4);       // kick
   make_euclid(&patterns[1],   LEN,    5, 0);    // stick
   make_euclid(&patterns[2],   LEN,    2, 5);    // clap
-  make_euclid(&patterns[3],   LEN/4,  16);      // snare
+  make_euclid(&patterns[3],   LEN / 4,  16);    // snare
   make_euclid(&patterns[4],   LEN,    3, 3);    // crash 1
   make_euclid(&patterns[5],   LEN,    7);       // tamb
   make_euclid(&patterns[6],   LEN,    9);       // hi tom!
-  make_euclid(&patterns[7],   LEN/4,  2, 3);    // low tom
-  make_euclid(&patterns[8],   LEN/2,  2, 3);    // pedal hat
+  make_euclid(&patterns[7],   LEN / 4,  2, 3);  // low tom
+  make_euclid(&patterns[8],   LEN / 2,  2, 3);  // pedal hat
   make_euclid(&patterns[9],   LEN,    4, 3);    // open hat
   make_euclid(&patterns[10],  LEN,    16);      // closed hat
   make_euclid(&patterns[11],  LEN,    1 , 1);   // crash 2
@@ -144,22 +146,22 @@ void initialise_euclidian() {
   make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal
 
   /*make_euclid(&patterns[0], 16, 16, 0);
-  make_euclid(&patterns[1], 13, 8, 0);
-  make_euclid(&patterns[2], 16, 4, 0);
-  make_euclid(&patterns[3], 16, 2, 0);
-  make_euclid(&patterns[4], 16, 3, 1);*/
+    make_euclid(&patterns[1], 13, 8, 0);
+    make_euclid(&patterns[2], 16, 4, 0);
+    make_euclid(&patterns[3], 16, 2, 0);
+    make_euclid(&patterns[4], 16, 3, 1);*/
   /*make_euclid(&patterns[5], 16, 5, 0);
-  make_euclid(&patterns[6], 13, 6, 5);
-  make_euclid(&patterns[7], 16, 7, 0);
-  make_euclid(&patterns[8], 12, 9, 3);
-  make_euclid(&patterns[9], 16, 10, 0);
-  make_euclid(&patterns[10], 16, 11, 1);
+    make_euclid(&patterns[6], 13, 6, 5);
+    make_euclid(&patterns[7], 16, 7, 0);
+    make_euclid(&patterns[8], 12, 9, 3);
+    make_euclid(&patterns[9], 16, 10, 0);
+    make_euclid(&patterns[10], 16, 11, 1);
 
-  make_euclid(&patterns[11], 16, 1, 1);
-  make_euclid(&patterns[12], 16, 1, 5);
-  make_euclid(&patterns[13], 16, 1, 9);
-  make_euclid(&patterns[14], 16, 1, 13);
-  make_euclid(&patterns[15], 16, 1, 3);*/
+    make_euclid(&patterns[11], 16, 1, 1);
+    make_euclid(&patterns[12], 16, 1, 5);
+    make_euclid(&patterns[13], 16, 1, 9);
+    make_euclid(&patterns[14], 16, 1, 13);
+    make_euclid(&patterns[15], 16, 1, 3);*/
   delay(100);
   debug_patterns();
 }
@@ -176,7 +178,7 @@ void debug_patterns() {
     Serial.print("Sequences are: "); Serial.printf("%01X ", x); Serial.print("[");
     //for (int i = 0 ; i < patterns[x].steps ; i++) {
     for (int i = 0 ; i < 16 ; i++) {
-      Serial.print(patterns[x].stored[i%patterns[x].steps] ? '#' : (i>=patterns[x].steps?'_':'.'));
+      Serial.print(patterns[x].stored[i % patterns[x].steps] ? '#' : (i >= patterns[x].steps ? '_' : '.'));
       Serial.print(" ");
     }
     Serial.println("]");
@@ -184,8 +186,8 @@ void debug_patterns() {
 }
 
 /* the original javascript from computermusicdesign
- * //calculate a euclidean rhythm
-function euclid(steps,  pulses, rotation){
+   //calculate a euclidean rhythm
+  function euclid(steps,  pulses, rotation){
     storedRhythm = []; //empty array which stores the rhythm.
     //the length of the array is equal to the number of steps
     //a value of 1 for each array element indicates a pulse
@@ -193,8 +195,8 @@ function euclid(steps,  pulses, rotation){
     var bucket = 0; //out variable to add pulses together for each step
 
     //fill array with rhythm
-    for( var i=0 ; i < steps ; i++){ 
-        bucket += pulses; 
+    for( var i=0 ; i < steps ; i++){
+        bucket += pulses;
             if(bucket >= steps) {
             bucket -= steps;
             storedRhythm.push(1); //'1' indicates a pulse on this beat
@@ -202,11 +204,11 @@ function euclid(steps,  pulses, rotation){
             storedRhythm.push(0); //'0' indicates no pulse on this beat
         }
     }
-}
-The second function carries out the rotation:
+  }
+  The second function carries out the rotation:
 
 
-function rotateSeq(seq, rotate){
+  function rotateSeq(seq, rotate){
     var output = new Array(seq.length); //new array to store shifted rhythm
     var val = seq.length - rotate;
 
@@ -215,14 +217,14 @@ function rotateSeq(seq, rotate){
     }
 
     return output;
-}
-Querying the current beat
+  }
+  Querying the current beat
 
-Finally, we have a function for querying the storedRhythm array to find out if there is a pulse on the current beat:
+  Finally, we have a function for querying the storedRhythm array to find out if there is a pulse on the current beat:
 
-//send triggers
+  //send triggers
     function query_beat(curBeat){
     var curStep = curBeat % curSteps; //wraps beat around if it is higher than the number of steps
     return storedRhythm[curStep];
-}
- */
+  }
+*/

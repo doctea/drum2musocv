@@ -18,6 +18,21 @@ Includes a template for FL Studio to make controlling the general and envelope s
 
 NEW: experimental generative euclidian rhythm generator
 
+# Controls
+
+ - Two buttons, button 1 on pin A0 and button 2 on pin 8
+ - Press button 1 = cycle through demo modes (none -> Euclidian -> Euclidian with mutation -> random -> back to start)
+ - When in a Euclidian mode:
+   - Press button 2 = enable/disable Euclidian generation (to shut it up but to keep mode)
+   - Hold button 2 for > 2 seconds & release = reset Euclidian patterns to initial default. (LEDs will light up red momentarily)
+ - When any button is pressed or released, LEDs will light up violet, current mode indicated by a blue LED on first row of pixels, autoplaying status indicated by red/green on first pixel)
+
+
+# Requirements
+
+ - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
+
+
 # TODO
 
  - Make CC config options to able to enable/disable so the CV outputs can be used as CC, envelopes or LFOs per-project
@@ -48,6 +63,10 @@ NEW: experimental generative euclidian rhythm generator
 
  - Save config options (RGB settings, envelope settings, euclidian patterns etc) to the flash memory and allow configuration via sysex / CCs.
 	 - Started adding this, but isn't supported on SAMD platforms, so aborted (untested code remains)
+
+## Requirements 
+
+ - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
 
 ### Done list
 

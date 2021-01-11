@@ -1,3 +1,9 @@
+#ifndef UI_INCLUDED
+#define UI_INCLUDED
+
+// config 
+#define BUTTON_PIN_1 A0
+#define BUTTON_PIN_2 8
 
 #define NUM_DEMO_MODES  4
 
@@ -5,3 +11,21 @@
 #define MODE_EUCLIDIAN          1
 #define MODE_EUCLIDIAN_MUTATION 2
 #define MODE_RANDOM             3
+
+#define UI_BUTTON_PRESSED_INDICATOR_INTERVAL  500 // duration to show on the pixels that a button has been pressed
+
+#define ACTION_NONE             0
+#define ACTION_MODE_CHANGE      1
+#define ACTION_RESET_EUCLIDIAN  2
+
+
+unsigned long button_pressed_at = 0;
+
+int ui_last_action = ACTION_NONE;
+
+
+void setup_buttons();
+void update_buttons();
+
+
+#endif

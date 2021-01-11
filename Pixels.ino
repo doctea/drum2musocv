@@ -203,6 +203,17 @@ void update_pixels_triggers() {
 #endif
 #endif
 
+      if (button_pressed_at > now - UI_BUTTON_PRESSED_INDICATOR_INTERVAL) {
+        // use i instead of p 
+        if (NUM_DEMO_MODES + STRIP_LENGTH - p == (NUM_DEMO_MODES - demo_mode)) { // indicate mode
+          colour = CRGB::Blue;
+        } else if (p == 0) {
+          colour = euclidian_auto_play ? CRGB::Red : CRGB::Green;
+        } else {
+          colour = ui_last_action==ACTION_RESET_EUCLIDIAN ? CRGB(p*(255/NUM_LEDS), 0, 0) : CRGB::Violet;
+        }
+      }
+
       if (leds[p] != colour)
         changed = true;
       leds[p] = colour;

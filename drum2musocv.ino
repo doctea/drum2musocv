@@ -3,8 +3,10 @@
 #define ENABLE_PIXELS
 //#define ENABLE_PIXELS_ADA // choose this or ENABLE_PIXELS_FASTLED
 #define ENABLE_PIXELS_FASTLED
+
+#define ENABLE_BUTTONS
+
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
-#define BUTTON_PIN A0
 
 //#define ENABLE_EEPROM     // untested, not available on SAMD platforms
 #define ENABLE_MIDI_ECHO
@@ -23,10 +25,6 @@
 
 #include "Euclidian.h"
 
-
-#ifdef BUTTON_PIN
-#include <DebounceEvent.h>
-#endif
 
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
@@ -84,7 +82,7 @@ void setup() {
   setup_pixels();
 #endif
 
-#ifdef BUTTON_PIN
+#ifdef ENABLE_BUTTONS
   setup_buttons();
 #endif
 
@@ -105,7 +103,7 @@ void loop() {
   // Call MIDI.read the fastest you can for real-time performance.
   MIDIIN.read();
 
-#ifdef BUTTON_PIN
+#ifdef ENABLE_BUTTONS
   update_buttons();
 #endif
 
