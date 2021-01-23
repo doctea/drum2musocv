@@ -102,48 +102,54 @@ void kill_notes() {
 // MIDI MESSAGE CALLBACKS
 
 void handleNoteOff(byte channel, byte pitch, byte velocity) {
-  byte p = pitch;
-  byte v = velocity;
-
-  activeNotes--;
-  /*if (!process_triggers_for_pitch(p, v, false)) {
-    p = convert_drum_pitch(p);
-    douse_trigger(p, 0);
-  }*/
-  douse_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), 0);
-  last_input_at = millis();
+  if (channel==GM_CHANNEL_DRUMS) {
+    byte p = pitch;
+    byte v = velocity;
+  
+    activeNotes--;
+    /*if (!process_triggers_for_pitch(p, v, false)) {
+      p = convert_drum_pitch(p);
+      douse_trigger(p, 0);
+    }*/
+    douse_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), 0);
+    last_input_at = millis();
+  }
 }
 
 void handleNoteOn(byte channel, byte pitch, byte velocity) {
-  byte p = pitch;
-  byte v = velocity;
-
-  if (v==0) 
-    handleNoteOff(channel, p, v);
-
-  activeNotes++;
-  /*if (!process_triggers_for_pitch(p, v, true)) {
-    p = convert_drum_pitch(p);
-    fire_trigger(p, v);
-  }*/
-  fire_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), v);
-  last_input_at = millis();
+  if (channel==GM_CHANNEL_DRUMS) {
+    byte p = pitch;
+    byte v = velocity;
+  
+    if (v==0) 
+      handleNoteOff(channel, p, v);
+  
+    activeNotes++;
+    /*if (!process_triggers_for_pitch(p, v, true)) {
+      p = convert_drum_pitch(p);
+      fire_trigger(p, v);
+    }*/
+    fire_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), v);
+    last_input_at = millis();
+  }
 }
 
 
 void handleControlChange(byte channel, byte number, byte value) {
-  // pass thru control changes, shifted to channel 1
-  // TODO: intercept our own control messages to do things like set envelope settings, LFO settings, trigger targets/choke linking..
-  if (number==CC_SYNC_RATIO) {
-    cc_value_sync_modifier = constrain(1+value,1,128); //add 1 !
-    // "number of real ticks per 24 pseudoticks"? 24 = 1:1, 121 = 1:2, 48 = 2:1, 96 = 4:1 i think?
-    // note actual CC value is 1 less than the intended value!
-  } else if (number==CC_CLOCK_TICK_RATIO) {
-    cc_value_clock_tick_ratio = constrain(value,0,127);
-  } else if (!handle_envelope_ccs(channel, number, value)) {
-    //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
+  if (channel==GM_CHANNEL_DRUMS) {
+    // pass thru control changes, shifted to channel 1
+    // TODO: intercept our own control messages to do things like set envelope settings, LFO settings, trigger targets/choke linking..
+    if (number==CC_SYNC_RATIO) {
+      cc_value_sync_modifier = constrain(1+value,1,128); //add 1 !
+      // "number of real ticks per 24 pseudoticks"? 24 = 1:1, 121 = 1:2, 48 = 2:1, 96 = 4:1 i think?
+      // note actual CC value is 1 less than the intended value!
+    } else if (number==CC_CLOCK_TICK_RATIO) {
+      cc_value_clock_tick_ratio = constrain(value,0,127);
+    } else if (!handle_envelope_ccs(channel, number, value)) {
+      //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
+    }
+    last_input_at = millis();
   }
-  last_input_at = millis();
 }
 
 void handleSongPosition(unsigned int beats) {
@@ -206,9 +212,9 @@ void setup_midi() {
   Serial.begin(115200);   // usb serial debug port
   //while (!Serial);
   
-  MIDIOUT.begin(GM_CHANNEL_DRUMS);
+  MIDIOUT.begin(MIDI_CHANNEL_OMNI); //GM_CHANNEL_DRUMS);
 #endif
-  MIDIIN.begin(GM_CHANNEL_DRUMS);
+  MIDIIN.begin(MIDI_CHANNEL_OMNI); //GM_CHANNEL_DRUMS);
 
 
   MIDIIN.turnThruOff();
@@ -220,7 +226,7 @@ void setup_midi() {
 
   MIDIIN.setHandleStop(handleStop);
   MIDIIN.setHandleStart(handleStart);
-  MIDIIN.setHandleStart(handleContinue);
+  MIDIIN.setHandleContinue(handleContinue);
 
   MIDIIN.setHandleClock(handleClock);
 

@@ -40,10 +40,6 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==DECAY-1) {
       envelopes[env_num].decay_length   = (ENV_MAX_DECAY) * ((float)value/127.0f);
     } else if (number==SUSTAIN-1) {
-      //envelopes[env_num].sustain_ratio = 1.0f; //SUSTAIN_RATIO_MINIMUM;// + ((float)value/127.0f) * (SUSTAIN_RATIO_MINIMUM); ///127.0f));
-      //envelopes[env_num].sustain_ratio = (log(((float)value))*127.0f)/127.0f; ///127.0f));
-      //envelopes[env_num].sustain_ratio = 0.5 + ((value/127.0f)/2.0);
-      //envelopes[env_num].sustain_ratio = (64 + (value/2))/127.0f;
       envelopes[env_num].sustain_ratio = (((float)value/127.0f) * (float)(128-SUSTAIN_MINIMUM)) / 127.0f;   // converted to range 0-96 so can use minimum
     } else if (number==RELEASE-1) {
       envelopes[env_num].release_length = (ENV_MAX_RELEASE) * ((float)value/127.0f);
