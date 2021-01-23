@@ -3,6 +3,10 @@
 
 #include "Drums.h"
 
+// messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron
+#define MIDI_CHANNEL_NEUTRON_IN   8
+#define MIDI_CHANNEL_NEUTRON_OUT  16
+
 // GLOBALS
 
 byte activeNotes = 0;             // tracking how many keys are held down
@@ -80,15 +84,19 @@ void douse_trigger(byte p, byte v, bool internal = false) {
 
 void midi_send_envelope_level(byte envelope, byte level) {
   //Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
-  MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
+  if (envelope==ENV_RIDE_CYMBAL) {  // hack to use the pitch bend output as an envelope, since my 'cc 74' output seems to have stopped working - could use this to add an extra envelope or LFO etc
+    MIDIOUT.sendPitchBend((level<<7) + MIDI_PITCHBEND_MIN, MUSO_CV_CHANNEL);
+  } else {
+    MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
+  }
 }
 
 void midi_kill_notes() {
-  MIDIOUT.sendControlChange(123,0,MUSO_GATE_CHANNEL);
+  MIDIOUT.sendControlChange(123,0,MUSO_GATE_CHANNEL); // todo -- check what this is actually doing/meant to do?!
 }
 
 void kill_notes() {
-  // forget which triggers are active (doesn't actually send stop notes)
+  // forget which triggers are active 
   for (int i = 0 ; i < NUM_TRIGGERS+NUM_ENVELOPES ; i++) {
     trigger_status[i] = TRIGGER_IS_OFF;
     douse_trigger(MUSO_NOTE_MINIMUM+i, 0);
@@ -149,7 +157,9 @@ void handleControlChange(byte channel, byte number, byte value) {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     }
     last_input_at = millis();
-  }
+  } /*(else {
+    MIDIOUT.sendControlChange(
+  }(*/
 }
 
 void handleSongPosition(unsigned int beats) {
@@ -216,8 +226,8 @@ void setup_midi() {
 #endif
   MIDIIN.begin(MIDI_CHANNEL_OMNI); //GM_CHANNEL_DRUMS);
 
-
   MIDIIN.turnThruOff();
+  //MIDIIN.setThruFilterMode(midi::Thru::DifferentChannel);
 
   MIDIIN.setHandleNoteOn(handleNoteOn);
   MIDIIN.setHandleNoteOff(handleNoteOff);

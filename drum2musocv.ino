@@ -100,17 +100,22 @@ void setup() {
 }
 
 void loop() {
-  // Call MIDI.read the fastest you can for real-time performance.
-  MIDIIN.read();
+  if (MIDIIN.read()) {
+    //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
+    //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+    if (MIDIIN.getChannel()==MIDI_CHANNEL_NEUTRON_IN) {
+      // relay all incoming messages for the Neutron
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   MIDI_CHANNEL_NEUTRON_OUT
+      );
+    }
+  }
 
 #ifdef ENABLE_BUTTONS
   update_buttons();
 #endif
-
-  // There is no need to check if there are messages incoming
-  // if they are bound to a Callback function.
-  // The attached method will be called automatically
-  // when the corresponding message has been received.
 
   //unsigned long now = clock_millis();
   unsigned long now = bpm_clock();
