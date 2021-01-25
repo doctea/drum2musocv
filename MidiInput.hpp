@@ -4,8 +4,10 @@
 #include "Drums.h"
 
 // messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron
-#define MIDI_CHANNEL_NEUTRON_IN   8
-#define MIDI_CHANNEL_NEUTRON_OUT  16
+#define MIDI_CHANNEL_BASS_IN   8
+#define MIDI_CHANNEL_BASS_OUT  2
+
+#define MIDI_BASS_ROOT_PITCH 0x30
 
 // GLOBALS
 
@@ -49,7 +51,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // FUNCTIONS
 
 void fire_trigger(byte p, byte v, bool internal = false) { // p = keyboard note
-  //Serial.printf("firing trigger %i\r\n", p);
+    //Serial.printf("firing trigger pitch=%i, v=%i\r\n", p, v);
     if (
       p>=MUSO_NOTE_MINIMUM && 
       p<MUSO_NOTE_MAXIMUM) {
@@ -60,6 +62,11 @@ void fire_trigger(byte p, byte v, bool internal = false) { // p = keyboard note
       p>=MUSO_NOTE_MAXIMUM && 
       p<MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
+    } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+      //Serial.printf("sending neutron note\r\n");
+      MIDIOUT.sendNoteOn(MIDI_BASS_ROOT_PITCH, v, MIDI_CHANNEL_BASS_OUT);
+    } else {
+      Serial.printf("WARNING: fire_trigger not doing anything with pitch %i\r\n", p);
     }
 #ifdef ENABLE_MIDI_ECHO
     if (internal) echo_fire_trigger(p-MUSO_NOTE_MINIMUM, v);
@@ -76,6 +83,10 @@ void douse_trigger(byte p, byte v, bool internal = false) {
       p>=MUSO_NOTE_MAXIMUM && 
       p<MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
+    } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+      MIDIOUT.sendNoteOff(MIDI_BASS_ROOT_PITCH, v, MIDI_CHANNEL_BASS_OUT);
+    } else {
+      Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
     }
 #ifdef ENABLE_MIDI_ECHO
     if (internal) echo_douse_trigger(p-MUSO_NOTE_MINIMUM, v);

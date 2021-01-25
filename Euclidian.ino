@@ -1,11 +1,12 @@
 // based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
-void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) {
+void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = 2) {
   // fill pattern_t according to parameters
 
   if (steps > 0)    p->steps = steps;
   if (pulses > 0)   p->pulses = pulses;
   if (rotation > 0) p->rotation = rotation;
+  if (duration > 0) p->duration = duration;
 
   int bucket = 0;
   for (int i = 0 ; i < p->steps ; i++) {
@@ -25,9 +26,17 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0) 
 
 }
 
-bool query_pattern(pattern_t *p, int beat) {
-  int curStep = beat % p->steps; //wraps beat around if it is higher than the number of steps
+bool query_pattern(pattern_t *p, int beat, int offset = 0) {
+  int curStep = (beat + offset) % p->steps; //wraps beat around if it is higher than the number of steps
+  if (curStep<0) curStep = (p->steps) + curStep;  // wrap around if result passes sequence boundary
+  //Serial.printf("\r\nquery_pattern querying step %i\r\n", curStep);
   return p->stored[curStep];
+}
+
+// find out if note should be killed this step
+bool query_pattern_note_off(pattern_t *p, int beat) { //, int offset = -2) {
+  //Serial.printf("\r\nnote_off querying beat %i with duration-based offset %i\r\n", beat, (int)p->duration*-1);
+  return query_pattern(p, beat, (int)p->duration*-1);
 }
 
 void rotate_pattern(pattern_t *p, int rotate) {
@@ -93,10 +102,15 @@ void process_euclidian(int ticks) {
     Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
     Serial.print("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      if (query_pattern(&patterns[i], current_step)) {
+      //Serial.printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+      if (query_pattern(&patterns[i], current_step)) {  // step trigger
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
+        douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
         fire_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
+      } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
+        Serial.printf(".", i); Serial.print(" ");
+        douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
       } else {
         Serial.printf("  ");
       }
@@ -110,13 +124,13 @@ void process_euclidian(int ticks) {
       Serial.print(" (first beat of phrase!)");
     }
     Serial.println("");
-  } else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
-    // its between a beat!
+  /*} else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
+    // its between a step!
     //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
     // TODO: turn off according to some other thing.. eg cut groups?
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
-    }
+    }*/
   }
   //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
@@ -144,6 +158,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[13],  LEN,    1, 9);    // vibra
   make_euclid(&patterns[14],  LEN,    1, 13);   // bell
   make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal
+  make_euclid(&patterns[16],  LEN,    4, 3);    // bass (neutron)
 
   /*make_euclid(&patterns[0], 16, 16, 0);
     make_euclid(&patterns[1], 13, 8, 0);
