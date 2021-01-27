@@ -25,7 +25,7 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 # Controls
 
  - Two buttons, button 1 on pin A0 and button 2 on pin 8
- - Press button 1 = cycle through demo modes (none -> Euclidian -> Euclidian with mutation -> random -> back to start)
+ - Press button 1 = cycle through demo modes (standby -> Euclidian -> Euclidian with mutation -> random -> back to start)
  - When in a Euclidian mode:
    - Press button 2 = enable/disable Euclidian generation (to shut it up but to keep mode)
    - Hold button 2 for > 2 seconds & release = reset Euclidian patterns to initial default. (LEDs will light up red momentarily)
@@ -35,13 +35,15 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 
 (incomplete, need to add the notes corresponding to the Muso triggers for bass, snare, ch/oh etc, CCs corresponding to the envelope parameters, and other settings eg clock sync)
 
-| MIDI type   | MIDI channel | MIDI value     | Purpose                   | 
-| ----------  | ------------ | -------------- | ------------------------- | 
-| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1  |
-| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2  |
-| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3  |
-| Note        | 10           | Ride Bell      | Trigger envelope on CV 4  |
-| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5* |
+| MIDI type   | MIDI channel | MIDI number    | Purpose                    |
+| ----------  | ------------ | -------------- | -------------------------- | 
+| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1   |
+| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2   |
+| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3   |
+| Note        | 10           | Ride Bell      | Trigger envelope on CV 4   |
+| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
+| Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
+| Note+CC etc | 8            | any            | Resend on channel 2 (bass) |
 
 * actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
 
@@ -67,6 +69,8 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
  - Make a KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
  
  - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
+ 
+ - Replace DebounceEvent library with one that doesn't need patching
 
 ## Future plans / ideas
 
