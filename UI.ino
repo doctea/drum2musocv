@@ -33,6 +33,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
 
     bool should_reset = false;
     bool reacted = false;
+    bool should_kill = false;
 
     button_pressed_at = millis();
     ui_last_action = ACTION_NONE;
@@ -64,6 +65,8 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
             //handleNoteOff(10, last_played_pitch, 0);
           kill_notes();
           kill_envelopes();
+        } else if (demo_mode==MODE_STANDBY || demo_mode==MODE_RANDOM) {
+          should_kill = true;
         }
       }
     } else if (pin==BUTTON_PIN_2) {
@@ -76,9 +79,18 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
             initialise_euclidian();
           } else if ( event==EVENT_RELEASED && length<=500  ) {
             euclidian_auto_play = !euclidian_auto_play;
+            if (bpm_internal_mode && !euclidian_auto_play) {
+              should_kill = true;
+            }
             Serial.printf(">>> Setting auto-play in Euclidian mode to %c!\r\n", euclidian_auto_play ? 'Y' : 'N');
           }
         }
+    }
+
+    if (should_kill) {
+      douse_all_triggers(true);
+      kill_notes();
+      kill_envelopes();
     }
 
 }

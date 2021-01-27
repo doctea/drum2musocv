@@ -56,7 +56,7 @@ typedef struct envelope_state {
   unsigned int  hold_length     = (PPQN / 4) - 1;   // H - hold    - length to hold at end of attack before decay
   unsigned int  decay_length    = (PPQN / 2) - 1;   // D - decay   - length of stage
   float         sustain_ratio   = 0.90f;            // S - sustain - level to drop to after decay phase
-  unsigned int  release_length  = (PPQN * 4) - 1;   // R - release - length (time to drop to 0)
+  unsigned int  release_length  = (PPQN / 2) - 1;   // R - release - length (time to drop to 0)
 
   byte lfo_sync_ratio_hold_and_decay = 0;
   byte lfo_sync_ratio_sustain_and_release = 0;

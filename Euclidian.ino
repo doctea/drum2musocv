@@ -1,6 +1,6 @@
 // based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
-void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = 2) {
+void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = STEPS_PER_BEAT/4) {
   // fill pattern_t according to parameters
 
   if (steps > 0)    p->steps = steps;

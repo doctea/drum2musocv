@@ -93,6 +93,12 @@ void douse_trigger(byte p, byte v, bool internal = false) {
 #endif
 }
 
+void douse_all_triggers(bool internal = false) {
+  for (int i = MUSO_NOTE_MINIMUM ; i < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES + 1 ; i++) {
+    douse_trigger(i, 0, internal);
+  }
+}
+
 void midi_send_envelope_level(byte envelope, byte level) {
   //Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
   if (envelope==ENV_RIDE_CYMBAL) {  // hack to use the pitch bend output as an envelope, since my 'cc 74' output seems to have stopped working - could use this to add an extra envelope or LFO etc
@@ -204,6 +210,7 @@ void handleStop() {
   MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
   Serial.println("Received STOP -- killing envelopes / resetting clock !");
+  douse_all_triggers();
   kill_envelopes();
   bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   
