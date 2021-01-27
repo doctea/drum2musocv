@@ -31,6 +31,19 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
    - Hold button 2 for > 2 seconds & release = reset Euclidian patterns to initial default. (LEDs will light up red momentarily)
  - When any button is pressed or released, LEDs will light up violet, current mode indicated by a blue LED on first row of pixels, autoplaying status indicated by red/green on first pixel)
 
+# MIDI parameters
+
+(incomplete, need to add the notes corresponding to the Muso triggers for bass, snare, ch/oh etc, CCs corresponding to the envelope parameters, and other settings eg clock sync)
+
+| MIDI type   | MIDI channel | MIDI value     | Purpose                   | 
+| ----------  | ------------ | -------------- | ------------------------- | 
+| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1  |
+| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2  |
+| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3  |
+| Note        | 10           | Ride Bell      | Trigger envelope on CV 4  |
+| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5* |
+
+* actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
 
 # Requirements
 
