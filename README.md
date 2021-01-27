@@ -8,10 +8,6 @@ Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain,
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
-Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
-
-Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
-
 Now also supports the Seeeduino Cortex M0+ board, presumably also works with Arduino Zero etc.
 
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
@@ -49,6 +45,8 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 
 # Requirements
 
+ - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
+ - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
  - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
 
 
