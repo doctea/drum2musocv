@@ -16,7 +16,11 @@ Now also supports the Seeeduino Cortex M0+ board, presumably also works with Ard
 
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
 
-NEW: experimental generative euclidian rhythm generator
+Has an experimental generative euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.
+
+NEW: added a 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike).
+
+Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
 # Controls
 
