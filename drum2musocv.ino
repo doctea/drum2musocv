@@ -94,6 +94,7 @@ void setup() {
 
   //NOISY_DEBUG(1000, 1);
 
+  kill_notes();
   kill_envelopes();
 
   Serial.println("---> Bambleweeny57 setup done! <---");

@@ -53,8 +53,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
         if (bpm_internal_mode && previous_mode!=demo_mode) {
           should_reset = ! ((previous_mode==MODE_EUCLIDIAN && demo_mode==MODE_EUCLIDIAN_MUTATION) || (demo_mode==MODE_EUCLIDIAN && previous_mode==MODE_EUCLIDIAN_MUTATION));  // don't reset if we've just switched between 1 and 2
           if (should_reset) {
-            kill_notes();
-            kill_envelopes();
+            should_kill = true;
             bpm_reset_clock(0);
           }
         }
@@ -82,7 +81,6 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
     }
 
     if (should_kill) {
-      douse_all_triggers(true);
       kill_notes();
       kill_envelopes();
     }

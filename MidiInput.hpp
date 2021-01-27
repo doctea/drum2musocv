@@ -117,10 +117,7 @@ void midi_kill_notes() {
 
 void kill_notes() {
   // forget which triggers are active 
-  for (int i = 0 ; i < NUM_TRIGGERS+NUM_ENVELOPES ; i++) {
-    trigger_status[i] = TRIGGER_IS_OFF;
-    douse_trigger(i, 0);
-  }
+  douse_all_triggers(true);
   activeNotes = 0;
 
   midi_kill_notes();
