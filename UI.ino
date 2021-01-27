@@ -43,7 +43,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
         demo_mode += count; 
         demo_mode = demo_mode % NUM_DEMO_MODES;
   
-        reacted = true;
+        reacted = demo_mode != previous_mode;
   
         Serial.printf("pin %i: [event %i, count %i, length %i] - switched to demo_mode %i\r\n", pin, event, count, length, demo_mode);
       } 
@@ -59,13 +59,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
           }
         }
     
-        if (demo_mode==MODE_RANDOM || previous_mode==MODE_RANDOM) {
-          if (last_played_pitch>-1)
-            douse_trigger(last_played_pitch+MUSO_NOTE_MINIMUM, 0);
-            //handleNoteOff(10, last_played_pitch, 0);
-          kill_notes();
-          kill_envelopes();
-        } else if (demo_mode==MODE_STANDBY || demo_mode==MODE_RANDOM) {
+        if (demo_mode==MODE_STANDBY || demo_mode==MODE_RANDOM) {
           should_kill = true;
         }
       }

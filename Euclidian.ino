@@ -106,11 +106,11 @@ void process_euclidian(int ticks) {
       if (query_pattern(&patterns[i], current_step)) {  // step trigger
         //if (i<5) update_envelope(i, 127, true);
         Serial.printf("%01X", i); Serial.print(" ");
-        douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
-        fire_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
+        douse_trigger(i, 127, true);
+        fire_trigger(i, 127, true);
       } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
         Serial.printf(".", i); Serial.print(" ");
-        douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
+        douse_trigger(i, 127, true);
       } else {
         Serial.printf("  ");
       }

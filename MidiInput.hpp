@@ -50,8 +50,10 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 // FUNCTIONS
 
-void fire_trigger(byte p, byte v, bool internal = false) { // p = keyboard note
+void fire_trigger(byte t, byte v, bool internal = false) { 
     //Serial.printf("firing trigger pitch=%i, v=%i\r\n", p, v);
+    // t = trigger number, p = keyboard note
+    byte p = MUSO_NOTE_MINIMUM + t;
     if (
       p>=MUSO_NOTE_MINIMUM && 
       p<MUSO_NOTE_MAXIMUM) {
@@ -73,7 +75,8 @@ void fire_trigger(byte p, byte v, bool internal = false) { // p = keyboard note
 #endif
 }
 
-void douse_trigger(byte p, byte v, bool internal = false) {
+void douse_trigger(byte t, byte v, bool internal = false) {
+    byte p = MUSO_NOTE_MINIMUM + t;
     if (
       p>=MUSO_NOTE_MINIMUM && 
       p<MUSO_NOTE_MAXIMUM) {
@@ -94,7 +97,7 @@ void douse_trigger(byte p, byte v, bool internal = false) {
 }
 
 void douse_all_triggers(bool internal = false) {
-  for (int i = MUSO_NOTE_MINIMUM ; i < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES + 1 ; i++) {
+  for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES + 1 ; i++) {
     douse_trigger(i, 0, internal);
   }
 }
@@ -116,7 +119,7 @@ void kill_notes() {
   // forget which triggers are active 
   for (int i = 0 ; i < NUM_TRIGGERS+NUM_ENVELOPES ; i++) {
     trigger_status[i] = TRIGGER_IS_OFF;
-    douse_trigger(MUSO_NOTE_MINIMUM+i, 0);
+    douse_trigger(i, 0);
   }
   activeNotes = 0;
 
@@ -136,7 +139,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
       p = convert_drum_pitch(p);
       douse_trigger(p, 0);
     }*/
-    douse_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), 0);
+    douse_trigger(get_trigger_for_pitch(p), 0);
     last_input_at = millis();
   }
 }
@@ -154,7 +157,7 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
       p = convert_drum_pitch(p);
       fire_trigger(p, v);
     }*/
-    fire_trigger(MUSO_NOTE_MINIMUM+get_trigger_for_pitch(p), v);
+    fire_trigger(get_trigger_for_pitch(p), v);
     last_input_at = millis();
   }
 }

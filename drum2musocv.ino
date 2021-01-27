@@ -34,7 +34,7 @@
 
 // for demo mode
 short demo_mode = 0;
-int last_played_pitch = -1;
+int last_played_trigger = -1;
 
 // for handling clock ---------------------------------------------------------
 // At 120 BPM, 24 clock ticks will last 0.02083 seconds. = 200ms
@@ -132,14 +132,14 @@ void loop() {
     //Serial.printf("looping in demo_mode = %i\r\n", demo_mode);
     if (is_bpm_on_step && random(0,5000)<10) {
       //Serial.printf("should trigger random!\r\n");
-      if (last_played_pitch>-1) {
+      if (last_played_trigger>-1) {
         //Serial.printf("noteoff = %i\r\n", last_played_pitch);
-        douse_trigger(MUSO_NOTE_MINIMUM+last_played_pitch, 0, true);
-        last_played_pitch = -1;
+        douse_trigger(last_played_trigger, 0, true);
+        last_played_trigger = -1;
       } else {
-        last_played_pitch = random(0,NUM_TRIGGERS+NUM_ENVELOPES);
+        last_played_trigger = random(0,NUM_TRIGGERS+NUM_ENVELOPES);
         //Serial.printf("noteon = %i\r\n", last_played_pitch);
-        fire_trigger(MUSO_NOTE_MINIMUM+last_played_pitch,random(1,127), true);
+        fire_trigger(last_played_trigger,random(1,127), true);
       }
     }
   }
