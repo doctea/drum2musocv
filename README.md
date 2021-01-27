@@ -8,10 +8,6 @@ Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain,
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
-Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
-
-Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
-
 Now also supports the Seeeduino Cortex M0+ board, presumably also works with Arduino Zero etc.
 
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
@@ -25,15 +21,32 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 # Controls
 
  - Two buttons, button 1 on pin A0 and button 2 on pin 8
- - Press button 1 = cycle through demo modes (none -> Euclidian -> Euclidian with mutation -> random -> back to start)
+ - Press button 1 = cycle through demo modes (standby -> Euclidian -> Euclidian with mutation -> random -> back to start)
  - When in a Euclidian mode:
    - Press button 2 = enable/disable Euclidian generation (to shut it up but to keep mode)
    - Hold button 2 for > 2 seconds & release = reset Euclidian patterns to initial default. (LEDs will light up red momentarily)
  - When any button is pressed or released, LEDs will light up violet, current mode indicated by a blue LED on first row of pixels, autoplaying status indicated by red/green on first pixel)
 
+# MIDI parameters
+
+(incomplete, need to add the notes corresponding to the Muso triggers for bass, snare, ch/oh etc, CCs corresponding to the envelope parameters, and other settings eg clock sync)
+
+| MIDI type   | MIDI channel | MIDI number    | Purpose                    |
+| ----------  | ------------ | -------------- | -------------------------- | 
+| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1   |
+| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2   |
+| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3   |
+| Note        | 10           | Ride Bell      | Trigger envelope on CV 4   |
+| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
+| Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
+| Note+CC etc | 8            | any            | Resend on channel 2 (bass) |
+
+* actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
 
 # Requirements
 
+ - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
+ - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
  - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
 
 
@@ -54,6 +67,8 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
  - Make a KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
  
  - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
+ 
+ - Replace DebounceEvent library with one that doesn't need patching
 
 ## Future plans / ideas
 
