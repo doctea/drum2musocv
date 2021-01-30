@@ -48,6 +48,9 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 #endif
 
+
+#include "Bass.hpp"
+
 // FUNCTIONS
 
 void fire_trigger(byte t, byte v, bool internal = false) { 
@@ -66,7 +69,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
       //Serial.printf("sending neutron note\r\n");
-      MIDIOUT.sendNoteOn(MIDI_BASS_ROOT_PITCH, v, MIDI_CHANNEL_BASS_OUT);
+      bass_note_on_and_next();
     } else {
       Serial.printf("WARNING: fire_trigger not doing anything with pitch %i\r\n", p);
     }
@@ -87,7 +90,7 @@ void douse_trigger(byte t, byte v, bool internal = false) {
       p<MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
     } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-      MIDIOUT.sendNoteOff(MIDI_BASS_ROOT_PITCH, v, MIDI_CHANNEL_BASS_OUT);
+      bass_note_off();
     } else {
       Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
     }
@@ -113,6 +116,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
 
 void midi_kill_notes() {
   MIDIOUT.sendControlChange(123,0,MUSO_GATE_CHANNEL); // todo -- check what this is actually doing/meant to do?!
+  MIDIOUT.sendControlChange(123,0,MIDI_CHANNEL_BASS_OUT); // todo -- check what this is actually doing/meant to do?!
 }
 
 void kill_notes() {

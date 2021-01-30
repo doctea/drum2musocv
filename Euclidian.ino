@@ -1,5 +1,15 @@
 // based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
+#ifdef EUC_DEBUG
+#define EUC_DEBUG 1
+#else
+#define EUC_DEBUG 0
+#endif
+
+// https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
+#define EUC_printf(fmt, ...) do { if (EUC_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
+#define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
+
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = STEPS_PER_BEAT/4) {
   // fill pattern_t according to parameters
 
@@ -29,13 +39,13 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, 
 bool query_pattern(pattern_t *p, int beat, int offset = 0) {
   int curStep = (beat + offset) % p->steps; //wraps beat around if it is higher than the number of steps
   if (curStep<0) curStep = (p->steps) + curStep;  // wrap around if result passes sequence boundary
-  //Serial.printf("\r\nquery_pattern querying step %i\r\n", curStep);
+  //EUC_printf("\r\nquery_pattern querying step %i\r\n", curStep);
   return p->stored[curStep];
 }
 
 // find out if note should be killed this step
 bool query_pattern_note_off(pattern_t *p, int beat) { //, int offset = -2) {
-  //Serial.printf("\r\nnote_off querying beat %i with duration-based offset %i\r\n", beat, (int)p->duration*-1);
+  //EUC_printf("\r\nnote_off querying beat %i with duration-based offset %i\r\n", beat, (int)p->duration*-1);
   return query_pattern(p, beat, (int)p->duration*-1);
 }
 
@@ -69,9 +79,9 @@ void mutate_euclidian(int pattern) {
   make_euclid(&patterns[pattern]); //, patterns[pattern].steps, patterns[pattern].pulses, patterns[pattern].rotation);
   if (mask_enabled && r < random(0, 100)) {
     mask_patterns(&patterns[pattern], &patterns[(pattern - 1) % NUM_PATTERNS]);
-    Serial.printf("[EUC] Mutated pattern %i (and masked against pattern %i!)!\r\n", pattern, (pattern - 1) % NUM_PATTERNS);
+    EUC_printf("[EUC] Mutated pattern %i (and masked against pattern %i!)!\r\n", pattern, (pattern - 1) % NUM_PATTERNS);
   } else {
-    Serial.printf("[EUC] Mutated pattern %i\r\n", pattern);
+    EUC_printf("[EUC] Mutated pattern %i\r\n", pattern);
   }
 }
 
@@ -96,43 +106,43 @@ void process_euclidian(int ticks) {
     }
 
     // its a beat!
-    //Serial.printf(" >>STEP %2.2u", current_step);
-    //Serial.printf(" >>BEAT %1.1u", current_beat);
-    Serial.printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %2.2u.%1.2u ", demo_mode, bpm_current, current_beat, current_step);
-    Serial.printf(" (ticks = %.4u", ticks); Serial.print(") ");
-    Serial.print("[ ");
+    //EUC_printf(" >>STEP %2.2u", current_step);
+    //EUC_printf(" >>BEAT %1.1u", current_beat);
+    EUC_printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %2.2u.%1.2u ", demo_mode, bpm_current, current_beat, current_step);
+    EUC_printf(" (ticks = %.4u", ticks); EUC_printf(") ");
+    EUC_printf("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      //Serial.printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+      //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
       if (query_pattern(&patterns[i], current_step)) {  // step trigger
         //if (i<5) update_envelope(i, 127, true);
-        Serial.printf("%01X", i); Serial.print(" ");
+        EUC_printf("%01X", i); EUC_printf(" ");
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
       } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
-        Serial.printf(".", i); Serial.print(" ");
+        EUC_printf(".", i); EUC_printf(" ");
         douse_trigger(i, 127, true);
       } else {
-        Serial.printf("  ");
+        EUC_printf("  ");
       }
     }
-    Serial.print("]  ");
-    Serial.print (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
+    EUC_printf("]  ");
+    EUC_printf (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
     if (current_beat == 0) {
-      Serial.print(" (first beat of bar)");
+      EUC_printf(" (first beat of bar)");
     }
     if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
-      Serial.print(" (first beat of phrase!)");
+      EUC_printf(" (first beat of phrase!)");
     }
-    Serial.println("");
+    EUC_println("");
   /*} else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
     // its between a step!
-    //Serial.print("Should turn off on ticks = "); Serial.println(ticks);
+    //EUC_printf("Should turn off on ticks = "); EUC_println(ticks);
     // TODO: turn off according to some other thing.. eg cut groups?
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
     }*/
   }
-  //Serial.printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
+  //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
 
@@ -141,7 +151,7 @@ void initialise_euclidian() {
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
     make_euclid(&patterns[i], LEN, 0, 1); // initialise patterns to default length, zero pulses, and default rotation of '1'
   }
-  Serial.println("initialise_euclidian():");
+  EUC_println("initialise_euclidian():");
   make_euclid(&patterns[0],   LEN,    4);       // kick
   make_euclid(&patterns[1],   LEN,    5, 0);    // stick
   make_euclid(&patterns[2],   LEN,    2, 5);    // clap
@@ -183,20 +193,20 @@ void initialise_euclidian() {
 
 
 void debug_patterns() {
-  Serial.print("                 [");
+  EUC_printf("                 [");
   for (int i = 0 ; i < 16 ; i++) {
-    Serial.printf("%01X ", i);
+    EUC_printf("%01X ", i);
   }
-  Serial.println("]");
+  EUC_println("]");
 
   for (int x = 0 ; x < NUM_PATTERNS ; x++) {
-    Serial.print("Sequences are: "); Serial.printf("%01X ", x); Serial.print("[");
+    EUC_printf("Sequences are: "); EUC_printf("%01X ", x); EUC_printf("[");
     //for (int i = 0 ; i < patterns[x].steps ; i++) {
     for (int i = 0 ; i < 16 ; i++) {
-      Serial.print(patterns[x].stored[i % patterns[x].steps] ? '#' : (i >= patterns[x].steps ? '_' : '.'));
-      Serial.print(" ");
+      EUC_printf(patterns[x].stored[i % patterns[x].steps] ? "#" : (i >= patterns[x].steps ? "_" : "."));
+      EUC_printf(" ");
     }
-    Serial.println("]");
+    EUC_println("]");
   }
 }
 

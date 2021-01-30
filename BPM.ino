@@ -31,6 +31,8 @@ void bpm_reset_clock (int offset) {
 
   bpm_update_status(received_ticks - offset);
 
+  bass_reset_sequence();
+
   Serial.printf("After reset, received_ticks is %i, current beat is %i, current step is %i\n", received_ticks, current_beat, current_step); 
 }
 

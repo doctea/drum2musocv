@@ -90,6 +90,8 @@ void setup() {
 
   initialise_euclidian();
 
+  initialise_bass();
+
   initialise_envelopes();
 
   //NOISY_DEBUG(1000, 1);
