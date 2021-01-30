@@ -23,6 +23,9 @@ unsigned long last_tick_at = 0;   // not sure if this is necessary/duplicate?
 unsigned long first_tick_received_at = 0;
 
 // for telling the rest of the program about what step and beat we're on
+int current_total_step = 0;
+int current_total_beat = 0;
+int current_total_bar  = 0;
 int current_step = 0; 
 int current_beat = 0; 
 int current_bar  = 0;
