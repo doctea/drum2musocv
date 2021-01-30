@@ -1,9 +1,11 @@
 #ifndef BASS_INCLUDED
 #define BASS_INCLUDED
 
+#define MIDI_BASS_ROOT_PITCH 0x30
+
 #include "MidiInput.hpp"
 
-//#define BASS_DEBUG
+#define BASS_DEBUG
 
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
 #ifdef BASS_DEBUG
@@ -15,17 +17,26 @@
 #define BASS_printf(fmt, ...)   do { if (BASS_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define BASS_println(fmt, ...)  do { if (BASS_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
+#define SCALE_SIZE  7
 
-int bass_scale_offset[] = { 0, 2, 4, 5, 7, 9, 11 } ; //, 12 };
-#define BASS_SCALE_SIZE       ((int)(sizeof(bass_scale_offset)/sizeof(bass_scale_offset[0])))
+int bass_scale_offset[][SCALE_SIZE] = {
+  { 0, 2, 4, 5, 7, 9, 11 },  // major scale
+  { 0, 2, 3, 5, 7, 8, 10 },  // // minor scale (? check)
+};
+int bass_sequence[]     =   { 0, 2, 4, 6 };     // degrees of scale to play per chord
+int chord_sequence[]    =   { 0, 5, 1, 4 };     // chord progression
 
-
-//int bass_sequence[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -7, -6, -5, -4, -3, -2, -1};
-int bass_sequence[]   =   { 0, 5, -5, 10 };
-#define BASS_SEQUENCE_LENGTH  ((int)(sizeof(bass_sequence)/sizeof(bass_sequence[0])))
+#define BASS_NUM_SCALES             (sizeof(bass_scale_offset) / sizeof(bass_scale_offset[0]))f
+#define BASS_SCALE_SIZE             ((int)(sizeof(bass_scale_offset[0])/sizeof(bass_scale_offset[0][0])))
+#define BASS_SEQUENCE_LENGTH        ((int)(sizeof(bass_sequence)/sizeof(bass_sequence[0])))
+#define BASS_CHORD_SEQUENCE_LENGTH  ((int)(sizeof(chord_sequence)/sizeof(chord_sequence[0])))
 
 int bass_counter = 0;               // track current position in sequence 
 int bass_currently_playing = -1;    // track currently playing note so that we know which one to turn off 
+
+//int bass_sequence[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -7, -6, -5, -4, -3, -2, -1};
+//int bass_sequence[]   =   { 0, 5, -5, 10 };
+//int bass_sequence[]   =   { 0, 4, 3, 1 };   // basically chord shape during this phase of development
 
 /*
 -14,-13,-12,-11,-10,-9, -8 = octave -2
@@ -58,23 +69,36 @@ void initialise_bass() {
 }
 
 int bass_get_scale_note(int scale_degree = 0) {
-  int sd = scale_degree % BASS_SCALE_SIZE;
-  int oct = scale_degree/BASS_SCALE_SIZE;
 
-  BASS_printf("bass_get_scale: for scale degree %i, got scale offset %i and octave %i - ", scale_degree, sd, oct);
+  // todo: move this elsewhere to make this changeable..
+  int scale_number = 0; //(0 + current_phrase) % BASS_NUM_SCALES;
+  int chord_number = chord_sequence[current_bar%BASS_CHORD_SEQUENCE_LENGTH] % BASS_SCALE_SIZE;
+
+  // temporary step through chord number based on the current_bar (so resets for each new phrase)
+  //scale_degree += chord_number;
+  
+  int sd = (chord_number + scale_degree);
+  int oct = sd/BASS_SCALE_SIZE;
+
+  BASS_printf("bass_get_scale: in phrase:bar:beat %i:%i:%i, using scale %i ", current_phrase, current_bar, current_beat, scale_number );
+  BASS_printf(" || chord %i, scale degree %i -> got scale offset %i and oct %i -> ",  chord_number, scale_degree, sd, oct);
   if (sd<0) {
     sd = BASS_SCALE_SIZE + sd;  // convert to the actual scale degree
     oct--;                      // account for needing to be one octave below
   }
-  BASS_printf("final oct:sd is %i:%i\r\n", oct, sd);
+  BASS_printf("final oct:sd is %i:%i", oct, sd);
     
-  return bass_scale_offset[sd] 
+  int r = bass_scale_offset[scale_number][sd  % BASS_SCALE_SIZE] 
          + 
          (oct * 12)
          ;
+
+  BASS_printf(" -- final note is %i\r\n", r);
+  return r;
 }
 
 int bass_get_sequence_note(int position = 0) {
+  if (position%BASS_SEQUENCE_LENGTH==0) BASS_printf("----- bass sequence restart (position %i)\r\n", position);
   return bass_get_scale_note(bass_sequence[position%BASS_SEQUENCE_LENGTH]);
 }
 
@@ -88,8 +112,8 @@ void bass_reset_sequence() {
 
 // start note for
 void bass_note_on (int v = 127) {
-  int pitch_offset = bass_get_sequence_pitch(bass_counter);
-  BASS_printf("bass_note_on: bass pitch is %i\r\n", pitch_offset);
+  int pitch_offset = bass_get_sequence_pitch(current_beat); //bass_counter);
+  //BASS_printf("bass_note_on: bass pitch is %i\r\n", pitch_offset);
 
   bass_currently_playing = pitch_offset;
   MIDIOUT.sendNoteOn(bass_currently_playing, v, MIDI_CHANNEL_BASS_OUT);
@@ -105,7 +129,7 @@ void bass_note_off() {
   /*int last_bass_position = bass_counter-1%BASS_SEQUENCE_LENGTH;
   if (last_bass_position<0) last_bass_position = BASS_SEQUENCE_LENGTH + last_bass_position;
   int pitch_offset = bass_sequence[last_bass_position%BASS_SEQUENCE_LENGTH];*/
-  BASS_printf("bass_note_off: bass pitch offset is %i\r\n", bass_currently_playing);
+  //BASS_printf("bass_note_off: bass pitch offset is %i\r\n", bass_currently_playing);
 
   //MIDIOUT.sendNoteOff(MIDI_BASS_ROOT_PITCH + pitch_offset, v, MIDI_CHANNEL_BASS_OUT);
   if (bass_currently_playing>=0) 

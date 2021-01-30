@@ -7,8 +7,6 @@
 #define MIDI_CHANNEL_BASS_IN   8
 #define MIDI_CHANNEL_BASS_OUT  2
 
-#define MIDI_BASS_ROOT_PITCH 0x30
-
 // GLOBALS
 
 byte activeNotes = 0;             // tracking how many keys are held down
