@@ -235,6 +235,34 @@ void midi_send_clock(unsigned long received_ticks) {
   last_clock_ticked = received_ticks;
 }
 
+// called every loop(), to read incoming midi and route if appropriate
+void process_midi() {
+  if (MIDIIN.read()) {
+    //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
+    //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+    if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {
+      // relay all incoming messages for the Neutron/bass
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   MIDI_CHANNEL_BASS_OUT
+      );
+    }
+    //todo: accept a note on another channel to set the root..?
+    //      or actually, have CCs to set the root note, scale, etc..?
+    // have separate midi input channels, one dedicated to triggering the autoplayer, and one for doing direct control, both output to the MIDI_CHANNEL_BASS_OUT
+    //      so root note set by MIDI CC (0-127?) ie - 'middle C' or 'high F'
+    //      another CC to set the scale (0 = major, 1 = minor, ...etc...)
+    //      on the 'autobass' channel, track what keys are held
+    //        lowest held note relative to scale root = chord number, so when triggered play appropriate note from the chord number
+    //          if note isn't in scale then????
+    //        highest held note relative to scale root = arp distance?  
+    //      orrr
+    //        lowest held note relative to scale root = chord number
+    //          further held notes (in order of pressing?) = bass_sequence, used to play through sequence as needed..
+    
+  }
+}
 
 void setup_midi() {
   

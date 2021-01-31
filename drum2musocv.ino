@@ -103,18 +103,7 @@ void setup() {
 }
 
 void loop() {
-  if (MIDIIN.read()) {
-    //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
-    //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
-    if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {
-      // relay all incoming messages for the Neutron
-      MIDIOUT.send(MIDIIN.getType(),
-                   MIDIIN.getData1(),
-                   MIDIIN.getData2(),
-                   MIDI_CHANNEL_BASS_OUT
-      );
-    }
-  }
+  process_midi();
 
 #ifdef ENABLE_BUTTONS
   update_buttons();

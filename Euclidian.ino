@@ -1,5 +1,7 @@
 // based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
+#define EUC_DEBUG
+
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1
 #else
@@ -10,7 +12,7 @@
 #define EUC_printf(fmt, ...) do { if (EUC_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
-void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = STEPS_PER_BEAT/4) {
+void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = 0) {
   // fill pattern_t according to parameters
 
   if (steps > 0)    p->steps = steps;
@@ -100,32 +102,43 @@ void process_euclidian(int ticks) {
 
   if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
     if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
-      int ran = random(1, NUM_PATTERNS);
-      mutate_euclidian(ran);
-      //debug_patterns();
+      for (int i = 0 ; i < 3 ; i++) {
+        int ran = random(1, NUM_PATTERNS);
+        mutate_euclidian(ran);
+        //debug_patterns();
+      }
     }
 
     // its a beat!
     //EUC_printf(" >>STEP %2.2u", current_step);
     //EUC_printf(" >>BEAT %1.1u", current_beat);
-    EUC_printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %2.2u.%1.2u ", demo_mode, bpm_current, current_beat, current_step);
+    EUC_printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %i:%i:%2.2u.%1.2u ", demo_mode, bpm_current, current_phrase, current_bar, current_beat, current_step);
     EUC_printf(" (ticks = %.4u", ticks); EUC_printf(") ");
     EUC_printf("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
       if (query_pattern(&patterns[i], current_step)) {  // step trigger
-        //if (i<5) update_envelope(i, 127, true);
-        EUC_printf("%01X", i); EUC_printf(" ");
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
+        if (i<16) {
+          EUC_printf("%01X", i); // print as hex 
+        } else {
+          //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
+          EUC_printf("%3s ", get_note_name(bass_currently_playing).c_str()); // for bass note indicator
+        }
+        //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
+        EUC_printf(" ");   
       } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
+        if (i==16) EUC_printf("..."); // add extra dots for bass note indicator
         EUC_printf(".", i); EUC_printf(" ");
         douse_trigger(i, 127, true);
       } else {
         EUC_printf("  ");
+        if (i==16) EUC_printf("   ");  // add extra spaces for bass note indicator
       }
     }
     EUC_printf("]  ");
+    //EUC_printf("bass playing pitch %2i ", bass_currently_playing);
     EUC_printf (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
     if (current_beat == 0) {
       EUC_printf(" (first beat of bar)");
@@ -149,18 +162,21 @@ void process_euclidian(int ticks) {
 void initialise_euclidian() {
   const int LEN = SEQUENCE_LENGTH_STEPS;
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-    make_euclid(&patterns[i], LEN, 0, 1); // initialise patterns to default length, zero pulses, and default rotation of '1'
+    make_euclid(&patterns[i], LEN, 0, 1, STEPS_PER_BEAT/STEPS_PER_BEAT); // initialise patterns to default length, zero pulses, default rotation of '1' and default duration of 1 step
   }
+
+  // definition: make_euclid( pattern_t *p,  int steps = 0,  int pulses = 0,   int rotation = 0,   int duration = STEPS_PER_BEAT/4   ) {
+  
   EUC_println("initialise_euclidian():");
   make_euclid(&patterns[0],   LEN,    4);       // kick
   make_euclid(&patterns[1],   LEN,    5, 0);    // stick
   make_euclid(&patterns[2],   LEN,    2, 5);    // clap
-  make_euclid(&patterns[3],   LEN / 4,  16);    // snare
+  make_euclid(&patterns[3],   LEN/4,  16  );    // snare
   make_euclid(&patterns[4],   LEN,    3, 3);    // crash 1
   make_euclid(&patterns[5],   LEN,    7);       // tamb
   make_euclid(&patterns[6],   LEN,    9);       // hi tom!
-  make_euclid(&patterns[7],   LEN / 4,  2, 3);  // low tom
-  make_euclid(&patterns[8],   LEN / 2,  2, 3);  // pedal hat
+  make_euclid(&patterns[7],   LEN/4,  2, 3);    // low tom
+  make_euclid(&patterns[8],   LEN/2,  2, 3);    // pedal hat
   make_euclid(&patterns[9],   LEN,    4, 3);    // open hat
   make_euclid(&patterns[10],  LEN,    16);      // closed hat
   make_euclid(&patterns[11],  LEN,    1 , 1);   // crash 2
@@ -168,7 +184,10 @@ void initialise_euclidian() {
   make_euclid(&patterns[13],  LEN,    1, 9);    // vibra
   make_euclid(&patterns[14],  LEN,    1, 13);   // bell
   make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal
-  make_euclid(&patterns[16],  LEN,    4, 3);    // bass (neutron)
+  //make_euclid(&patterns[16],  LEN,    4, 3, STEPS_PER_BEAT/2);    // bass (neutron) offbeat
+  //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
+  //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
+  make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
 
   /*make_euclid(&patterns[0], 16, 16, 0);
     make_euclid(&patterns[1], 13, 8, 0);

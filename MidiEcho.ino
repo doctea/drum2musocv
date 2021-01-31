@@ -47,3 +47,15 @@ void echo_douse_trigger(int trigger, int velocity) {
   //Serial.printf("########## GOT DOUSE FOR INTERNAL TRIGGER %i - converted to external pitch %i!\r\n", trigger, ext);
   MIDIIN.sendNoteOff(ext, 0,       GM_CHANNEL_DRUMS); 
 }
+
+
+String get_note_name(int pitch) {
+  int octave = pitch / 12;
+  int chromatic_degree = pitch % 12; 
+  const String note_names[] = {
+    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+  };
+
+  String s = note_names[chromatic_degree] + String(octave);
+  return s;
+}
