@@ -53,6 +53,14 @@ int bass_root = MIDI_BASS_ROOT_PITCH;
 int bass_counter = 0;               // track current position in sequence 
 int bass_currently_playing = -1;    // track currently playing note so that we know which one to turn off 
 
+int scale_number = 0;
+int chord_number = 0;
+int sequence_number = 0;
+
+bool bass_auto_scale = false;
+bool bass_auto_progression = false;
+bool bass_auto_arp = false;
+
 //int bass_sequence[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -7, -6, -5, -4, -3, -2, -1};
 //int bass_sequence[]   =   { 0, 5, -5, 10 };
 //int bass_sequence[]   =   { 0, 4, 3, 1 };   // basically chord shape during this phase of development
@@ -87,12 +95,27 @@ void initialise_bass() {
   debug_bass_scales();
 }
 
+int get_scale_number() {
+  if (bass_auto_scale) {
+    return scale_number = (0 + current_phrase) % BASS_NUM_SCALES; // todo: make this switchable .. 
+  } else {
+    return 0; // default to major
+  }
+}
+int get_chord_number() {
+  if (bass_auto_progression) {
+    return chord_sequence[current_bar%BASS_CHORD_SEQUENCE_LENGTH] % BASS_SCALE_SIZE;  // todo: make this select from lowest held note?
+  } else {
+    return 0;
+  }
+}
+
 int bass_get_scale_note(int scale_degree = 0) {
 
   // todo: move this elsewhere to make this changeable..
   //int scale_number = 0; 
-  int scale_number = (0 + current_phrase) % BASS_NUM_SCALES;  // todo: make this switchable .. 
-  int chord_number = chord_sequence[current_bar%BASS_CHORD_SEQUENCE_LENGTH] % BASS_SCALE_SIZE;  // todo: make this select from lowest held note?
+  scale_number = get_scale_number();
+  chord_number = get_chord_number();
 
   // temporary step through chord number based on the current_bar (so resets for each new phrase)
   //scale_degree += chord_number;
@@ -119,8 +142,12 @@ int bass_get_scale_note(int scale_degree = 0) {
 
 int bass_get_sequence_note(int position = 0) {
   if (position%BASS_SEQUENCE_LENGTH==0) BASS_printf("----- bass sequence restart (position %i)\r\n", position);
-  int sequence_number = current_bar % BASS_NUM_SEQUENCES;
-    
+  if (bass_auto_arp) {
+    sequence_number = current_bar % BASS_NUM_SEQUENCES;
+  } else {
+    sequence_number = 0;
+  }
+      
   return bass_get_scale_note(bass_sequence[sequence_number][position%BASS_SEQUENCE_LENGTH]);
 }
 
@@ -158,6 +185,22 @@ void bass_note_off() {
   if (bass_currently_playing>=0) 
     MIDIOUT.sendNoteOff(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
   bass_currently_playing = -1;
+}
+
+char *get_bass_info() {
+  static char output[20];
+
+  sprintf(output, "s%i %i %i:%3s", scale_number, sequence_number, chord_number, get_note_name(bass_currently_playing).c_str());
+  return output;
+}
+
+
+char *get_bass_info_2() {
+  static char output[32];
+
+  // auto arp, auto progression, bass counter
+  sprintf(output, "as aa ap bc\n%c  %c  %c  %2i\n", bass_auto_scale?'Y':'N', bass_auto_arp?'Y':'N', bass_auto_progression?'Y':'N', bass_counter);
+  return output;
 }
 
 #endif
