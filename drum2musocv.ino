@@ -1,6 +1,6 @@
 // config settings
 //#define TEST_TRIGGERS
-//#define ENABLE_PIXELS
+#define ENABLE_PIXELS
 //#define ENABLE_PIXELS_ADA // choose this or ENABLE_PIXELS_FASTLED
 #define ENABLE_PIXELS_FASTLED
 
@@ -157,10 +157,11 @@ void loop() {
 #endif
 
 #ifdef ENABLE_SCREEN
-  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH/2) {
-    Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
+  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH) {
+    //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
     last_updated_screen_at = now_ms;
     screen_update();
+    Serial.printf("updated screen in %ims\n", millis() - last_updated_screen_at);
   }
 #endif
 

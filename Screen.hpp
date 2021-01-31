@@ -9,6 +9,7 @@
 //DisplaySSD1306_128x64_I2C display(-1); // This line is suitable for most platforms by default
 //DisplaySSD1306_128x64_I2C display(-1); // This line is suitable for most platforms by default
 DisplaySSD1306_128x64_I2C display(-1, {-1,0x3C,-1,-1,3400000}); 
+//NanoEngine<TILE_128x64_MONO,DisplaySSD1306_128x64_I2C> engine(display);
 
 void initialise_screen() {
   
@@ -17,12 +18,20 @@ void initialise_screen() {
 
     display.begin();
 
+    //engine.begin();
+    //engine.setFrameRate(10);
+
     display.clear();
 }
 
 void screen_update() {
+  //if (!engine.nextFrame()) return;
+  //engine.getCanvas().clear();    // This step can be removed, if you don't want to clear buffer
+  //engine.getCanvas().setColor(255);
+  //engine.getCanvas().drawRect(15,12,70,55);
+  //engine.display();
 
-  //display.clear();
+  display.clear();
   display.printFixed(0,  8, "Normal text", STYLE_NORMAL);
   display.printFixed(0, 16, "Bold text", STYLE_BOLD);
   display.printFixed(0, 24, "Italic text", STYLE_ITALIC);
