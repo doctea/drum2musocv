@@ -65,7 +65,7 @@ unsigned int bpm_clock() {
     bpm_internal_mode = true;
 
     int delta_ms = (now - last_ticked);
-    double ms_per_tick = (60.0d / (bpm_current * (double)PPQN));
+    double ms_per_tick = (60.0d / (double)(bpm_current * (double)PPQN));
     double delta_ticks = (double)delta_ms / (1000.0d*ms_per_tick);
     if ((int)delta_ticks>0) {
       received_ticks += delta_ticks;
