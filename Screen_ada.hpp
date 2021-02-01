@@ -44,6 +44,9 @@ void testdrawline();
 
 
 void initialise_screen() {
+
+  Wire.setClock(3400000);
+  
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -61,6 +64,9 @@ void initialise_screen() {
   // Draw a single pixel in white
   display.drawPixel(10, 10, SSD1306_WHITE);
 
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.cp437(true);         // Use full 256 char 'Code Page 437' font
+
   // Show the display buffer on the screen. You MUST call display() after
   // drawing commands to make them visible on screen!
   display.display();
@@ -76,9 +82,7 @@ void initialise_screen() {
 void screen_update() {
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE); // Draw white text
   display.setCursor(0, 0);     // Start at top-left corner
-  display.cp437(true);         // Use full 256 char 'Code Page 437' font
 
   char output[32];
 

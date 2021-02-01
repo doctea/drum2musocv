@@ -1,3 +1,9 @@
+#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
+
+#ifdef SEEEDUINO
+#define ARDUINO_SAMD_ZERO
+#endif
+
 // config settings
 //#define TEST_TRIGGERS
 #define ENABLE_PIXELS
@@ -5,7 +11,7 @@
 #define ENABLE_PIXELS_FASTLED
 
 #define ENABLE_SCREEN
-//#define ENABLE_SCREEN_ADA
+#define ENABLE_SCREEN_ADA
 
 #define ENABLE_BUTTONS
 
@@ -17,7 +23,6 @@
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 
 #define USB_NATIVE  // enable native usb support
-#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
 
 
 #include "MidiInput.hpp"
@@ -162,7 +167,7 @@ void loop() {
 #endif
 
 #ifdef ENABLE_SCREEN
-  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH*5) {
+  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH*10) {
     //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
     last_updated_screen_at = now_ms;
     screen_update();
