@@ -44,8 +44,9 @@ void testdrawline();
 
 
 void initialise_screen() {
+  //Wire.enableDMAMode(true);
 
-  Wire.setClock(3400000);
+  Wire.setClock(3400000L);
   
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -110,7 +111,13 @@ void screen_update() {
   display.write(get_bass_info_2());
   display.write("\n");
 
-  display.display();
+  static uint8_t last[128];
+
+  memcpy(&last, display.getBuffer(), 64);
+  display.getBuffer();
+  if (!memcmp(&last, display.getBuffer(), sizeof(display.getBuffer()))) {
+    display.display();
+  }
 }
 
 void testdrawline() {

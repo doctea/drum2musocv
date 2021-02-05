@@ -21,6 +21,8 @@ void initialise_screen() {
     //engine.begin();
     //engine.setFrameRate(10);
 
+    Wire.setClock(3400000);
+
     display.clear();
 }
 

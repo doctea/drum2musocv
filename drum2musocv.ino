@@ -11,7 +11,8 @@
 #define ENABLE_PIXELS_FASTLED
 
 #define ENABLE_SCREEN
-#define ENABLE_SCREEN_ADA
+//#define ENABLE_SCREEN_ADA
+//#define ENABLE_SCREEN_LCDGFX
 
 #define ENABLE_BUTTONS
 
@@ -54,12 +55,18 @@ unsigned long time_last; // last time main loop was run, for calculating elapsed
 #include "BPM.hpp"
 
 #ifdef ENABLE_SCREEN
+
 #ifdef ENABLE_SCREEN_ADA
 #include "Screen_ada.hpp"
-#else
+#endif
+
+#ifdef ENABLE_SCREEN_LCDGFX
 #include "Screen_lcdgfx.hpp"
+#else
+#include "Screen_snowflakes.hpp"
 #endif
 long last_updated_screen_at = 0;
+
 #endif
 
 // override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
@@ -167,7 +174,7 @@ void loop() {
 #endif
 
 #ifdef ENABLE_SCREEN
-  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH*10) {
+  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH) {
     //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
     last_updated_screen_at = now_ms;
     screen_update();
