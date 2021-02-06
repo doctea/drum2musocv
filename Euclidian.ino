@@ -112,8 +112,9 @@ void process_euclidian(int ticks) {
     // its a beat!
     //EUC_printf(" >>STEP %2.2u", current_step);
     //EUC_printf(" >>BEAT %1.1u", current_beat);
-    EUC_printf("[EUC] [mode %i] >>BPM %3.3f >>STEP %i:%i:%2.2u.%1.2u ", demo_mode, bpm_current, current_phrase, current_bar, current_beat, current_step);
-    EUC_printf(" (ticks = %.4u", ticks); EUC_printf(") ");
+    EUC_printf("[EUC] [mode %i] ", demo_mode );
+    EUC_printf(" (ticks = %5u", ticks); EUC_printf(") ");
+    EUC_printf(" >>BPM %3.3f >>STEP %i:%i:%2.2u.%1.2u ", bpm_current, current_phrase, current_bar, current_beat, current_step);
     EUC_printf("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
@@ -146,6 +147,11 @@ void process_euclidian(int ticks) {
     if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
       EUC_printf(" (first beat of phrase!)");
     }
+
+    if (is_bass_auto_note_held()) {
+      EUC_printf(" [%s]", get_debug_bass_notes_held());
+    }
+    
     EUC_println("");
   /*} else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
     // its between a step!

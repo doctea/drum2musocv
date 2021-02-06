@@ -3,10 +3,6 @@
 
 #include "Drums.h"
 
-// messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron
-#define MIDI_CHANNEL_BASS_IN   8
-#define MIDI_CHANNEL_BASS_OUT  2
-
 // GLOBALS
 
 byte activeNotes = 0;             // tracking how many keys are held down
@@ -67,7 +63,8 @@ void fire_trigger(byte t, byte v, bool internal = false) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
       //Serial.printf("sending neutron note\r\n");
-      bass_note_on_and_next();
+      if (is_bass_auto_note_held())
+        bass_note_on_and_next();
     } else {
       Serial.printf("WARNING: fire_trigger not doing anything with pitch %i\r\n", p);
     }
@@ -247,6 +244,12 @@ void process_midi() {
                    MIDIIN.getData2(),
                    MIDI_CHANNEL_BASS_OUT
       );
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_AUTO_IN) {
+      if (MIDIIN.getType()==midi::MidiType::NoteOn) {
+        bass_auto_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+      } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
+        bass_auto_note_off(MIDIIN.getData1());
+      }
     }
     //todo: accept a note on another channel to set the root..?
     //      or actually, have CCs to set the root note, scale, etc..?
