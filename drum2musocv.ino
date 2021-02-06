@@ -10,7 +10,7 @@
 //#define ENABLE_PIXELS_ADA // choose this or ENABLE_PIXELS_FASTLED
 #define ENABLE_PIXELS_FASTLED
 
-#define ENABLE_SCREEN
+//#define ENABLE_SCREEN
 //#define ENABLE_SCREEN_ADA
 //#define ENABLE_SCREEN_LCDGFX
 
@@ -174,7 +174,7 @@ void loop() {
 #endif
 
 #ifdef ENABLE_SCREEN
-  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH) {
+  if (now_ms - last_updated_screen_at >= PIXEL_REFRESH * 2) {
     //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
     last_updated_screen_at = now_ms;
     screen_update();

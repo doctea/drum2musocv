@@ -198,7 +198,7 @@ char *get_bass_info() {
 char *get_bass_info_2() {
   static char output[32];
 
-  // auto arp, auto progression, bass counter
+  // auto scale, auto arp, auto progression, bass counter
   sprintf(output, "as aa ap bc\n%c  %c  %c  %2i\n", bass_auto_scale?'Y':'N', bass_auto_arp?'Y':'N', bass_auto_progression?'Y':'N', bass_counter);
   return output;
 }

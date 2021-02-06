@@ -187,6 +187,9 @@ static const uint8_t maxCount = 3;
 /* These are our snow flakes */
 SnowFlake snowFlakes[maxCount];
 
+
+
+
 void initialise_screen()
 {
   //delay(1000);
@@ -197,7 +200,7 @@ void initialise_screen()
 //    ssd1351_128x128_spi_init(3,4,5);
 //    il9163_128x128_spi_init(3,4,5);
 
-    engine.setFrameRate( 10 );
+    engine.setFrameRate( 5 );
     engine.begin();
 
     engine.getDisplay().setFixedFont(ssd1306xled_font6x8);
@@ -224,12 +227,20 @@ static uint8_t globalTimer=3;
 
 void screen_update()
 {
-  if (!engine.nextFrame()) return;
-  //engine.refresh();
-  //engine.display();
+    if (!engine.nextFrame()) return;
+    if (0 == (--globalTimer))
+    {
+        // Try to add new snowflake every ~ 90ms 
+        globalTimer = 3;
+        addSnowFlake();
+    }
+    //engine.update();
+    //engine.display();
+    
   //engine.getCanvas().setCursor(0, 0);     // Start at top-left corner
 
-  char output[32];
+  /*
+  static char output[32];
 
   sprintf(output, "%2i:%i:%i:%2i ", current_phrase, current_bar, current_beat, current_step);
   engine.getCanvas().printFixed(0,0, output);
@@ -241,10 +252,12 @@ void screen_update()
     demo_mode==MODE_RANDOM ? "RnDm" : 
     "????");
   //engine.getCanvas().write(output);
+  engine.getCanvas().setColor(RGB_COLOR8(255,0,0));
   engine.getCanvas().printFixed(0, 9, output);
 
   //engine.setTextSize(2);
-  
+  */
+  /*
   sprintf(output, "%cBPM: %3.1f\n", bpm_internal_mode?'i':'e', bpm_current);
   engine.getCanvas().printFixed(0, 17, output);
 
@@ -252,7 +265,7 @@ void screen_update()
 
   //engine.getCanvas().write(get_bass_info());
   //engine.getCanvas().printFixed(0, 23, get_bass_info());
-  
+  */
   /*engine.getCanvas().write("\n");
   engine.setTextSize(1);
   engine.getCanvas().write(get_bass_info_2());

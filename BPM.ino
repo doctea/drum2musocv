@@ -101,6 +101,7 @@ unsigned int bpm_clock() {
 }
 
 
+// for tracking beat times for bpm calculation
 void push_beat(unsigned long duration) {
   last_beat_stamp[ph] = duration;
   //Serial.printf("pushed duration %i to slot %i\n", duration, ph);
