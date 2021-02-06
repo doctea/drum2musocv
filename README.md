@@ -14,7 +14,7 @@ Includes a template for FL Studio to make controlling the general and envelope s
 
 Has an experimental generative euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.
 
-NEW: added a 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike).
+NEW: added a 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).
 
 Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
@@ -40,8 +40,9 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 | Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
 | Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
 | Note+CC etc | 8            | any            | Resend on channel 2 (bass) |
+| Note        | 9            | any            | arpeggiate chord on chan 2 |
 
-* actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
+* *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
 
 # Requirements
 
@@ -67,6 +68,8 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
  - Make a KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
  
  - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
+   - features to do this.  currently arps over held chord
+   - make this so can switch between modes...
  
  - Replace DebounceEvent library with one that doesn't need patching
 
@@ -82,8 +85,9 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 
  - Save config options (RGB settings, envelope settings, euclidian patterns etc) to the flash memory and allow configuration via sysex / CCs.
 	 - Started adding this, but isn't supported on SAMD platforms, so aborted (untested code remains)
+	 - support FRAM over SPI?
 	 
- - Add extra output on the pitch bend output
+ - Add extra output on the pitch bend output (currently using this to replace my broken output cc74)
 
 ## Requirements 
 
