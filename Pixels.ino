@@ -1,10 +1,6 @@
 #ifdef ENABLE_PIXELS
 #ifdef ENABLE_PIXELS_FASTLED
 
-#ifdef SEEEDUINO
-#define ARDUINO_SAMD_ZERO
-#endif
-
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused
 #define REVERSE_LEDS           // if pixel strips should be reversed

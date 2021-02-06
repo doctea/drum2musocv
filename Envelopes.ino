@@ -18,7 +18,8 @@ void kill_envelopes() {
   for (byte i = 0 ; i < NUM_ENVELOPES; i++) {
     envelopes[i].stage = OFF;
     envelopes[i].stage_start_level = (byte)0;
-    MIDIOUT.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
+    //MIDIOUT.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
+    midi_send_envelope_level(i, 0);
   }
 }
 

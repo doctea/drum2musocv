@@ -1,3 +1,9 @@
+#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
+
+#ifdef SEEEDUINO
+#define ARDUINO_SAMD_ZERO
+#endif
+
 // config settings
 //#define TEST_TRIGGERS
 #define ENABLE_PIXELS
@@ -14,7 +20,6 @@
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 
 #define USB_NATIVE  // enable native usb support
-#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
 
 
 #include "MidiInput.hpp"
@@ -44,7 +49,6 @@ unsigned long time_last; // last time main loop was run, for calculating elapsed
 //float ticks = 0;  // store ticks as float, so can update by fractional ticks
 
 #include "BPM.hpp"
-
 
 // override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
 // however this doesn't work like i need it to
@@ -140,10 +144,10 @@ void loop() {
   process_envelopes(now);
 
 #ifdef ENABLE_PIXELS
-  if (last_updated_pixels_at - now_ms >= PIXEL_REFRESH) {
+  if (now_ms - last_updated_pixels_at >= PIXEL_REFRESH) {
     last_updated_pixels_at = now_ms;
     update_pixels();
-  }
+  } 
 #endif
 
   time_last = now_ms;
