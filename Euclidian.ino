@@ -1,4 +1,6 @@
-// based on pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
+// based on example code/pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
+
+#include "MidiOutput.hpp" // because we need to send MIDI
 
 #define EUC_DEBUG
 
@@ -148,8 +150,8 @@ void process_euclidian(int ticks) {
       EUC_printf(" (first beat of phrase!)");
     }
 
-    if (is_bass_auto_note_held()) {
-      EUC_printf(" [%s]", get_debug_bass_notes_held());
+    if (bass.is_note_held()) {
+      EUC_printf(" [%s]", bass.get_debug_notes_held());
     }
     
     EUC_println("");
@@ -190,10 +192,10 @@ void initialise_euclidian() {
   make_euclid(&patterns[13],  LEN,    1, 9);    // vibra
   make_euclid(&patterns[14],  LEN,    1, 13);   // bell
   make_euclid(&patterns[15],  LEN,    5, 13);   // cymbal
-  //make_euclid(&patterns[16],  LEN,    4, 3, STEPS_PER_BEAT/2);    // bass (neutron) offbeat
+  make_euclid(&patterns[16],  LEN,    4, 3, STEPS_PER_BEAT/2);    // bass (neutron) offbeat
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
-  make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
+  //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
 
   /*make_euclid(&patterns[0], 16, 16, 0);
     make_euclid(&patterns[1], 13, 8, 0);

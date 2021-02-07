@@ -48,7 +48,6 @@ void echo_douse_trigger(int trigger, int velocity) {
   MIDIIN.sendNoteOff(ext, 0,       GM_CHANNEL_DRUMS); 
 }
 
-
 String get_note_name(int pitch) {
   int octave = pitch / 12;
   int chromatic_degree = pitch % 12; 

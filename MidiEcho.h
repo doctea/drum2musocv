@@ -6,10 +6,19 @@ int get_trigger_for_pitch(int pitch);
 void echo_fire_trigger(int trigger, int velocity);
 void echo_douse_trigger(int trigger, int velocity);
 
+//String get_note_name(int pitch);
+
+// TODO: move all this stuff below into some generic midi header
 String get_note_name(int pitch);
 
+#define MIDI_C2   32
+#define MIDI_C3   48
+#define MIDI_C4   60  // middle C
+#define MIDI_C5   72
+#define MIDI_C6   88
+#define MIDI_C7   104
 
-
+#define MIDI_BASS_ROOT_PITCH  MIDI_C3
 
 // from https://github.com/FortySevenEffects/arduino_midi_library/blob/master/src/midi_Defs.h
 /*! Enumeration of MIDI types */

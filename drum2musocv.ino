@@ -21,8 +21,10 @@
 
 #define USB_NATIVE  // enable native usb support
 
+#include "MidiSetup.hpp"
 
 #include "MidiInput.hpp"
+#include "MidiOutput.hpp"
 #include "UI.h"
 
 #include "Drums.h"

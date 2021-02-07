@@ -1,5 +1,7 @@
 #include "SinTables.h"
 
+#include "MidiOutput.hpp"
+
 void initialise_envelopes() {
   // set up the default envelope states
   /*envelopes[ENV_SPLASH].attack_length = PPQN / 2;

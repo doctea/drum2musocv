@@ -6,18 +6,18 @@
 #define MIDI_CHANNEL_BASS_AUTO_IN   9
 #define MIDI_CHANNEL_BASS_OUT  2
 
-
-#define MIDI_C2   32
-#define MIDI_C3   48
-#define MIDI_C4   60  // middle C
-#define MIDI_C5   72
-#define MIDI_C6   88
-#define MIDI_C7   104
-
-#define MIDI_BASS_ROOT_PITCH  MIDI_C3
-
 #include "MidiInput.hpp"
-#include "BassHeld.hpp"
+#include "MidiOutput.hpp"
+#include "BPM.hpp"          // for access to song position info
+//#include "BassHeld.hpp"
+#include "ChannelState.hpp"
+
+
+void midi_bass_send_note_on(int pitch, int velocity, int channel = MIDI_CHANNEL_BASS_OUT);
+void midi_bass_send_note_off(int pitch, int velocity = 0, int channel = MIDI_CHANNEL_BASS_OUT);
+
+
+ChannelState bass = ChannelState();
 
 //#define BASS_DEBUG
 
@@ -54,7 +54,6 @@ int chord_sequence[]    =   { 0, 5, 1, 4 };     // chord progression
 #define BASS_SEQUENCE_LENGTH        ((int)(sizeof(bass_sequence[0])/sizeof(bass_sequence[0][0])))
 #define BASS_CHORD_SEQUENCE_LENGTH  ((int)(sizeof(chord_sequence)/sizeof(chord_sequence[0])))
 
-bool bass_auto_note_held = false;
 
 //int bass_root = MIDI_BASS_ROOT_PITCH;
 
@@ -161,10 +160,10 @@ int bass_get_sequence_note(int position = 0) {
 
 int bass_get_sequence_pitch(int position = 0) {
   //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
-  if (is_bass_auto_note_held()) {
-    return bass_get_sequence_held_note(position);
+  if (bass.is_note_held()) {
+    return bass.get_sequence_held_note(position);
   }
-  return get_bass_root_note() + bass_get_sequence_note(position);
+  return bass.get_root_note() + bass_get_sequence_note(position);
 }
 
 void bass_reset_sequence() {
@@ -177,7 +176,7 @@ void bass_note_on (int v = 127) {
   //BASS_printf("bass_note_on: bass pitch is %i\r\n", pitch_offset);
 
   bass_currently_playing = pitch_offset;
-  MIDIOUT.sendNoteOn(bass_currently_playing, v, MIDI_CHANNEL_BASS_OUT);
+  midi_bass_send_note_on(bass_currently_playing, v);
 }
 
 void bass_note_on_and_next(int v = 127) {
@@ -194,7 +193,8 @@ void bass_note_off() {
 
   //MIDIOUT.sendNoteOff(MIDI_BASS_ROOT_PITCH + pitch_offset, v, MIDI_CHANNEL_BASS_OUT);
   if (bass_currently_playing >= 0)
-    MIDIOUT.sendNoteOff(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
+    midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
+
   bass_currently_playing = -1;
 }
 

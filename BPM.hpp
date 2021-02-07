@@ -2,6 +2,8 @@
 #define BPM_INCLUDED
 //#define ENABLE_STEP_DEBUG // for enabling step debug output
 
+#include "MidiSetup.hpp"
+
 // utility functions for calculating BPM etc
 
 // defines for clock type and time signature etc
@@ -12,7 +14,6 @@
 #define BEATS_PER_BAR           SEQUENCE_LENGTH_BEATS
 #define BARS_PER_PHRASE         4
 
-#define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
 #define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
 
 byte cc_value_clock_tick_ratio = PPQN;
