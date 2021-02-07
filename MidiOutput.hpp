@@ -23,7 +23,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
         update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
       //Serial.printf(">> got BASS trigger!\r\n");
-      if (bass.is_note_held()) // todo: make this so that can still play bass when no DAW present...
+      //if (bass.is_note_held()) // todo: make this so that can still play bass when no DAW present...
         bass_note_on_and_next();
       //else 
       //  Serial.println("No note held? is_note_held is false");

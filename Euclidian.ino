@@ -132,6 +132,7 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         EUC_printf(" ");   
       } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
+        // TODO: turn off according to some other thing.. eg cut groups?
         if (i==16) EUC_printf("..."); // add extra dots for bass note indicator
         EUC_printf(".", i); EUC_printf(" ");
         douse_trigger(i, 127, true);
@@ -155,13 +156,6 @@ void process_euclidian(int ticks) {
     }
     
     EUC_println("");
-  /*} else if ((TICKS_PER_STEP / 2) == ticks % TICKS_PER_STEP) {
-    // its between a step!
-    //EUC_printf("Should turn off on ticks = "); EUC_println(ticks);
-    // TODO: turn off according to some other thing.. eg cut groups?
-    for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      douse_trigger(MUSO_NOTE_MINIMUM + i, 127, true);
-    }*/
   }
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;

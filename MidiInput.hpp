@@ -135,6 +135,7 @@ void process_midi() {
     //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
     if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {
       // relay all incoming messages for the Neutron/bass
+      //Serial.println("Received a message targeted at the neutron directly: %0x, %0x, %0x\n", MIDIIN.getType(), MIDIIN.getData1(), MIDIIN.getData2());
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
