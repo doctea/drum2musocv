@@ -1,12 +1,12 @@
 
 int bass_held_notes[10] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
-#define BASS_HELD_NOTES_SIZE (sizeof(bass_held_notes)/sizeof(bass_held_notes[0]))
+#define BASS_HELD_NOTES_MAX (sizeof(bass_held_notes)/sizeof(bass_held_notes[0]))
 
 int bass_held_notes_count = 0;
 
 void bass_push_note (byte pitch) {
-  for (int i = 0 ; i < BASS_HELD_NOTES_SIZE ; i++) {
+  for (int i = 0 ; i < BASS_HELD_NOTES_MAX ; i++) {
     if (bass_held_notes[i]==-1) { // free slot so add this new pitch
       bass_held_notes[i] = pitch;
       bass_held_notes_count = i+1;
@@ -19,19 +19,19 @@ void bass_push_note (byte pitch) {
 void bass_pop_note(byte pitch) {
   bool found = false;
   bool found_held = false;
-  for (int i = 0 ; i < BASS_HELD_NOTES_SIZE ; i++) {
+  for (int i = 0 ; i < BASS_HELD_NOTES_MAX ; i++) {
     if (!found && bass_held_notes[i]==pitch) { // found the note that's just gone off
       found = true;
       bass_held_notes_count--;
     } else {
       found_held = true;
     }
-    if (found && i+1 < BASS_HELD_NOTES_SIZE) {
+    if (found && i+1 < BASS_HELD_NOTES_MAX) {
       bass_held_notes[i] = bass_held_notes[i+1];
     }
   }
   if (found) 
-    bass_held_notes[BASS_HELD_NOTES_SIZE-1] = -1;
+    bass_held_notes[BASS_HELD_NOTES_MAX-1] = -1;
   //bass_auto_note_held = true;
 }
 
