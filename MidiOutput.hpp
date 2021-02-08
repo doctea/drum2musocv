@@ -73,11 +73,14 @@ void midi_send_envelope_level(byte envelope, byte level) {
 
 void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
+  MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
+  //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);  
   // todo: echo back to host
 }
 
 void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOff(pitch, velocity, channel);
+  MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   // todo: echo back to host
 }
 
@@ -94,14 +97,11 @@ void kill_notes() {
   midi_kill_notes();
 }
 
-
-
 void midi_send_clock(unsigned long received_ticks) {
   static unsigned long last_clock_ticked;
   if (received_ticks!=last_clock_ticked)
     MIDIOUT.sendClock();
   last_clock_ticked = received_ticks;
 }
-
 
 #endif

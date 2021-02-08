@@ -2,7 +2,7 @@
 
 #include "MidiOutput.hpp" // because we need to send MIDI
 
-#define EUC_DEBUG
+//#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1

@@ -37,15 +37,19 @@ int get_trigger_for_pitch(int pitch) {
 }
 
 void echo_fire_trigger(int trigger, int velocity) {
-  int ext = get_pitch_for_trigger(trigger);
-  //Serial.printf("########## GOT TRIGGER FOR INTERNAL TRIGGER %i - converted to external pitch %i!\r\n", trigger, ext); //p-MUSO_NOTE_MINIMUM));
-  MIDIIN.sendNoteOn(ext, velocity, GM_CHANNEL_DRUMS);
+  if (trigger<NUM_TRIGGERS+NUM_ENVELOPES) { // dont send notes if this is the bass track todo: handle bass here too?
+    int ext = get_pitch_for_trigger(trigger);
+    //Serial.printf("# MidiEcho GOT TRIGGER FOR INTERNAL TRIGGER %i - sending external pitch %i!\r\n", trigger, ext); //p-MUSO_NOTE_MINIMUM));
+    MIDIIN.sendNoteOn(ext, velocity, GM_CHANNEL_DRUMS);
+  }
 }
 
 void echo_douse_trigger(int trigger, int velocity) {
-  int ext = get_pitch_for_trigger(trigger);
-  //Serial.printf("########## GOT DOUSE FOR INTERNAL TRIGGER %i - converted to external pitch %i!\r\n", trigger, ext);
-  MIDIIN.sendNoteOff(ext, 0,       GM_CHANNEL_DRUMS); 
+  if (trigger<NUM_TRIGGERS+NUM_ENVELOPES) { // dont send notes if this is the bass track todo: handle bass here too?
+    int ext = get_pitch_for_trigger(trigger);
+    //Serial.printf("########## GOT DOUSE FOR INTERNAL TRIGGER %i - converted to external pitch %i!\r\n", trigger, ext);
+    MIDIIN.sendNoteOff(ext, 0,       GM_CHANNEL_DRUMS); 
+  }
 }
 
 String get_note_name(int pitch) {
