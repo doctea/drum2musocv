@@ -17,11 +17,14 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 #define CC_SYNC_RATIO   110
 #define CC_CLOCK_TICK_RATIO   111
 
+#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32
+
 // IMPORTS
 
 #include "MidiEcho.h"
 #include "BPM.hpp"
 #include "Envelopes.h"
+#include "Euclidian.h"
 
 //#include "Bass.hpp"
 
@@ -71,7 +74,11 @@ void handleControlChange(byte channel, byte number, byte value) {
       // note actual CC value is 1 less than the intended value!
     } else if (number==CC_CLOCK_TICK_RATIO) {
       cc_value_clock_tick_ratio = constrain(value,0,127);
-    } else if (!handle_envelope_ccs(channel, number, value)) {
+    } else if (handle_envelope_ccs(channel, number, value)) {
+      //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
+    } else if (handle_euclidian_ccs(channel, number, value)) {
+      
+    } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     }
     last_input_at = millis();

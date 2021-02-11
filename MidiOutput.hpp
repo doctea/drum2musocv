@@ -35,7 +35,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
 #endif
 }
 
-void douse_trigger(byte t, byte v, bool internal = false) {
+void douse_trigger(byte t, byte v = 0, bool internal = false) {
     byte p = MUSO_NOTE_MINIMUM + t;
     if (
       p>=MUSO_NOTE_MINIMUM && 
@@ -75,13 +75,13 @@ void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
   MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);  
-  // todo: echo back to host
+  // todo: move echo back to host stuff into MidiEcho
 }
 
 void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOff(pitch, velocity, channel);
   MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
-  // todo: echo back to host
+  // todo: move echo back to host stuff into MidiEcho
 }
 
 void midi_kill_notes() {

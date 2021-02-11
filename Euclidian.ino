@@ -2,7 +2,7 @@
 
 #include "MidiOutput.hpp" // because we need to send MIDI
 
-//#define EUC_DEBUG
+#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1
@@ -60,6 +60,11 @@ void rotate_pattern(pattern_t *p, int rotate) {
     stored[i] = p->stored[abs( (i + offset) % p->steps )];
   }
   memcpy(p->stored, stored, sizeof(stored));
+}
+
+void set_pattern_active_status(int pattern, bool active) {
+  patterns[pattern].active_status = active;
+  douse_trigger(pattern);
 }
 
 void mutate_euclidian(int pattern) {
@@ -120,6 +125,8 @@ void process_euclidian(int ticks) {
     EUC_printf("[ ");
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
       //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+      if (!patterns[i].active_status) continue;
+      
       if (query_pattern(&patterns[i], current_step)) {  // step trigger
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
@@ -230,6 +237,20 @@ void debug_patterns() {
     EUC_println("]");
   }
 }
+
+
+
+// change to an euclidian setting
+bool handle_euclidian_ccs(byte channel, byte number, byte value) {
+  //NOISY_DEBUG(1000, number);
+
+  if (number>=CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
+    set_pattern_active_status(number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value>1);
+    return true;
+  }
+  return true;
+}
+
 
 /* the original javascript from computermusicdesign
    //calculate a euclidean rhythm
