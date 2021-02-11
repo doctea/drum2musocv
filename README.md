@@ -29,7 +29,7 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 
 # MIDI parameters
 
-(incomplete, need to add the notes corresponding to the Muso triggers for bass, snare, ch/oh etc, CCs corresponding to the envelope parameters, and other settings eg clock sync)
+(TODO: incomplete, need to add the notes corresponding to the Muso triggers for bass drum, snare, ch/oh etc, CCs corresponding to the envelope parameters, and other settings eg clock sync)
 
 | MIDI type   | MIDI channel | MIDI number    | Purpose                    |
 | ----------  | ------------ | -------------- | -------------------------- | 
@@ -39,8 +39,9 @@ Temporary hack: uses the pitch bend output instead of the CV output that corresp
 | Note        | 10           | Ride Bell      | Trigger envelope on CV 4   |
 | Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
 | Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
-| Note+CC etc | 8            | any            | Resend on channel 2 (bass) |
-| Note        | 9            | any            | arpeggiate chord on chan 2 |
+| CC          | 10           | 32 to 48       | Enable/disable Euclidian track |
+| Note+CC etc | 8            | any            | Resend on channel 2 (bass synth) |
+| Note        | 9            | any            | Euclidian track arpeggiates held chord on chan 2 (bass synth) |
 
 * *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
 
