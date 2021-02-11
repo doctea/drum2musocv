@@ -128,6 +128,8 @@ void process_euclidian(int ticks) {
       if (!patterns[i].active_status) continue;
       
       if (query_pattern(&patterns[i], current_step)) {  // step trigger
+        //if (i==BASS_PATTERN && (bass_only_note_held && !bass.is_note_held())) continue;
+        
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
         if (i<16) {
@@ -239,16 +241,32 @@ void debug_patterns() {
 }
 
 
+// returns true if it means we should kill what's playing
+bool euclidian_set_auto_play (bool enable) {
+  bool current_mode = euclidian_auto_play;
+  euclidian_auto_play = enable; //!euclidian_auto_play;
+  if (bpm_internal_mode && !euclidian_auto_play) {
+    return true;
+  }
+  return false;
+}
 
 // change to an euclidian setting
 bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
+  if (channel!=GM_CHANNEL_DRUMS) return false;
 
   if (number>=CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
     set_pattern_active_status(number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value>1);
     return true;
+  } else if (number==CC_EUCLIDIAN_SET_AUTO_PLAY) {
+    if (euclidian_set_auto_play (value>0)) {
+      kill_notes();
+      kill_envelopes();
+    }
+    return true;
   }
-  return true;
+  return false;
 }
 
 

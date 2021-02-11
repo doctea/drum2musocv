@@ -40,7 +40,6 @@
 // GLOBALS
 
 // for demo mode
-short demo_mode = 0;
 int last_played_trigger = -1;
 
 // for handling clock ---------------------------------------------------------

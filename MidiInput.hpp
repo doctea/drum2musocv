@@ -17,7 +17,7 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 #define CC_SYNC_RATIO   110
 #define CC_CLOCK_TICK_RATIO   111
 
-#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32
+
 
 // IMPORTS
 
@@ -25,6 +25,7 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 #include "BPM.hpp"
 #include "Envelopes.h"
 #include "Euclidian.h"
+#include "UI.h"
 
 //#include "Bass.hpp"
 
@@ -77,6 +78,10 @@ void handleControlChange(byte channel, byte number, byte value) {
     } else if (handle_envelope_ccs(channel, number, value)) {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     } else if (handle_euclidian_ccs(channel, number, value)) {
+
+    } else if (handle_bass_ccs(channel, number, value)) {
+      Serial.printf("Handled bass cc channel %i number %i value %i\r\n", number, value);      
+    } else if (handle_ui_ccs(channel, number, value)) {
       
     } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
@@ -153,6 +158,9 @@ void process_midi() {
         bass.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         bass.handle_note_off(MIDIIN.getData1());
+        if (!bass.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note
+          bass_note_off();
+        }
       }
     }
     //todo: accept a note on another channel to set the root..?

@@ -17,6 +17,15 @@
 #define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 #define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
 
+#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
+#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+
+#define ARP_MODE_NONE         0
+#define ARP_MODE_PER_BEAT     1
+#define ARP_MODE_NEXT_ON_NOTE 2
+#define ARP_MODE_MAX          3
+
+
 #include "MidiInput.hpp"
 #include "MidiOutput.hpp"
 #include "BPM.hpp"              // for access to song position info
@@ -64,6 +73,8 @@ int sequence_number = 0;            // index of the arp sequence that we're curr
 bool bass_auto_scale       = false;   // automatically switch scales every phrase
 bool bass_auto_progression = false;   // automatically play chords in progression order
 bool bass_auto_arp         = false;   // choose notes to play from the current sequence (eg incrementing through them)
+int bass_arp_mode          = ARP_MODE_NEXT_ON_NOTE;
+bool bass_only_note_held = true;
 
 /*
   scale chord number to octave table 
@@ -199,19 +210,51 @@ void bass_note_on (int v = 127) {
 
 // start note and increment position counter
 void bass_note_on_and_next(int v = 127) {
+  if (!bpm_internal_mode && bass_only_note_held && !bass.is_note_held())
+    return;
+  
   bass_note_on(v);
 
-  bass_counter++;
+  if (bass_arp_mode==ARP_MODE_NEXT_ON_NOTE)
+    bass_counter++;
+  else if (bass_arp_mode==ARP_MODE_PER_BEAT)
+    bass_counter = current_beat;
+  else if (bass_arp_mode==ARP_MODE_NONE)// dont arp at all
+    bass_counter = 0;
 }
 
 void bass_note_off() {
   //BASS_printf("bass_note_off: bass pitch offset is %i\r\n", bass_currently_playing);
+  if (!bass_currently_playing && (!bpm_internal_mode && bass_only_note_held && !bass.is_note_held()))
+    return;
 
   if (bass_currently_playing >= 0)
     midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
 
   bass_currently_playing = -1;
 }
+
+void bass_set_arp_mode(int mode) {
+  bass_arp_mode = mode % ARP_MODE_MAX;
+}
+
+void bass_set_only_note_held(int value) {
+  bass_only_note_held = value; //= mode % ARP_MODE_MAX;
+}
+
+bool handle_bass_ccs(byte channel, byte number, byte value) {
+  if (channel!=GM_CHANNEL_DRUMS) return false;
+
+  if (number==CC_BASS_SET_ARP_MODE) {
+    bass_set_arp_mode(value);
+    return true;
+  } else if (number==CC_BASS_ONLY_NOTE_HELD) {
+    bass_set_only_note_held(value>0);
+  }
+  return false;
+}
+
+
 
 // get strings about the current scale/sequence/chords settings
 char *get_bass_info() {
