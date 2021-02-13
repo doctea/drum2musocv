@@ -37,6 +37,7 @@ int get_trigger_for_pitch(int pitch) {
 }
 
 void echo_fire_trigger(int trigger, int velocity) {
+  if (!midiecho_enabled) return;
   if (trigger<NUM_TRIGGERS+NUM_ENVELOPES) { // dont send notes if this is the bass track todo: handle bass here too?
     int ext = get_pitch_for_trigger(trigger);
     //Serial.printf("# MidiEcho GOT TRIGGER FOR INTERNAL TRIGGER %i - sending external pitch %i!\r\n", trigger, ext); //p-MUSO_NOTE_MINIMUM));
@@ -45,11 +46,23 @@ void echo_fire_trigger(int trigger, int velocity) {
 }
 
 void echo_douse_trigger(int trigger, int velocity) {
+  if (!midiecho_enabled) return;
   if (trigger<NUM_TRIGGERS+NUM_ENVELOPES) { // dont send notes if this is the bass track todo: handle bass here too?
     int ext = get_pitch_for_trigger(trigger);
     //Serial.printf("########## GOT DOUSE FOR INTERNAL TRIGGER %i - converted to external pitch %i!\r\n", trigger, ext);
     MIDIIN.sendNoteOff(ext, 0,       GM_CHANNEL_DRUMS); 
   }
+}
+
+bool handle_midiecho_ccs(int channel, int number, int value) {
+  if (channel!=GM_CHANNEL_DRUMS) return false;
+
+  if (number==CC_MIDIECHO_ENABLED) {
+    //Serial.printf("Setting midiecho_enabled to %i\n", value);
+    midiecho_enabled = value>0;
+    return true;
+  }
+  return false;
 }
 
 String get_note_name(int pitch) {

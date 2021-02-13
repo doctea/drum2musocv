@@ -54,8 +54,10 @@ unsigned long last_beat_at = 0;
 static unsigned long last_ticked = 0;
 
 
-// stubs
+// prototypes
 void bpm_receive_clock_tick ();
 void bpm_reset_clock (int offset = 0);
+void bpm_update_status( unsigned int received_ticks );
+
 
 #endif

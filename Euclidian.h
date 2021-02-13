@@ -6,11 +6,30 @@
 
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32  // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16  
+#define CC_EUCLIDIAN_SET_MUTATE_MODE      20
+#define CC_EUCLIDIAN_SEED_MODIFIER        22
+
+// so need master "mutate enabled"
+//    and then sub-options within that:-
+//      mutate with masking
+//      seed based on bar number, for repeatability
+//        set 
+
+/*enum mutate_modes : int {
+  EUCLIDIAN_MUTATE_MODE_NONE = 0,
+  EUCLIDIAN_MUTATE_MODE_RANDOM = 1,
+  EUCLIDIAN_MUTATE_MODE_SEED_BAR = 2,
+  EUCLIDIAN_MUTATE_MODE_RESET_ON_STOP = 3,
+  EUCLIDIAN_MUTATE_MODE_MAX = 4
+};*/
+
+int euclidian_seed_modifier = 0;
 
 bool mutate_enabled = false;
-bool mask_enabled = true;
+bool mask_enabled = false;
 
 bool euclidian_auto_play = true;
+//int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_RANDOM;
 
 typedef struct {
   bool active_status = true;

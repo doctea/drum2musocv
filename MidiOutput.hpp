@@ -30,9 +30,8 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     } else {
       Serial.printf("WARNING: fire_trigger not doing anything with pitch %i\r\n", p);
     }
-#ifdef ENABLE_MIDI_ECHO
-    if (internal) echo_fire_trigger(p-MUSO_NOTE_MINIMUM, v);
-#endif
+    if (midiecho_enabled)
+      if (internal) echo_fire_trigger(p-MUSO_NOTE_MINIMUM, v);
 }
 
 void douse_trigger(byte t, byte v = 0, bool internal = false) {
@@ -51,9 +50,8 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
     } else {
       Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
     }
-#ifdef ENABLE_MIDI_ECHO
-    if (internal) echo_douse_trigger(p-MUSO_NOTE_MINIMUM, v);
-#endif
+    if (midiecho_enabled)
+      if (internal) echo_douse_trigger(p-MUSO_NOTE_MINIMUM, v);
 }
 
 void douse_all_triggers(bool internal = false) {
@@ -73,20 +71,24 @@ void midi_send_envelope_level(byte envelope, byte level) {
 
 void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
-  MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
+  if (midiecho_enabled)
+    MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);  
   // todo: move echo back to host stuff into MidiEcho
 }
 
 void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOff(pitch, velocity, channel);
-  MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
+  if (midiecho_enabled)
+    MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   // todo: move echo back to host stuff into MidiEcho
 }
 
 void midi_kill_notes() {
   MIDIOUT.sendControlChange(123,0,MUSO_GATE_CHANNEL); // todo -- check what this is actually doing/meant to do?!
   MIDIOUT.sendControlChange(123,0,MIDI_CHANNEL_BASS_OUT); // todo -- check what this is actually doing/meant to do?!
+  MIDIIN.sendControlChange(123,0,MIDI_CHANNEL_BASS_OUT); // todo -- check what this is actually doing/meant to do?!
+  MIDIIN.sendControlChange(123,0,GM_CHANNEL_DRUMS);
 }
 
 void kill_notes() {

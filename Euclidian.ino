@@ -2,7 +2,7 @@
 
 #include "MidiOutput.hpp" // because we need to send MIDI
 
-#define EUC_DEBUG
+//#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1
@@ -108,7 +108,14 @@ void process_euclidian(int ticks) {
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
 
   if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
+    // TODO: configurable mutation frequency
     if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
+      // TODO: if mutate mode = a seed variation then do this?
+      // TODO: dont reset euclidian if some cc option is set
+      initialise_euclidian();
+      Serial.printf("Euclidian seed: %i\n", euclidian_seed_modifier + current_phrase + 1);
+      randomSeed(euclidian_seed_modifier + current_phrase + 1);
+      
       for (int i = 0 ; i < 3 ; i++) {
         int ran = random(1, NUM_PATTERNS);
         mutate_euclidian(ran);
@@ -217,8 +224,8 @@ void initialise_euclidian() {
     make_euclid(&patterns[13], 16, 1, 9);
     make_euclid(&patterns[14], 16, 1, 13);
     make_euclid(&patterns[15], 16, 1, 3);*/
-  delay(100);
-  debug_patterns();
+  //delay(100);
+  //debug_patterns();
 }
 
 
@@ -245,13 +252,20 @@ void debug_patterns() {
 bool euclidian_set_auto_play (bool enable) {
   bool current_mode = euclidian_auto_play;
   euclidian_auto_play = enable; //!euclidian_auto_play;
-  if (bpm_internal_mode && !euclidian_auto_play) {
+  if (bpm_internal_mode && !euclidian_auto_play && current_mode!=euclidian_auto_play) {
     return true;
   }
   return false;
 }
 
-// change to an euclidian setting
+// returns true if mode changed
+/*bool euclidian_set_mutate_mode(int mutate_mode) {
+  bool current_mode = euclidian_mutate_mode;
+  euclidian_mutate_mode = mutate_mode % EUCLIDIAN_MUTATE_MODE_MAX;
+  return current_mode != euclidian_mutate_mode;
+}*/
+
+// change to an euclidian setting; returns true if this CC was handled here
 bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
   if (channel!=GM_CHANNEL_DRUMS) return false;
@@ -265,7 +279,13 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
       kill_envelopes();
     }
     return true;
+  } else if (number==CC_EUCLIDIAN_SEED_MODIFIER) {
+    euclidian_seed_modifier = value;
   }
+    /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
+    euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);
+    return true;      
+  }*/
   return false;
 }
 

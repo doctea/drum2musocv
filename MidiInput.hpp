@@ -80,9 +80,11 @@ void handleControlChange(byte channel, byte number, byte value) {
     } else if (handle_euclidian_ccs(channel, number, value)) {
 
     } else if (handle_bass_ccs(channel, number, value)) {
-      Serial.printf("Handled bass cc channel %i number %i value %i\r\n", number, value);      
+      Serial.printf("Handled bass cc channel %i number %i value %i\r\n", channel, number, value);      
     } else if (handle_ui_ccs(channel, number, value)) {
-      
+
+    } else if (handle_midiecho_ccs(channel, number, value)) {
+            
     } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     }
@@ -92,13 +94,21 @@ void handleControlChange(byte channel, byte number, byte value) {
   }(*/
 }
 
-void handleSongPosition(unsigned int beats) {
+void handleSongPosition(unsigned int steps) {
+  // A type of MIDI message held in a MIDI sequencer or synchronizer telling a connected device how many 16th notes have elapsed since the beginning of a song. 
   // TODO: put LFO / envelope timer into correct phase, if that is possible?
 
   // TODO: reset position to align with incoming clock...
   //    ticks_received = beats * PPQN ?
   // set the clock_count to an appropriate value in handle SongPosition ? clock_count = beats * 24 or somesuch, if its 24pqn ? beat is a 16th note i think tho so would it be * 96 ? need to check this
-  song_position = beats/4;  // TODO: make this work with the BPM handling...
+  song_position = steps/4;  
+  
+  received_ticks = steps * TICKS_PER_STEP;    // this should work with the BPM handling...?
+  bpm_update_status(received_ticks-1);
+
+  //Serial.printf("Received song position of %i received_ticks which is %i steps ", received_ticks, steps);
+  //Serial.printf("(current_step=%i) (and so should be song phrase %i?)\r\n",  current_step, current_phrase); //(received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) / BARS_PER_PHRASE;);
+  
   last_input_at = millis();  
 }
 
@@ -122,14 +132,16 @@ void handleContinue() {
 void handleStop() {
   MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
-  Serial.println("Received STOP -- killing envelopes / resetting clock !");
+  Serial.println("Received STOP -- killing envelopes / notes / resetting clock !");
   douse_all_triggers();
   kill_envelopes();
-  bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
-  
-#ifdef ENABLE_PIXELS
   kill_notes();
-#endif
+  bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
+  last_input_at = millis();
+  
+//#ifdef ENABLE_PIXELS
+//  kill_notes();
+//#endif
 
 }
 

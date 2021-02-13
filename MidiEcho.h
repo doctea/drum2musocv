@@ -5,6 +5,9 @@ int get_pitch_for_trigger(int trigger);
 int get_trigger_for_pitch(int pitch);
 void echo_fire_trigger(int trigger, int velocity);
 void echo_douse_trigger(int trigger, int velocity);
+bool handle_midiecho_ccs(int channel, int number, int value);
+
+bool midiecho_enabled = true;
 
 //String get_note_name(int pitch);
 
@@ -19,6 +22,8 @@ String get_note_name(int pitch);
 #define MIDI_C7   104
 
 #define MIDI_BASS_ROOT_PITCH  MIDI_C3
+
+#define CC_MIDIECHO_ENABLED   21
 
 // from https://github.com/FortySevenEffects/arduino_midi_library/blob/master/src/midi_Defs.h
 /*! Enumeration of MIDI types */

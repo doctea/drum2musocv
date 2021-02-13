@@ -15,7 +15,7 @@
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 
 //#define ENABLE_EEPROM     // untested, not available on SAMD platforms
-#define ENABLE_MIDI_ECHO
+//#define ENABLE_MIDI_ECHO  // now replaced with midiecho_enabled runtime-settable option
 
 #define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
 

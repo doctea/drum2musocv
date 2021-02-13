@@ -12,6 +12,7 @@ void bpm_update_status( unsigned int received_ticks ) {
   current_beat =    current_step / STEPS_PER_BEAT; //(ticks/24);//%16;
   current_bar  =    (received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) % BARS_PER_PHRASE;
   current_phrase =  (received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) / BARS_PER_PHRASE;
+  //Serial.printf("bpm_update_status: current_phrase is %i from received_ticks %i\r\n", current_phrase, received_ticks);
 
   is_bpm_on_beat = (0==received_ticks%PPQN);
   is_bpm_on_step = (0==received_ticks%TICKS_PER_STEP);
