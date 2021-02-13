@@ -9,6 +9,7 @@ Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
 Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32  // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 Euclidian.h:#define CC_EUCLIDIAN_SET_AUTO_PLAY        16  
+Euclidian.h:#define CC_EUCLIDIAN_SET_MUTATE_MODE      20
 MidiInput.hpp:#define CC_SYNC_RATIO   110
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111
 UI.h:#define CC_DEMO_MODE  19
