@@ -112,7 +112,10 @@ void process_euclidian(int ticks) {
     if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
       // TODO: if mutate mode = a seed variation then do this?
       // TODO: dont reset euclidian if some cc option is set
-      initialise_euclidian();
+      if (euclidian_reset_before_mutate) {
+        Serial.println("Resetting euclidian before mutation!");
+        initialise_euclidian();
+      }
       Serial.printf("Euclidian seed: %i\n", euclidian_seed_modifier + current_phrase + 1);
       randomSeed(euclidian_seed_modifier + current_phrase + 1);
       
@@ -281,6 +284,9 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     return true;
   } else if (number==CC_EUCLIDIAN_SEED_MODIFIER) {
     euclidian_seed_modifier = value;
+    return true;
+  } else if (number==CC_EUCLIDIAN_RESET_BEFORE_MUTATE) {
+    euclidian_reset_before_mutate = value>0;
   }
     /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);

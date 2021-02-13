@@ -8,6 +8,7 @@
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16  
 #define CC_EUCLIDIAN_SET_MUTATE_MODE      20
 #define CC_EUCLIDIAN_SEED_MODIFIER        22
+#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  23
 
 // so need master "mutate enabled"
 //    and then sub-options within that:-
@@ -24,6 +25,7 @@
 };*/
 
 int euclidian_seed_modifier = 0;
+bool euclidian_reset_before_mutate = false;
 
 bool mutate_enabled = false;
 bool mask_enabled = false;
