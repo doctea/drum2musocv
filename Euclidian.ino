@@ -117,15 +117,17 @@ void process_euclidian(int ticks) {
         Serial.println("Resetting euclidian before mutation!");
         initialise_euclidian();
       }
-      unsigned long seed = ((1+euclidian_seed_modifier) * (256+euclidian_seed_modifier_2*2));
+      unsigned long seed = euclidian_seed_modifier;
+      if (euclidian_seed_modifier_2>0) seed *= (256+euclidian_seed_modifier_2*2);
       if (euclidian_seed_use_phrase) seed += current_phrase + 1;
+      if (seed==0) seed = 1;
       Serial.printf("Euclidian seed: %i\n", seed);
       randomSeed(seed);
       
       for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
-        Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl)..\r\n", euclidian_mutate_minimum_pattern % NUM_PATTERNS, euclidian_mutate_maximum_pattern % NUM_PATTERNS);
-        int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, euclidian_mutate_maximum_pattern % NUM_PATTERNS);
-        Serial.printf("Chose pattern %i\r\n", ran);
+        Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1+euclidian_mutate_maximum_pattern % NUM_PATTERNS);
+        int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1+euclidian_mutate_maximum_pattern);
+        Serial.printf("chose pattern %i\r\n", ran);
         mutate_euclidian(ran);
         //debug_patterns();
       }
