@@ -109,18 +109,21 @@ void process_euclidian(int ticks) {
 
   if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
     // TODO: configurable mutation frequency
-    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { //==current_song_position%SEQUENCE_LENGTH_BEATS) {
+    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar==(BARS_PER_PHRASE/2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
       // TODO: if mutate mode = a seed variation then do this?
-      // TODO: dont reset euclidian if some cc option is set
       if (euclidian_reset_before_mutate) {
         Serial.println("Resetting euclidian before mutation!");
         initialise_euclidian();
       }
-      Serial.printf("Euclidian seed: %i\n", euclidian_seed_modifier + current_phrase + 1);
-      randomSeed(euclidian_seed_modifier + current_phrase + 1);
+      unsigned long seed = ((1+euclidian_seed_modifier) * (256+euclidian_seed_modifier_2*2));
+      if (euclidian_seed_use_phrase) seed += current_phrase + 1;
+      Serial.printf("Euclidian seed: %i\n", seed);
+      randomSeed(seed);
       
-      for (int i = 0 ; i < 3 ; i++) {
-        int ran = random(1, NUM_PATTERNS);
+      for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
+        Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl)..\r\n", euclidian_mutate_minimum_pattern % NUM_PATTERNS, euclidian_mutate_maximum_pattern % NUM_PATTERNS);
+        int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, euclidian_mutate_maximum_pattern % NUM_PATTERNS);
+        Serial.printf("Chose pattern %i\r\n", ran);
         mutate_euclidian(ran);
         //debug_patterns();
       }
@@ -285,8 +288,21 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   } else if (number==CC_EUCLIDIAN_SEED_MODIFIER) {
     euclidian_seed_modifier = value;
     return true;
+  } else if (number==CC_EUCLIDIAN_SEED_MODIFIER_2) {
+    euclidian_seed_modifier_2 = value;
+    return true;
   } else if (number==CC_EUCLIDIAN_RESET_BEFORE_MUTATE) {
     euclidian_reset_before_mutate = value>0;
+    return true;
+  } else if (number==CC_EUCLIDIAN_SET_MINIMUM_PATTERN) {
+    euclidian_mutate_minimum_pattern = value % NUM_PATTERNS;
+    return true;
+  } else if (number==CC_EUCLIDIAN_SET_MAXIMUM_PATTERN) {
+    euclidian_mutate_maximum_pattern = value % NUM_PATTERNS;
+    return true;
+  } else if (number==CC_EUCLIDIAN_SEED_USE_PHRASE) {
+    euclidian_seed_use_phrase = value;
+    return true;
   }
     /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);

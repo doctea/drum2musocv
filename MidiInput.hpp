@@ -122,7 +122,7 @@ void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
   
-  bpm_reset_clock();
+  bpm_reset_clock(-1);  // -1 so next tick will be start
 }
 void handleContinue() {
   // TODO: continue LFOs
