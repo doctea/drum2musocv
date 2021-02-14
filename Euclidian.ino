@@ -1,5 +1,7 @@
 // based on example code/pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
+#include "Euclidian.h"
+
 #include "MidiOutput.hpp" // because we need to send MIDI
 
 //#define EUC_DEBUG
