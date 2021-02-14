@@ -142,9 +142,7 @@ void process_euclidian(int ticks) {
       //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
       if (!patterns[i].active_status) continue;
       
-      if (query_pattern(&patterns[i], current_step)) {  // step trigger
-        //if (i==BASS_PATTERN && (bass_only_note_held && !bass.is_note_held())) continue;
-        
+      if (query_pattern(&patterns[i], current_step)) {  // step trigger       
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
         if (i<16) {
@@ -156,10 +154,10 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         EUC_printf(" ");   
       } else if (query_pattern_note_off(&patterns[i], current_step)) {  // step kill
+        douse_trigger(i, 127, true);
         // TODO: turn off according to some other thing.. eg cut groups?
         if (i==16) EUC_printf("..."); // add extra dots for bass note indicator
         EUC_printf(".", i); EUC_printf(" ");
-        douse_trigger(i, 127, true);
       } else {
         EUC_printf("  ");
         if (i==16) EUC_printf("   ");  // add extra spaces for bass note indicator
