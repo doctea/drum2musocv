@@ -20,13 +20,12 @@
 //      seed based on bar number, for repeatability
 //        set 
 
-/*enum mutate_modes : int {
+enum mutate_modes : int {
   EUCLIDIAN_MUTATE_MODE_NONE = 0,
-  EUCLIDIAN_MUTATE_MODE_RANDOM = 1,
-  EUCLIDIAN_MUTATE_MODE_SEED_BAR = 2,
-  EUCLIDIAN_MUTATE_MODE_RESET_ON_STOP = 3,
-  EUCLIDIAN_MUTATE_MODE_MAX = 4
-};*/
+  EUCLIDIAN_MUTATE_MODE_SUBTLE = 1,
+  EUCLIDIAN_MUTATE_MODE_TOTAL = 2,
+  EUCLIDIAN_MUTATE_MODE_MAX = 3
+};
 
 int euclidian_seed_modifier = 0;
 int euclidian_seed_modifier_2 = 0;
@@ -39,7 +38,7 @@ bool mutate_enabled = false;
 bool mask_enabled = false;
 
 bool euclidian_auto_play = true;
-//int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_RANDOM;
+int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 
 typedef struct {
   bool active_status = true;

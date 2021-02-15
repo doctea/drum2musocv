@@ -69,6 +69,13 @@ void set_pattern_active_status(int pattern, bool active) {
   douse_trigger(pattern);
 }
 
+
+void mutate_euclidian_total(int pattern) {
+  int steps = random(2, SEQUENCE_LENGTH_STEPS);   // limit the other random results to max steps so that we don't frequently saturate
+  //void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = 0) {
+  make_euclid(&patterns[pattern], steps, random(1, steps), random(1, steps), random(1, STEPS_PER_BEAT*2));
+}
+
 void mutate_euclidian(int pattern) {
   int r = random(0, 100);
   if (r > 50) {
@@ -128,7 +135,10 @@ void process_euclidian(int ticks) {
         Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1+euclidian_mutate_maximum_pattern % NUM_PATTERNS);
         int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1+euclidian_mutate_maximum_pattern);
         Serial.printf("chose pattern %i\r\n", ran);
-        mutate_euclidian(ran);
+        if (euclidian_mutate_mode==EUCLIDIAN_MUTATE_MODE_TOTAL) 
+          mutate_euclidian_total(ran);
+        else
+          mutate_euclidian(ran);
         //debug_patterns();
       }
     }
@@ -305,7 +315,10 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   } else if (number==CC_EUCLIDIAN_SEED_USE_PHRASE) {
     euclidian_seed_use_phrase = value;
     return true;
-  }
+  } else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
+    euclidian_mutate_mode = value % EUCLIDIAN_MUTATE_MODE_MAX;
+    return true;
+  } 
     /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);
     return true;      
