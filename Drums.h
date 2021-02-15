@@ -59,7 +59,7 @@
 
 
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
-#define MUSO_GATE_CHANNEL   16
+#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 #define MUSO_NOTE_MINIMUM   60
 #define MUSO_NOTE_GATE_1    60
 #define MUSO_NOTE_GATE_2    61
@@ -83,7 +83,7 @@
 #define MUSO_CC_CV_4  71
 #define MUSO_CC_CV_5  74
 
-#define MUSO_CV_CHANNEL     1
+#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 
 // tracking what triggers are currently active, for the sake of pixel output 
 int trigger_status[NUM_TRIGGERS];

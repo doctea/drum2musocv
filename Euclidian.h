@@ -4,15 +4,15 @@
 #define NUM_PATTERNS 17   // 11 triggers + 5 envelopes + 1 midi output
 #define BASS_PATTERN 17
 
-#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32  // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
-#define CC_EUCLIDIAN_SET_AUTO_PLAY        16  
-#define CC_EUCLIDIAN_SET_MUTATE_MODE      20
-#define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random bank X
-#define CC_EUCLIDIAN_SEED_MODIFIER_2      23    // euclidian random bank Y
-#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24
-#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25
-#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26
-#define CC_EUCLIDIAN_SEED_USE_PHRASE      27
+#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
+#define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
+#define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = _NONE, 1 = _SUBTLE, 2 = _TOTAL
+#define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random "bank" X
+#define CC_EUCLIDIAN_SEED_MODIFIER_2      23    // euclidian random "bank" Y
+#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24    // reset sequences to 0 before mutation?
+#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pattern to automutate
+#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
+#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
 
 // so need master "mutate enabled"
 //    and then sub-options within that:-

@@ -5,23 +5,26 @@ Drums.h:#define MUSO_CC_CV_2  7
 Drums.h:#define MUSO_CC_CV_3  11
 Drums.h:#define MUSO_CC_CV_4  71
 Drums.h:#define MUSO_CC_CV_5  74
+Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
-Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32  // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
-Euclidian.h:#define CC_EUCLIDIAN_SET_AUTO_PLAY        16  
-Euclidian.h:#define CC_EUCLIDIAN_SET_MUTATE_MODE      20
-Euclidian.h:#define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random bank X
-Euclidian.h:#define CC_EUCLIDIAN_SEED_MODIFIER_2      23    // euclidian random bank Y
-Euclidian.h:#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24
-Euclidian.h:#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25
-Euclidian.h:#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26
-Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27
+Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
+Euclidian.h:#define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
+Euclidian.h:#define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = _NONE, 1 = _SUBTLE, 2 = _TOTAL
+Euclidian.h:#define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random "bank" X
+Euclidian.h:#define CC_EUCLIDIAN_SEED_MODIFIER_2      23    // euclidian random "bank" Y
+Euclidian.h:#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24    // reset sequences to 0 before mutation?
+Euclidian.h:#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pattern to automutate
+Euclidian.h:#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
+Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
 MidiEcho.h:#define CC_MIDIECHO_ENABLED   21
-MidiInput.hpp:#define CC_SYNC_RATIO   110
-MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111
+MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation
+MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks
 UI.h:#define CC_DEMO_MODE  19
 
 Bass.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Bass.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Bass.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
 Drums.h:#define GM_CHANNEL_DRUMS 10
+Drums.h:#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
+Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
