@@ -1,6 +1,11 @@
 #ifndef EUCLIDIAN_INCLUDED
 #define EUCLIDIAN_INCLUDED
 
+
+#ifndef DEFAULT_RESET_BEFORE_MUTATE
+#define DEFAULT_RESET_BEFORE_MUTATE   true
+#endif
+
 #define NUM_PATTERNS 17   // 11 triggers + 5 envelopes + 1 midi output
 #define BASS_PATTERN 17
 
@@ -26,19 +31,20 @@ enum mutate_modes : int {
   EUCLIDIAN_MUTATE_MODE_TOTAL = 2,
   EUCLIDIAN_MUTATE_MODE_MAX = 3
 };
+int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 
 int euclidian_seed_modifier = 0;
 int euclidian_seed_modifier_2 = 0;
-bool euclidian_seed_use_phrase = true;
-bool euclidian_reset_before_mutate = false;
 int euclidian_mutate_minimum_pattern = 1; // default 1 so that kick never mutates
 int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
-bool mutate_enabled = false;
-bool mask_enabled = false;
+bool euclidian_seed_use_phrase      = true;
+bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
+
+bool mutate_enabled   = false;
+bool mask_enabled     = false;
 
 bool euclidian_auto_play = true;
-int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 
 typedef struct {
   bool active_status = true;
