@@ -82,7 +82,7 @@
 #define MUSO_CC_CV_3  11
 #define MUSO_CC_CV_4  71
 #define MUSO_CC_CV_5  74
-#define MUSO_USE_PITCH_FOR  MUSO_CC_CV5
+#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 
 #define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 
