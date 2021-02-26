@@ -28,3 +28,4 @@ Bass.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass not
 Drums.h:#define GM_CHANNEL_DRUMS 10
 Drums.h:#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
+MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_OUT 11
