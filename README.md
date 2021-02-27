@@ -54,8 +54,8 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
 | Type         	| MIDI channel | MIDI number   | Purpose |
 | ------------- | ------------ | ------------- | ------- |
 | Notes/CC/etc 	| 2 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
-| Note   	| 11    | any | 'shadow' copy of notes sent to midimuso, starting at 0 so they work with default bitbox pads |
-| Notes 	| 16 	| 60-70 | outputs to MIDI Muso CV-12, gates |
+| Note   	| 11    | 36-51 (C2-D#3) | 'shadow' copy of notes sent to midimuso, starting at 0 so they work with default bitbox pads |
+| Notes 	| 16 	| 60-70 (C4-?) | outputs to MIDI Muso CV-12, gates |
 | CV + pitch 	| 1 	| 1,7,11,71,74+pitch | outputs to MIDI Muso, CV/pitch outputs |
 
 * *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken

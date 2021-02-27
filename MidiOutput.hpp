@@ -1,7 +1,10 @@
 #ifndef MIDIOUTPUT_INCLUDED
 #define MIDIOUTPUT_INCLUDED
 
+#define BITBOX_NOTE_MINIMUM     36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
+#define BITBOX_KEYS_OCTAVE_OFFSET 2
 #define MIDI_CHANNEL_BITBOX_OUT 11
+#define MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
 
 #include "MidiSetup.hpp"
 #include "Envelopes.h"    // for access to envelope info
@@ -9,22 +12,26 @@
 
 // functions for sending MIDI out
 
+static int i = 0;
 void fire_trigger(byte t, byte v, bool internal = false) {
   //Serial.printf("firing trigger pitch=%i, v=%i\r\n", p, v);
   // t = trigger number, p = keyboard note
   byte p = MUSO_NOTE_MINIMUM + t;
+  byte b = BITBOX_NOTE_MINIMUM + t;
   if (
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = v > 0; // TRIGGER_IS_ON;
     MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL);
-    MIDIOUT.sendNoteOn(t, v, MIDI_CHANNEL_BITBOX_OUT);
+    MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    //MIDIOUT.sendNoteOn(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
   } else if (
     //Serial.printf("is an envelope trigger!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
-    MIDIOUT.sendNoteOn(t, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
+    MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
+    //MIDIOUT.sendNoteOn(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);  // also send trigger for the envelopes
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //Serial.printf(">> got BASS trigger!\r\n");
     //if (bass.is_note_held()) // todo: make this so that can still play bass when no DAW present...
@@ -40,17 +47,21 @@ void fire_trigger(byte t, byte v, bool internal = false) {
 
 void douse_trigger(byte t, byte v = 0, bool internal = false) {
   byte p = MUSO_NOTE_MINIMUM + t;
+  byte b = BITBOX_NOTE_MINIMUM + t;
   if (
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
     MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
-    MIDIOUT.sendNoteOff(t, v, MIDI_CHANNEL_BITBOX_OUT);
+    MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
+    //Serial.printf("fired a note OFF to bit box: %i\r\n", i);
   } else if (
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
-    MIDIOUT.sendNoteOff(t, v, MIDI_CHANNEL_BITBOX_OUT);
+    MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    //MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_KEYS);
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     bass_note_off();
   } else {
@@ -82,6 +93,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
 
 void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
+  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output an octave up
   if (midiecho_enabled)
     MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);
@@ -90,6 +102,7 @@ void midi_bass_send_note_on(int pitch, int velocity, int channel) {
 
 void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOff(pitch, velocity, channel);
+  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output an octave up for bitbox keys
   if (midiecho_enabled)
     MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   // todo: move echo back to host stuff into MidiEcho

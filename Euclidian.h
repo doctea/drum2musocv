@@ -6,6 +6,8 @@
 #define DEFAULT_RESET_BEFORE_MUTATE   true
 #endif
 
+#define DEFAULT_DURATION (STEPS_PER_BEAT / STEPS_PER_BEAT)
+
 #define NUM_PATTERNS 17   // 11 triggers + 5 envelopes + 1 midi output
 #define BASS_PATTERN 17
 
@@ -18,6 +20,7 @@
 #define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pattern to automutate
 #define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
 #define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
+#define CC_EUCLIDIAN_FILLS                28
 
 // so need master "mutate enabled"
 //    and then sub-options within that:-
@@ -43,6 +46,7 @@ bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
 
 bool mutate_enabled   = false;
 bool mask_enabled     = false;
+bool euclidian_fills_enabled = true;
 
 bool euclidian_auto_play = true;
 

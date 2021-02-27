@@ -5,6 +5,7 @@ Drums.h:#define MUSO_CC_CV_2  7
 Drums.h:#define MUSO_CC_CV_3  11
 Drums.h:#define MUSO_CC_CV_4  71
 Drums.h:#define MUSO_CC_CV_5  74
+Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
@@ -17,6 +18,7 @@ Euclidian.h:#define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24    // reset sequences t
 Euclidian.h:#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pattern to automutate
 Euclidian.h:#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
 Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
+Euclidian.h:#define CC_EUCLIDIAN_FILLS                28
 MidiEcho.h:#define CC_MIDIECHO_ENABLED   21
 MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks
@@ -29,3 +31,4 @@ Drums.h:#define GM_CHANNEL_DRUMS 10
 Drums.h:#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_OUT 11
+MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave

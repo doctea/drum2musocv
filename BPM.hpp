@@ -16,8 +16,10 @@
 #define STEPS_PER_BAR           (STEPS_PER_BEAT*BEATS_PER_BAR)
 
 #define TICKS_PER_STEP  (PPQN/STEPS_PER_BEAT)
+#define DEFAULT_CLOCK_TICK_RATIO    1      // use this to send standard MIDI clock at 24 PPQN
+//#define DEFAULT_CLOCK_TICK_RATIO  PPQN   // or use this to only send 1 clock tick per beat
 
-byte cc_value_clock_tick_ratio = PPQN;
+byte cc_value_clock_tick_ratio = DEFAULT_CLOCK_TICK_RATIO; 
 
 unsigned long received_ticks = 0;
 unsigned long last_tick_received_at = 0;

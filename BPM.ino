@@ -95,6 +95,11 @@ unsigned int bpm_clock() {
     }
   }
 
+  if (received_ticks==0) {
+    //handleStart();  // if we've reset our clock, send MIDI start
+    MIDIOUT.sendStart();
+  }
+
   if (received_ticks%cc_value_clock_tick_ratio==0) {
     midi_send_clock(received_ticks);
   }

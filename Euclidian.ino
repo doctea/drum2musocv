@@ -4,7 +4,7 @@
 #include "MidiOutput.hpp" // because we need to send MIDI
 #include "BPM.hpp"  // cos we need to know lengths
 
-//#define EUC_DEBUG
+#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1
@@ -16,13 +16,15 @@
 #define EUC_printf(fmt, ...) do { if (EUC_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
-void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = 0, int duration = 0) {
+void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = 0) {
   // fill pattern_t according to parameters
 
   if (steps > 0)    p->steps = steps;
   if (pulses > 0)   p->pulses = pulses;
-  if (rotation > 0) p->rotation = rotation;
+  if (rotation >= 0) p->rotation = rotation;
   if (duration > 0) p->duration = duration;
+
+  EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
 
   int bucket = 0;
   for (int i = 0 ; i < p->steps ; i++) {
@@ -122,30 +124,55 @@ void process_euclidian(int ticks) {
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
 
-  if (is_bpm_on_step) { //0==ticks%TICKS_PER_STEP) {
+  if (is_bpm_on_step) { 
     // TODO: configurable mutation frequency
-    if (mutate_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
-      // TODO: if mutate mode = a seed variation then do this?
+    // start of phrase or middle of phrase
+    if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+
+      // always reset even if not in mutate mode, so that fills work
       if (euclidian_reset_before_mutate) {
         Serial.println("Resetting euclidian before mutation!");
         initialise_euclidian();
       }
-      unsigned long seed = euclidian_seed_modifier;
-      if (euclidian_seed_modifier_2 > 0) seed *= (256 + euclidian_seed_modifier_2 * 2);
-      if (euclidian_seed_use_phrase) seed += current_phrase + 1;
-      if (seed == 0) seed = 1;
-      Serial.printf("Euclidian seed: %i\n", seed);
-      randomSeed(seed);
 
-      for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
-        Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern % NUM_PATTERNS);
+      bool should_mutate = mutate_enabled;
+
+      if (should_mutate) {
+        unsigned long seed = euclidian_seed_modifier;
+        if (euclidian_seed_modifier_2 > 0) seed *= (256 + euclidian_seed_modifier_2 * 2);
+        if (euclidian_seed_use_phrase) seed += current_phrase + 1;
+        if (seed == 0) seed = 1;
+        Serial.printf("Euclidian seed: %i\n", seed);
+        randomSeed(seed);
+  
+        for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
+          Serial.printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern % NUM_PATTERNS);
+          int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern);
+          Serial.printf("chose pattern %i\r\n", ran);
+          randomSeed(seed + ran);
+          if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
+            mutate_euclidian_total(ran);
+          else
+            mutate_euclidian(ran);
+          //debug_patterns();
+        }
+      }
+    }
+
+    // fills on last bar of phrase if enabled
+    if (euclidian_fills_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && ((is_bpm_on_bar && current_bar == (BARS_PER_PHRASE - 1)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+      Serial.printf("FILLING at bar %i!", current_bar);
+      randomSeed(current_phrase);
+      for (int i = 0 ; i < 3 ; i++) {
+        int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, 1 + euclidian_mutate_maximum_pattern);
+        patterns[ran].rotation += 2;
+        make_euclid(&patterns[ran]);
+      }
+      for (int i = 0 ; i < 3 ; i++) {
         int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern);
-        Serial.printf("chose pattern %i\r\n", ran);
-        if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
-          mutate_euclidian_total(ran);
-        else
-          mutate_euclidian(ran);
-        //debug_patterns();
+        patterns[ran].pulses *= 2;
+        if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
+        make_euclid(&patterns[ran]);
       }
     }
 
@@ -202,31 +229,36 @@ void process_euclidian(int ticks) {
 }
 
 void initialise_euclidian() {
+
+  EUC_println("initialise_euclidian():");
+
+  EUC_println("resetting all:-");
   const int LEN = SEQUENCE_LENGTH_STEPS;
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-    make_euclid(&patterns[i], LEN, 0, 1, STEPS_PER_BEAT / STEPS_PER_BEAT); // initialise patterns to default length, zero pulses, default rotation of '1' and default duration of 1 step
+    make_euclid(&patterns[i], LEN, 0, 1, DEFAULT_DURATION); // initialise patterns to default length, zero pulses, default rotation of '1' and default duration of 1 step
+    // if we don't do this then this does a bad job of resetting the patterns
   }
 
   // definition: make_euclid( pattern_t *p,  int steps = 0,  int pulses = 0,   int rotation = 0,   int duration = STEPS_PER_BEAT/4   ) {
 
-  EUC_println("initialise_euclidian():");
+  EUC_println("initialising:-");
   //     length, pulses, rotation, duration
-  make_euclid(&patterns[0],   LEN,    4);       // kick
-  make_euclid(&patterns[1],   LEN,    5, 0);    // stick
-  make_euclid(&patterns[2],   LEN,    2, 5);    // clap
-  make_euclid(&patterns[3],   LEN / 4,  16  );  // snare
-  make_euclid(&patterns[4],   LEN,    3, 3);    // crash 1
-  make_euclid(&patterns[5],   LEN,    7);       // tamb
-  make_euclid(&patterns[6],   LEN,    9);       // hi tom!
-  make_euclid(&patterns[7],   LEN / 4,  2, 3);  // low tom
-  make_euclid(&patterns[8],   LEN / 2,  2, 3);  // pedal hat
-  make_euclid(&patterns[9],   LEN,    4, 3);    // open hat
-  make_euclid(&patterns[10],  LEN,    16);      // closed hat
-  make_euclid(&patterns[11],  LEN*2,    1 , 1,  1);   // crash 2
-  make_euclid(&patterns[12],  LEN*2,    1 , 5,  1);   // splash
-  make_euclid(&patterns[13],  LEN*2,    1, 9,   1);    // vibra
-  make_euclid(&patterns[14],  LEN*2,    1, 13,  1);   // bell
-  make_euclid(&patterns[15],  LEN*2,    5, 13,  1);   // cymbal
+  make_euclid(&patterns[0],   LEN,    4, 1, DEFAULT_DURATION);    // kick
+  make_euclid(&patterns[1],   LEN,    5, 1, DEFAULT_DURATION);    // stick
+  make_euclid(&patterns[2],   LEN,    2, 5, DEFAULT_DURATION);    // clap
+  make_euclid(&patterns[3],   LEN/4,  16,1, DEFAULT_DURATION);   // snare
+  make_euclid(&patterns[4],   LEN,    3, 3, DEFAULT_DURATION);    // crash 1
+  make_euclid(&patterns[5],   LEN,    7, 1, DEFAULT_DURATION);    // tamb
+  make_euclid(&patterns[6],   LEN,    9, 1, DEFAULT_DURATION);    // hi tom!
+  make_euclid(&patterns[7],   LEN/4,  2, 3, DEFAULT_DURATION);    // low tom
+  make_euclid(&patterns[8],   LEN/2,  2, 3, DEFAULT_DURATION);    // pedal hat
+  make_euclid(&patterns[9],   LEN,    4, 3, DEFAULT_DURATION);    // open hat
+  make_euclid(&patterns[10],  LEN,    16, 1, DEFAULT_DURATION);   // closed hat
+  make_euclid(&patterns[11],  LEN*2,  1 , 1,  0);   // crash 2
+  make_euclid(&patterns[12],  LEN*2,  1 , 5,  0);   // splash
+  make_euclid(&patterns[13],  LEN*2,  1, 9,   0);    // vibra
+  make_euclid(&patterns[14],  LEN*2,  1, 13,  0);   // bell
+  make_euclid(&patterns[15],  LEN*2,  5, 13,  0);   // cymbal
   make_euclid(&patterns[16],  LEN,    4, 3, STEPS_PER_BEAT / 2);  // bass (neutron) offbeat
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
@@ -325,6 +357,8 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   } else if (number == CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_mutate_mode = value % EUCLIDIAN_MUTATE_MODE_MAX;
     return true;
+  } else if (number == CC_EUCLIDIAN_FILLS) {
+    euclidian_fills_enabled = value > 0;
   }
   /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);
