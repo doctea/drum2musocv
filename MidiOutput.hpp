@@ -93,7 +93,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
 
 void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
-  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output an octave up
+  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output to separate channel an octave up
   if (midiecho_enabled)
     MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);
