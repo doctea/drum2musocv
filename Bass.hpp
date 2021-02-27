@@ -1,6 +1,9 @@
 #ifndef BASS_INCLUDED
 #define BASS_INCLUDED
 
+#define DEFAULT_AUTO_PROGRESSION_ENABLED  false   // automatically play chords in progression order?
+#define DEFAULT_AUTO_ARP_ENABLED          false   // choose notes to play from the current sequence (eg incrementing through them)?
+
 //#define BASS_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
 #ifdef BASS_DEBUG
@@ -71,8 +74,8 @@ int sequence_number = 0;            // index of the arp sequence that we're curr
 
 // TODO: make these configurable by UI/CC
 bool bass_auto_scale       = false;   // automatically switch scales every phrase
-bool bass_auto_progression = false;   // automatically play chords in progression order
-bool bass_auto_arp         = false;   // choose notes to play from the current sequence (eg incrementing through them)
+bool bass_auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
+bool bass_auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
 int bass_arp_mode          = ARP_MODE_NEXT_ON_NOTE;
 bool bass_only_note_held = true;
 
