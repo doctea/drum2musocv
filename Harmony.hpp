@@ -101,7 +101,7 @@ class Harmony {
       // todo: adjust if arping / progressioning / etc
 
       last_root = pitch;
-      Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
+      //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
       mko_bass.send_note_on(pitch, 127);
     }
     void fire_both () {
