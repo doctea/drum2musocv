@@ -124,8 +124,8 @@ void kill_notes() {
   midi_kill_notes();
 }
 
-void midi_send_clock(unsigned long received_ticks) {
-  static unsigned long last_clock_ticked;
+static unsigned long last_clock_ticked;
+void midi_send_clock(unsigned long received_ticks) {  
   if (received_ticks != last_clock_ticked)
     MIDIOUT.sendClock();
   last_clock_ticked = received_ticks;

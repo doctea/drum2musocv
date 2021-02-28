@@ -46,28 +46,30 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
 | Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
 | Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
 | CC          | 10           | 32 to 48       | Enable/disable Euclidian track |
-| Note+CC etc | 8            | any            | Resend on channel 2 (bass synth) |
-| Note        | 9            | any            | Euclidian track arpeggiates held chord on chan 2 (bass synth) |
+| Note+CC etc | 8            | any            | Bass synth - Resend on channel 2 |
+| Note        | 9            | any            | Bass synth - Euclidian track arpeggiates held chord on chan 2+3 (see below) |
 
 ## MIDI Outputs
 
 | Type         	| MIDI channel | MIDI number   | Purpose |
 | ------------- | ------------ | ------------- | ------- |
 | Notes/CC/etc 	| 2 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
-| Note   	| 11    | 36-51 (C2-D#3) | 'shadow' copy of notes sent to midimuso, starting at 0 so they work with default bitbox pads |
+| Notes/CC/etc  | 3     | any | Output bass notes 2 octaves higher, for playing melodies / pads | 
+| Notes   	| 11    | 36-51 (C2-D#3) | 'shadow' copy of notes sent to midimuso, starting at C2 so they work with default bitbox pads |
 | Notes 	| 16 	| 60-70 (C4-?) | outputs to MIDI Muso CV-12, gates |
 | CV + pitch 	| 1 	| 1,7,11,71,74+pitch | outputs to MIDI Muso, CV/pitch outputs |
 
-* *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken
+* *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken - configure with MUSO_USE_PITCH_FOR in Drums.h 
 
 # Requirements
 
  - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
  - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
- - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
+ - DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
 
+# TODO / future plans + ideas
 
-# TODO
+ - Replace DebounceEvent library with one that doesn't need patching
 
  - Make CC config options to able to enable/disable so the CV outputs can be used as CCs, envelopes or LFOs per-project
 
@@ -79,7 +81,7 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
 
  - TODO: find out whether my output on '74'/Ride Cymbal 1 is broken due to code, panel mislabelling, or a problem with my midimuso-cv
 
- - Add more physical buttons to provide greater control over modes / 
+ - Add more physical buttons to provide greater control over modes  
 
  - Make a KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
  
@@ -89,8 +91,6 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
  
  - Replace DebounceEvent library with one that doesn't need patching
 
-## Future plans / ideas
- 
  - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
 
  - Latency/flam/swing on euclidian tracks.  Adjust the euclidian loop to check a copy of received_ticks that is adjusted by the appropriate latency
@@ -106,7 +106,11 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
 
  - Shadow triggers with MIDI to trigger Bitbox.  output options - global/per track - muso/bitbox/both.  always/random/alternate/pattern (+euclidian)?  add this to fire_trigger & douse_trigger?
 	- more broadly this is turning into a need to have more of a structure for outputs, for sending to host/midi over multiple channels and can be turned on and off easily
-	- done: basic shadow triggers on the default bitbox pad trigger notes, sending on channel 11
+	- done: basic shadow of triggers+envelopes on the default bitbox pad trigger notes, sending on channel 11
+	- Allow to configure the octave-shifted melody/pad outputs on Channel 3:
+		- configuration of octave shift
+		- option to arpeggiate on None / Channel 2 / Channel 3 / Both
+		- option to play full-chord / arp / root-only on Channel 3
 
  - set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits.
 	- turn one into a bar-synced LFO

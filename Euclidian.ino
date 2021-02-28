@@ -4,7 +4,7 @@
 #include "MidiOutput.hpp" // because we need to send MIDI
 #include "BPM.hpp"  // cos we need to know lengths
 
-#define EUC_DEBUG
+//#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
 #define EUC_DEBUG 1
