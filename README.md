@@ -31,6 +31,8 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
 
 # Routing of features
 
+A diagram to help me understand how everything is routed:-
+
 ![Routing diagram](drum2musocv_routing_diagram.svg)
 
 
