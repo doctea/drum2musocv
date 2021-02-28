@@ -1,3 +1,12 @@
+/*
+  scale chord number to octave table 
+  -14,-13,-12,-11,-10,-9, -8 = octave -2
+  -7, -6, -5, -4, -3, -2, -1 = octave -1
+  0,   1,  2,  3,  4,  5,  6 = octave 0
+  7,   8,  9, 10, 11, 12, 13 = octave +1
+  14, 15, 16, 17, 18, 19, 20 = octave +2
+*/
+
 #ifndef BASS_INCLUDED
 #define BASS_INCLUDED
 
@@ -38,7 +47,8 @@
 void midi_bass_send_note_on(int pitch, int velocity, int channel = MIDI_CHANNEL_BASS_OUT);
 void midi_bass_send_note_off(int pitch, int velocity = 0, int channel = MIDI_CHANNEL_BASS_OUT);
 
-ChannelState bass = ChannelState();   // tracking notes that are held
+ChannelState autobass_input = ChannelState();   // tracking notes that are held
+//Serial.printf("\r\n>>>>>>>>>> autobass_input address is %i\r\n", &autobass_input); 
 
 // stuff for handling scales, for automatic bassline/arp generation
 
@@ -79,14 +89,6 @@ bool bass_auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play
 int bass_arp_mode          = ARP_MODE_NEXT_ON_NOTE;
 bool bass_only_note_held = true;
 
-/*
-  scale chord number to octave table 
-  -14,-13,-12,-11,-10,-9, -8 = octave -2
-  -7, -6, -5, -4, -3, -2, -1 = octave -1
-  0,   1,  2,  3,  4,  5,  6 = octave 0
-  7,   8,  9, 10, 11, 12, 13 = octave +1
-  14, 15, 16, 17, 18, 19, 20 = octave +2
-*/
 
 void debug_bass_scales() {
   // TODO: make this use the actual functions instead of these tests
@@ -185,19 +187,19 @@ int bass_get_sequence_note(int position = 0) {
 
 int bass_get_sequence_pitch(int position = 0) {
   //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
-  if (bass.is_note_held()) {
+  if (autobass_input.is_note_held()) {
     // bass is autoplaying, so ask it for what note it recommends for this position
-    return bass.get_sequence_held_note(position);
+    return autobass_input.get_sequence_held_note(position);
   }
   // else base it on the root note and the sequence's position
-  return bass.get_root_note() + bass_get_sequence_note(position);
+  return autobass_input.get_root_note() + bass_get_sequence_note(position);
 }
 
 void bass_reset_sequence() {
   bass_counter = 0;
 }
 
-
+/*
 // start note for bass 
 void bass_note_on (int v = 127) {
   int pitch_offset = bass_get_sequence_pitch(bass_counter); // current_beat); // todo: configurable options to change based on bass_counter or to keep synced to the current_beat number
@@ -213,7 +215,7 @@ void bass_note_on (int v = 127) {
 
 // start note and increment position counter
 void bass_note_on_and_next(int v = 127) {
-  if (!bpm_internal_mode && bass_only_note_held && !bass.is_note_held())
+  if (!bpm_internal_mode && bass_only_note_held && !autobass_input.is_note_held())
     return;
   
   bass_note_on(v);
@@ -228,14 +230,14 @@ void bass_note_on_and_next(int v = 127) {
 
 void bass_note_off() {
   //BASS_printf("bass_note_off: bass pitch offset is %i\r\n", bass_currently_playing);
-  if (!bass_currently_playing && (!bpm_internal_mode && bass_only_note_held && !bass.is_note_held()))
+  if (!bass_currently_playing && (!bpm_internal_mode && bass_only_note_held && !autobass_input.is_note_held()))
     return;
 
   if (bass_currently_playing >= 0)
     midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
 
   bass_currently_playing = -1;
-}
+}*/
 
 void bass_set_arp_mode(int mode) {
   bass_arp_mode = mode % ARP_MODE_MAX;

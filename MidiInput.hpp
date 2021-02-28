@@ -25,7 +25,7 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 #include "Euclidian.h"
 #include "UI.h"
 
-//#include "Bass.hpp"
+//#include "autobass_input.hpp"
 
 // MIDI MESSAGE CALLBACKS
 
@@ -165,11 +165,15 @@ void process_midi() {
       );
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_AUTO_IN) {
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
-        bass.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        //Serial.println(autobass_input.get_debug_notes_held());
+
+        Serial.printf("\r\n>>>>>>>>>> channel_state address is %i\r\n", &autobass_input);
+
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
-        bass.handle_note_off(MIDIIN.getData1());
-        if (!bass.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note
-          bass_note_off();
+        autobass_input.handle_note_off(MIDIIN.getData1());
+        if (!autobass_input.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note
+          harmony.douse_both(); //bass_note_off();
         }
       }
     }

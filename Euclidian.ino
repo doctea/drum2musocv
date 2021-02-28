@@ -218,8 +218,8 @@ void process_euclidian(int ticks) {
       EUC_printf(" (first beat of phrase!)");
     }
 
-    if (bass.is_note_held()) {
-      EUC_printf(" [%s]", bass.get_debug_notes_held());
+    if (autobass_input.is_note_held()) {
+      EUC_printf(" [%s]", autobass_input.get_debug_notes_held());
     }
 
     EUC_println("");

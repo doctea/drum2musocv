@@ -4,7 +4,7 @@
 //#include <Arduino.h>
 #include "MidiSetup.hpp"
 #include "MidiEcho.h"
-
+ 
 class ChannelState {
 
 private:
@@ -16,6 +16,7 @@ private:
 
     // track pitches internally
     void push_note (byte pitch) {
+      Serial.printf("channelstate push_note(%i)\r\n", pitch);
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==-1) { // free slot so add this new pitch
           held_notes[i] = pitch;
@@ -28,6 +29,7 @@ private:
     }
     
     void pop_note(byte pitch) {
+      Serial.printf("channelstate pop_note(%i)\r\n", pitch);
       bool found = false;
       bool found_held = false;
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
@@ -70,6 +72,7 @@ private:
   public:  
 
     int get_root_note() {
+      Serial.println(debug_string);
       if (held_notes[0]!=-1) {
         return held_notes[0];
       } else {

@@ -8,7 +8,7 @@
 
 #include "MidiSetup.hpp"
 #include "Envelopes.h"    // for access to envelope info
-#include "Bass.hpp"       // for access to the bass channel info
+#include "Harmony.hpp"       // for access to the harmony channel info
 
 // functions for sending MIDI out
 
@@ -34,8 +34,8 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     //MIDIOUT.sendNoteOn(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);  // also send trigger for the envelopes
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //Serial.printf(">> got BASS trigger!\r\n");
-    //if (bass.is_note_held()) // todo: make this so that can still play bass when no DAW present...
-    bass_note_on_and_next();
+    //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
+    harmony.fire_both(); //bass_note_on_and_next();
     //else
     //  Serial.println("No note held? is_note_held is false");
   } else {
@@ -63,7 +63,7 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
     MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_KEYS);
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    bass_note_off();
+    harmony.douse_both(); //bass_note_off();
   } else {
     Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
@@ -91,6 +91,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
   }
 }
 
+/*
 void midi_bass_send_note_on(int pitch, int velocity, int channel) {
   MIDIOUT.sendNoteOn(pitch, velocity, channel);
   MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output to separate channel an octave up
@@ -106,7 +107,7 @@ void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   if (midiecho_enabled)
     MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
   // todo: move echo back to host stuff into MidiEcho
-}
+}*/
 
 void midi_kill_notes() {
   MIDIOUT.sendControlChange (123, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
