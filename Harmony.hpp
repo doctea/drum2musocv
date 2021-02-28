@@ -56,16 +56,16 @@ class MidiKeysOutput {
 class Harmony {
 
   private:
-    ChannelState channel_state;
     int last_root = -1;
-    MidiKeysOutput mko_bass;
-    MidiKeysOutput mko_keys;
+    int last_melody_root = -1;
+    ChannelState&   channel_state;
+    MidiKeysOutput& mko_bass;
+    MidiKeysOutput& mko_keys;
 
   public:  
-    Harmony(ChannelState channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_): mko_bass(mko_bass_), mko_keys(mko_keys_)
+    Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_)
     { // todo: pass in config settings
       channel_state = channel_state_;
-      //Serial.printf("\r\n>>>>>>>>>> in constructor, channel_state address is %i\r\n", channel_state_);
       mko_bass = mko_bass_;
       mko_keys = mko_keys_;
     }
@@ -73,24 +73,26 @@ class Harmony {
     void fire_melody () {
       // send notes to melody appropriate for current status
       //  to include options for playing root, full chords or arpeggiation
+
+      if (bass_only_note_held && !channel_state.is_note_held()) {
+        return;
+      }
+      
       int pitch = MIDI_BASS_ROOT_PITCH;
+      pitch = channel_state.get_root_note();
+
+      last_melody_root = pitch;
       
       mko_keys.send_note_on(pitch);
     }
     void fire_bass () {
       // send notes to bass appropriate for current status
-      //  to include optional arpeggiation
-
-      // check if we should only play when there is input on input
-
-      // get the next pitch that we want to play
-
+      
       if (bass_only_note_held && !channel_state.is_note_held()) {
         return;
       }
 
       int pitch = MIDI_BASS_ROOT_PITCH;       // TODO: adjust pitch if required by the mode
-      Serial.printf("\r\n>>>>>>>>>> channel_state address is %i\r\n", &channel_state);
       pitch = channel_state.get_root_note();
       Serial.printf("harmony.fire_bass() told to fire pitch %i?\r\n", pitch);
       /*if (channel_state.is_note_held()) {
@@ -99,6 +101,7 @@ class Harmony {
       // todo: adjust if arping / progressioning / etc
 
       last_root = pitch;
+      Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
       mko_bass.send_note_on(pitch, 127);
     }
     void fire_both () {
@@ -107,14 +110,16 @@ class Harmony {
     }
     void douse_melody () {
       // send notes to douse playing melody
-      int pitch = last_root;
+      int pitch = last_melody_root;
       mko_keys.send_note_off(pitch);
+      last_melody_root = -1;
     }
     void douse_bass () {
       // send notes to douse bass
       //bass_note_off();
       int pitch = last_root;
       mko_bass.send_note_off(pitch);
+      last_root = -1;
     }
     void douse_both () {
       douse_bass();

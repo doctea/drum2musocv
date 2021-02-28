@@ -4,7 +4,9 @@
 //#include <Arduino.h>
 #include "MidiSetup.hpp"
 #include "MidiEcho.h"
- 
+
+static int channelcount = 0;
+
 class ChannelState {
 
 private:
@@ -70,10 +72,16 @@ private:
 
   
   public:  
+    int chanindex;
+    ChannelState() {
+      chanindex = channelcount;
+      //Serial.printf("ChannelState() constructed chanindex %i\r\n", chanindex);
+      channelcount++;
+    }
 
     int get_root_note() {
-      Serial.println(debug_string);
-      if (held_notes[0]!=-1) {
+      //Serial.printf("in get_root_note in ChannelState number #%i got: %s\r\n", chanindex, debug_string);
+      if (is_note_held()) {
         return held_notes[0];
       } else {
         return MIDI_BASS_ROOT_PITCH;

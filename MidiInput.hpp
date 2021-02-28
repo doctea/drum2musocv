@@ -167,9 +167,10 @@ void process_midi() {
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         //Serial.println(autobass_input.get_debug_notes_held());
-
-        Serial.printf("\r\n>>>>>>>>>> channel_state address is %i\r\n", &autobass_input);
-
+        /*Serial.printf("\r\n>>>>> in process_midi, channel_state number is #%i, address is %i", autobass_input.chanindex, &autobass_input);
+        Serial.printf(", notes: %s\r\n", autobass_input.get_debug_notes_held());
+        if (autobass_input.is_note_held())
+          Serial.printf(">>> in process_midi, a note is held !\r\n");*/
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         autobass_input.handle_note_off(MIDIIN.getData1());
         if (!autobass_input.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note

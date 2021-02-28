@@ -48,7 +48,6 @@ void midi_bass_send_note_on(int pitch, int velocity, int channel = MIDI_CHANNEL_
 void midi_bass_send_note_off(int pitch, int velocity = 0, int channel = MIDI_CHANNEL_BASS_OUT);
 
 ChannelState autobass_input = ChannelState();   // tracking notes that are held
-//Serial.printf("\r\n>>>>>>>>>> autobass_input address is %i\r\n", &autobass_input); 
 
 // stuff for handling scales, for automatic bassline/arp generation
 
