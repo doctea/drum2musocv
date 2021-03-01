@@ -69,7 +69,7 @@ private:
         debug_string[strlen(debug_string)-1] = '\0';
       return (char *)debug_string;
     }
-
+  
   
   public:  
     int chanindex;

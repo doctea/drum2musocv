@@ -104,10 +104,17 @@ class Harmony {
       int pitch = MIDI_BASS_ROOT_PITCH;
       pitch = channel_state.get_root_note();
 
-      //mko_keys.send_note_on(pitch, 127);    // send a single pitch
+      // get the current chord number
+      if (!channel_state.is_note_held()) {
+        pitch = channel_state.get_root_note() + bass_get_scale_note();
+      }
+    
       last_melody_root = pitch;   
 
-      mko_keys.send_note_on(channel_state.get_held_notes(), 127);  // send all held notes
+      if (channel_state.is_note_held())
+        mko_keys.send_note_on(channel_state.get_held_notes(), 127);  // send all held notes
+      else
+        mko_keys.send_note_on(pitch, 127);    // send a single pitch  
     }
     
     void douse_melody () {
@@ -128,8 +135,14 @@ class Harmony {
 
       int pitch = MIDI_BASS_ROOT_PITCH;       // TODO: adjust pitch if required by the mode
       pitch = channel_state.get_root_note();
-      Serial.printf("harmony.fire_bass() told to fire pitch %i?\r\n", pitch);
+
       // todo: adjust if arping / progressioning / etc
+
+      // get the current chord number
+      if (!channel_state.is_note_held()) {
+        pitch = channel_state.get_root_note() + bass_get_scale_note();
+      }
+      Serial.printf("harmony.fire_bass() told to fire pitch %i?\r\n", pitch);
 
       last_root = pitch;
       //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);

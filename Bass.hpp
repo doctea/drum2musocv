@@ -10,7 +10,7 @@
 #ifndef BASS_INCLUDED
 #define BASS_INCLUDED
 
-#define DEFAULT_AUTO_PROGRESSION_ENABLED  false   // automatically play chords in progression order?
+#define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_AUTO_ARP_ENABLED          false   // choose notes to play from the current sequence (eg incrementing through them)?
 
 //#define BASS_DEBUG
@@ -184,6 +184,7 @@ int bass_get_sequence_note(int position = 0) {
   );
 }
 
+/*
 int bass_get_sequence_pitch(int position = 0) {
   //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
   if (autobass_input.is_note_held()) {
@@ -193,7 +194,7 @@ int bass_get_sequence_pitch(int position = 0) {
   // else base it on the root note and the sequence's position
   return autobass_input.get_root_note() + bass_get_sequence_note(position);
 }
-
+*/
 void bass_reset_sequence() {
   bass_counter = 0;
 }
