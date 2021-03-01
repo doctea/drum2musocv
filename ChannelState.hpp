@@ -118,6 +118,10 @@ private:
       //debug_notes_held();
       build_notes_held_string();
     }
+
+    int *get_held_notes() {
+      return held_notes;
+    }
     
     int get_sequence_held_note(int position) {
       return held_notes[position % held_notes_count];

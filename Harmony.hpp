@@ -4,6 +4,7 @@
 #include "bass.hpp"       // for access to the bass channel info  -- to be deprecated ? 
 
 // for providing multiple MIDI key outputs ie bass and harmony
+//  todo: properly handle multiple notes being on at the same time for tracking chords
 class MidiKeysOutput {
   public:
     MidiKeysOutput(int chan, int octave_off = 0) {
@@ -11,9 +12,31 @@ class MidiKeysOutput {
       octave_offset = octave_off;
     }
 
+    // send_note_on/off multiplexors
+    // todo: make this handle velocity per note
+    void send_note_on(int pitch[10], int velocity = 127) { //velocity[10] = { 127, 127, 127, 127, 127, 127, 127, 127, 127, 127 }) {
+      //Serial.printf("send_note_on!\r\n");
+      for (int i = 0 ; i < 10 ; i++) {
+        if (pitch[i]>=0) {
+          //Serial.printf("send_note_on %i with list sending %i\r\n", i, pitch[i]);
+          send_note_on(pitch[i], velocity); //velocity[i]);
+        }
+      }
+    }
+
+    void send_note_off(int pitch[10], int velocity = 0) {
+      for (int i = 0 ; i < 10 ; i++) {
+        if (pitch[i]>=0) {
+          //Serial.printf("send_note_off %i with list sending %i\r\n", i, pitch[i]);
+          send_note_off(pitch[i], velocity); //velocity[i]);
+        }
+      }
+    }
+
+    // actually send note on/off midi for one specified pitch
     void send_note_on(int pitch, int velocity = 127) {
       if (currently_playing>=0) {
-        Serial.printf("Harmony WARNING: asked to play note %i on channel %i, but already playing note %i!\r\n", pitch, channel, currently_playing);
+        Serial.printf("Harmony #i WARNING: asked to play note %i, but already playing %i!\r\n", channel, pitch, currently_playing);
       }
       // from midi_send_note_on(bass_currently_playing, velocity);
       pitch += (12*octave_offset);
@@ -23,7 +46,7 @@ class MidiKeysOutput {
       if (midiecho_enabled)
         MIDIIN.sendNoteOn(pitch, velocity, channel);  // echo back to host
     }
-
+ 
     void send_note_off(int pitch, int velocity = 0) {
       //BASS_printf("bass_note_off: bass pitch offset is %i\r\n", bass_currently_playing);
       // from bass_note_off()
@@ -81,10 +104,21 @@ class Harmony {
       int pitch = MIDI_BASS_ROOT_PITCH;
       pitch = channel_state.get_root_note();
 
-      last_melody_root = pitch;
-      
-      mko_keys.send_note_on(pitch);
+      //mko_keys.send_note_on(pitch, 127);    // send a single pitch
+      last_melody_root = pitch;   
+
+      mko_keys.send_note_on(channel_state.get_held_notes(), 127);  // send all held notes
     }
+    
+    void douse_melody () {
+      // send notes to douse playing melody
+      int pitch = last_melody_root;
+      //mko_keys.send_note_off(pitch);
+      mko_keys.send_note_off(channel_state.get_held_notes(), 127);
+      last_melody_root = -1;
+    }
+
+    
     void fire_bass () {
       // send notes to bass appropriate for current status
       
@@ -95,25 +129,13 @@ class Harmony {
       int pitch = MIDI_BASS_ROOT_PITCH;       // TODO: adjust pitch if required by the mode
       pitch = channel_state.get_root_note();
       Serial.printf("harmony.fire_bass() told to fire pitch %i?\r\n", pitch);
-      /*if (channel_state.is_note_held()) {
-        pitch = channel_state.
-      }*/
       // todo: adjust if arping / progressioning / etc
 
       last_root = pitch;
       //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
       mko_bass.send_note_on(pitch, 127);
     }
-    void fire_both () {
-      fire_bass();
-      fire_melody();
-    }
-    void douse_melody () {
-      // send notes to douse playing melody
-      int pitch = last_melody_root;
-      mko_keys.send_note_off(pitch);
-      last_melody_root = -1;
-    }
+
     void douse_bass () {
       // send notes to douse bass
       //bass_note_off();
@@ -121,12 +143,16 @@ class Harmony {
       mko_bass.send_note_off(pitch);
       last_root = -1;
     }
+
+    // todo: checking/configure which should fire
+    void fire_both () {
+      fire_bass();
+      fire_melody();
+    }
     void douse_both () {
       douse_bass();
       douse_melody();
     }
-
-
 };
 
 
