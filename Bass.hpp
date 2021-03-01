@@ -11,7 +11,7 @@
 #define BASS_INCLUDED
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
-#define DEFAULT_AUTO_ARP_ENABLED          false   // choose notes to play from the current sequence (eg incrementing through them)?
+#define DEFAULT_AUTO_ARP_ENABLED          true   // choose notes to play from the current sequence (eg incrementing through them)?
 
 //#define BASS_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
@@ -145,6 +145,7 @@ int get_sequence_number() {
 }
 
 // get the root note for the scale chord -- can go negative/higher than 6 to access other octaves
+// part of harmony
 int bass_get_scale_note(int scale_degree = 0) {
   // todo: move this elsewhere to make this changeable..
   //int scale_number = 0;
@@ -175,6 +176,7 @@ int bass_get_scale_note(int scale_degree = 0) {
 }
 
 // get the note to play based on the position in the arp sequence
+// part of harmony generation
 int bass_get_sequence_note(int position = 0) {
   if (position % BASS_SEQUENCE_LENGTH == 0) BASS_printf("----- at bass arp sequence start (position %i)\r\n", position);
   int sequence_number = get_sequence_number();
@@ -184,7 +186,7 @@ int bass_get_sequence_note(int position = 0) {
   );
 }
 
-/*
+// uses channelstate, but is actually part of harmony generation
 int bass_get_sequence_pitch(int position = 0) {
   //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
   if (autobass_input.is_note_held()) {
@@ -194,7 +196,8 @@ int bass_get_sequence_pitch(int position = 0) {
   // else base it on the root note and the sequence's position
   return autobass_input.get_root_note() + bass_get_sequence_note(position);
 }
-*/
+
+
 void bass_reset_sequence() {
   bass_counter = 0;
 }

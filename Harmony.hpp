@@ -36,7 +36,7 @@ class MidiKeysOutput {
     // actually send note on/off midi for one specified pitch
     void send_note_on(int pitch, int velocity = 127) {
       if (currently_playing>=0) {
-        Serial.printf("Harmony #i WARNING: asked to play note %i, but already playing %i!\r\n", channel, pitch, currently_playing);
+        Serial.printf("Harmony #%i WARNING: asked to play note %i, but already playing %i!\r\n", channel, pitch, currently_playing);
       }
       // from midi_send_note_on(bass_currently_playing, velocity);
       pitch += (12*octave_offset);
@@ -67,6 +67,7 @@ class MidiKeysOutput {
     void send_all_notes_off() {
       MIDIOUT.sendControlChange (123, 0, channel);   // 123 = kill all notes
     }
+
     
   private:
     int channel = 0;
@@ -106,7 +107,8 @@ class Harmony {
 
       // get the current chord number
       if (!channel_state.is_note_held()) {
-        pitch = channel_state.get_root_note() + bass_get_scale_note();
+        //pitch = channel_state.get_root_note() + bass_get_scale_note();
+        pitch = bass_get_sequence_pitch(bass_counter);
       }
     
       last_melody_root = pitch;   
@@ -141,12 +143,15 @@ class Harmony {
       // get the current chord number
       if (!channel_state.is_note_held()) {
         pitch = channel_state.get_root_note() + bass_get_scale_note();
+        //pitch = bass_get_sequence_pitch(bass_counter);
       }
       Serial.printf("harmony.fire_bass() told to fire pitch %i?\r\n", pitch);
 
       last_root = pitch;
       //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
       mko_bass.send_note_on(pitch, 127);
+
+      bass_counter++;
     }
 
     void douse_bass () {
