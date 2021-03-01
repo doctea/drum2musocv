@@ -12,6 +12,7 @@
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_AUTO_ARP_ENABLED          true   // choose notes to play from the current sequence (eg incrementing through them)?
+#define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
 
 //#define BASS_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
@@ -85,8 +86,8 @@ int sequence_number = 0;            // index of the arp sequence that we're curr
 bool bass_auto_scale       = false;   // automatically switch scales every phrase
 bool bass_auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
 bool bass_auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
-int bass_arp_mode          = ARP_MODE_NEXT_ON_NOTE;
-bool bass_only_note_held = true;
+int  bass_arp_mode         = ARP_MODE_NEXT_ON_NOTE;
+bool bass_only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
 
 
 void debug_bass_scales() {
@@ -244,10 +245,12 @@ void bass_note_off() {
 
 void bass_set_arp_mode(int mode) {
   bass_arp_mode = mode % ARP_MODE_MAX;
+  // todo: kill notes that otherwise won't end when this mode changes
 }
 
 void bass_set_only_note_held(int value) {
   bass_only_note_held = value; //= mode % ARP_MODE_MAX;
+  // todo: kill notes that otherwise won't end when this mode changes
 }
 
 bool handle_bass_ccs(byte channel, byte number, byte value) {
@@ -258,6 +261,7 @@ bool handle_bass_ccs(byte channel, byte number, byte value) {
     return true;
   } else if (number==CC_BASS_ONLY_NOTE_HELD) {
     bass_set_only_note_held(value>0);
+    return true;
   }
   return false;
 }

@@ -138,6 +138,9 @@ void process_euclidian(int ticks) {
       bool should_mutate = mutate_enabled;
 
       if (should_mutate) {
+
+        harmony.randomise();
+        
         unsigned long seed = euclidian_seed_modifier;
         if (euclidian_seed_modifier_2 > 0) seed *= (256 + euclidian_seed_modifier_2 * 2);
         if (euclidian_seed_use_phrase) seed += current_phrase + 1;

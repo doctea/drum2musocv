@@ -66,6 +66,8 @@ class MidiKeysOutput {
 
     void send_all_notes_off() {
       MIDIOUT.sendControlChange (123, 0, channel);   // 123 = kill all notes
+      if (midiecho_enabled)
+        MIDIIN.sendControlChange (123, 0, channel);   // 123 = kill all notes - for midiecho back to host
     }
 
     
@@ -94,6 +96,7 @@ class Harmony {
       mko_keys = mko_keys_;
     }
 
+    // MELODY
     void fire_melody () {
       // send notes to melody appropriate for current status
       //  to include options for playing root, full chords or arpeggiation
@@ -113,10 +116,13 @@ class Harmony {
     
       last_melody_root = pitch;   
 
-      if (channel_state.is_note_held())
+      if (channel_state.is_note_held()) {
         mko_keys.send_note_on(channel_state.get_held_notes(), 127);  // send all held notes
-      else
-        mko_keys.send_note_on(pitch, 127);    // send a single pitch  
+      } else {
+        //mko_keys.send_note_on(pitch, 127);    // send a single pitch  
+        int pitches[10] = { pitch, pitch + bass_scale_offset[scale_number][2], pitch + bass_scale_offset[scale_number][4], -1, -1, -1, -1, -1, -1, -1 };  // send a triad based on the root
+        mko_keys.send_note_on(pitches, 127);
+      }
     }
     
     void douse_melody () {
@@ -127,7 +133,7 @@ class Harmony {
       last_melody_root = -1;
     }
 
-    
+    // BASS
     void fire_bass () {
       // send notes to bass appropriate for current status
       
@@ -170,6 +176,23 @@ class Harmony {
     void douse_both () {
       douse_bass();
       douse_melody();
+    }
+
+    void kill_notes() {
+        mko_bass.send_all_notes_off();
+        mko_keys.send_all_notes_off();
+    }
+
+    void randomise() {
+      for (int i = 0 ; i < 4 ; i++) {
+        if (random(10)<2)
+          chord_progression[i] = random(0,8);
+          
+        for (int x = 0 ; x < 4 ; x++) {
+          if (random(10)<5)
+            bass_sequence[i][x] = random(0,8);
+        }
+      }
     }
 };
 
