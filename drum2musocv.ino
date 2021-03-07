@@ -77,6 +77,11 @@ void setup() {
 
   initialise_pitch_for_triggers();
 
+  pinMode(S0, OUTPUT);
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  pinMode(S3, OUTPUT);
+
 #ifdef ENABLE_EEPROM
   initialise_eeprom();
 #endif

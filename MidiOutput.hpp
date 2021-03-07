@@ -124,11 +124,91 @@ void kill_notes() {
   midi_kill_notes();
 }
 
+#define S0  2
+#define S1  3
+#define S2  4
+#define S3  5
+
+void clock_1 (bool on) {
+  if (on) {
+    Serial.println("clock 11111111 on");
+    // low high low high = 0101 = 10d
+    // low high high low = 0110 = 6d
+    // low low high high = 0011 = 3d
+    // high high low low = 1100 = 12
+    digitalWrite(S0, HIGH);
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, LOW);
+    digitalWrite(S3, LOW);
+  } else {
+    digitalWrite(S0, LOW);
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, LOW);
+    digitalWrite(S3, LOW);
+  }
+}
+void clock_2 (bool on) {
+  if (on) {
+    Serial.println("clock 22222222 on");
+    // low high low low = reversed = 0010 = 2d
+    digitalWrite(S0, LOW);
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, LOW);
+    digitalWrite(S3, LOW);
+    //clock_1 (on);
+  } else {
+    digitalWrite(S0, LOW);
+    digitalWrite(S1, LOW);
+    digitalWrite(S2, LOW);
+    digitalWrite(S3, LOW);
+  }
+}
+
 static unsigned long last_clock_ticked;
+static unsigned long last_beat_clock_ticked;
+
+
+#define CLOCK_LOOP_COUNT 10
+static int should_send_clock_1 = 0; //= false;
+static int should_send_clock_2 = 0; //false;
+
 void midi_send_clock(unsigned long received_ticks) {  
-  if (received_ticks != last_clock_ticked)
+  //Serial.println("midi_send_clock()");
+
+
+  //last_clock_ticked = received_ticks;
+  if (received_ticks!=last_beat_clock_ticked && !should_send_clock_2 && is_bpm_on_beat && current_beat % 2 == 0) {
+    //clock_2 (true); //clock_2 (true); clock_1 (true); clock_1 (true); clock_2 (true); clock_2 (true); clock_1 (true); clock_1 (true); clock_2 (true); clock_2 (true); 
+    //clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true);
+    //clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true);
+    last_beat_clock_ticked = received_ticks;
+    should_send_clock_2 = CLOCK_LOOP_COUNT;
+  }
+  if (received_ticks!=last_beat_clock_ticked && is_bpm_on_beat && !should_send_clock_1) {
+    //clock_1 (true);
+    last_beat_clock_ticked = received_ticks;
+    should_send_clock_1 = CLOCK_LOOP_COUNT;
+  }
+
+  if (received_ticks != last_clock_ticked) {
     MIDIOUT.sendClock();
-  last_clock_ticked = received_ticks;
+    last_clock_ticked = received_ticks;
+  } 
+  
+  if (should_send_clock_1>0) {
+    clock_1 (true);
+    should_send_clock_1--;// = false;
+  } else if (should_send_clock_2>0) {
+    clock_2 (true);
+    should_send_clock_2--;// = false;
+  }
+
+  /*if (received_ticks > last_beat_clock_ticked + 5) {
+    Serial.println("clock off");*/
+  if (!should_send_clock_1 && !should_send_clock_2) {
+    clock_1 (false); clock_2 (false);
+  }
+  
 }
 
 #endif
