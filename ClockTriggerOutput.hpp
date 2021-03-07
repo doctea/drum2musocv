@@ -89,11 +89,11 @@ void process_clock_triggers(unsigned long received_ticks) {
       if (should_send_clock[i]==CLOCK_LOOP_COUNT)   // only set arduino pins on first signal to trigger this output
         clock_output (i, true);
       should_send_clock[i] -= millis() - last_beat_clock_millis;  // decrement time left by delta
-      last_beat_clock_millis = millis();
       if (should_send_clock[i]<0) should_send_clock[i] = 0;
       break;                                        // only one clock at a time, process in order 0..3
     }
   }
+  last_beat_clock_millis = millis();
 
   // turn off outputs when they're all done
   //if (received_ticks > last_clock_trigger_ticked + 15) {
