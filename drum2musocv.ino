@@ -32,7 +32,6 @@
 
 #include "Euclidian.h"
 
-
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
 #endif
