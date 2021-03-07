@@ -124,70 +124,79 @@ void kill_notes() {
   midi_kill_notes();
 }
 
-#define S0  2
-#define S1  3
-#define S2  4
-#define S3  5
+/// clock stuff (hacky via CD74HC4067 multiplexor output module https://www.amazon.co.uk/dp/B07VF14YNG/ref=pe_3187911_185740111_TE_item)
 
-void clock_1 (bool on) {
-  if (on) {
-    Serial.println("clock 11111111 on");
-    // low high low high = 0101 = 10d
-    // low high high low = 0110 = 6d
-    // low low high high = 0011 = 3d
-    // high high low low = 1100 = 12
-    digitalWrite(S0, HIGH);
-    digitalWrite(S1, HIGH);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
-  } else {
-    digitalWrite(S0, LOW);
-    digitalWrite(S1, LOW);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
+#define CLOCK_OUT_START_PIN 2
+#define CLOCK_BEAT      0
+#define CLOCK_BEAT_ALT  1
+#define CLOCK_BAR       2
+#define CLOCK_PHRASE    3
+#define CLOCK_COUNT     4
+//const static byte clock_map[] = { 1, 2, 6, 10 };
+//const static byte clock_map[] = { 2, 6, 4, 10 };
+const static byte clock_map[] = { 4, 2, 3, 10 };  // this is the one, for some reason?  have i got my pins swapped somewhere?
+//const static byte clock_map[] = { 1, 2, 6, 11 };
+
+#define CLOCK_LOOP_COUNT  5  // X ms before moving onto next clock / stopping clock
+
+static int should_send_clock[4] = { 0, 0, 0, 0 };
+
+bool clock_on = false;
+static unsigned long last_beat_clock_ticked;
+static unsigned long last_beat_clock_millis;
+
+void initialise_clock_outputs() {
+  for (int i = 0 ; i < 4 ; i++) {
+    pinMode(CLOCK_OUT_START_PIN + i, OUTPUT);
+    digitalWrite(CLOCK_OUT_START_PIN + i, LOW);
   }
 }
-void clock_2 (bool on) {
-  if (on) {
-    Serial.println("clock 22222222 on");
-    // low high low low = reversed = 0010 = 2d
-    digitalWrite(S0, LOW);
-    digitalWrite(S1, HIGH);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
-    //clock_1 (on);
+
+void clock_output (byte clock_number, bool on) {
+  if (!on) {
+    for (int i = 0 ; i < 4 ; i++) {
+      digitalWrite( CLOCK_OUT_START_PIN + i, LOW );
+    }
+    clock_on = false;
   } else {
-    digitalWrite(S0, LOW);
-    digitalWrite(S1, LOW);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
+    Serial.printf("clock number %i on to mapped %i, beat number %i, count %i\r\n", clock_number, clock_map[clock_number], current_beat, should_send_clock[clock_number]);
+    for (int i = 0 ; i < 4 ; i++) {
+      digitalWrite( CLOCK_OUT_START_PIN + i, bitRead(clock_map[clock_number], i) );
+    }
+    clock_on = true;
   }
 }
+
 
 static unsigned long last_clock_ticked;
-static unsigned long last_beat_clock_ticked;
-
-
-#define CLOCK_LOOP_COUNT 10
-static int should_send_clock_1 = 0; //= false;
-static int should_send_clock_2 = 0; //false;
-
-void midi_send_clock(unsigned long received_ticks) {  
+void midi_send_clock(unsigned long received_ticks) {
   //Serial.println("midi_send_clock()");
 
 
   //last_clock_ticked = received_ticks;
-  if (received_ticks!=last_beat_clock_ticked && !should_send_clock_2 && is_bpm_on_beat && current_beat % 2 == 0) {
-    //clock_2 (true); //clock_2 (true); clock_1 (true); clock_1 (true); clock_2 (true); clock_2 (true); clock_1 (true); clock_1 (true); clock_2 (true); clock_2 (true); 
-    //clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true);
-    //clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true); clock_1 (true); clock_2 (true);
-    last_beat_clock_ticked = received_ticks;
-    should_send_clock_2 = CLOCK_LOOP_COUNT;
-  }
-  if (received_ticks!=last_beat_clock_ticked && is_bpm_on_beat && !should_send_clock_1) {
-    //clock_1 (true);
-    last_beat_clock_ticked = received_ticks;
-    should_send_clock_1 = CLOCK_LOOP_COUNT;
+  if (last_beat_clock_ticked!=received_ticks) {
+    if (!should_send_clock[CLOCK_BEAT_ALT] && is_bpm_on_beat && (current_beat==1 || current_beat==3)) {
+      last_beat_clock_ticked = received_ticks;
+      Serial.printf("setting CLOCK_BEAT_ALT to %i, was already %i\r\n", should_send_clock[CLOCK_BEAT_ALT], CLOCK_LOOP_COUNT);
+      should_send_clock[CLOCK_BEAT_ALT] = CLOCK_LOOP_COUNT;
+    }
+    if (!should_send_clock[CLOCK_BEAT] && is_bpm_on_beat) {
+      last_beat_clock_ticked = received_ticks;
+      should_send_clock[CLOCK_BEAT] = CLOCK_LOOP_COUNT;
+    }
+    if (!should_send_clock[CLOCK_BAR] && is_bpm_on_beat && is_bpm_on_bar) {
+      last_beat_clock_ticked = received_ticks;
+      should_send_clock[CLOCK_BAR] = CLOCK_LOOP_COUNT;
+    }
+    if (!should_send_clock[CLOCK_PHRASE] && is_bpm_on_beat && is_bpm_on_phrase) {
+      last_beat_clock_ticked = received_ticks;
+      should_send_clock[CLOCK_PHRASE] = CLOCK_LOOP_COUNT;
+    }
+    /*  // for testing - trigger-per-beat-number
+    if (is_bpm_on_beat && should_send_clock[current_beat]==0) {
+      should_send_clock[current_beat] = CLOCK_LOOP_COUNT;
+      last_beat_clock_ticked = received_ticks;
+    }*/
   }
 
   if (received_ticks != last_clock_ticked) {
@@ -195,20 +204,23 @@ void midi_send_clock(unsigned long received_ticks) {
     last_clock_ticked = received_ticks;
   } 
   
-  if (should_send_clock_1>0) {
-    clock_1 (true);
-    should_send_clock_1--;// = false;
-  } else if (should_send_clock_2>0) {
-    clock_2 (true);
-    should_send_clock_2--;// = false;
+  for (int i = 0 ; i < CLOCK_COUNT ; i++) {
+    if (should_send_clock[i]>0) {
+      /*if (!clock_on)*/ 
+      if (should_send_clock[i]==CLOCK_LOOP_COUNT) clock_output (i, true);
+      should_send_clock[i] -= millis() - last_beat_clock_millis;
+      if (should_send_clock[i]<0) should_send_clock[i] = 0;
+      break;
+    }
   }
 
-  /*if (received_ticks > last_beat_clock_ticked + 5) {
-    Serial.println("clock off");*/
-  if (!should_send_clock_1 && !should_send_clock_2) {
-    clock_1 (false); clock_2 (false);
-  }
-  
+  last_beat_clock_millis = millis();
+  //if (received_ticks > last_beat_clock_ticked + 15) {
+    if (clock_on && should_send_clock[0]==0 && should_send_clock[1]==0 && should_send_clock[2]==0 && should_send_clock[3]==0) {
+      Serial.println("=== all clocks off");
+      clock_output (0, false); 
+    }
+  //}  
 }
 
 #endif
