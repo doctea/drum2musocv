@@ -4,23 +4,32 @@
 
 Arduino sketch adapting the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-12/) to use General Midi note numbers on MIDI Channel 10, for easy use as a drum machine from a DAW.  
 
+Now targets the Arduino Zero / Seeeduino Cortex M0+ boards, probably possible to make it work on a Uno again though with some changes + testing.  (interested in this?  let me know)
+
 This allows you to play the modular drum machine using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-Also generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (midimuso CC 1, 7, 11, 71 and 74).
+Could also be used to add Euclidian rhythms to any MIDI device (drum machine etc) if reconfigured to use different output note mappings.
+
+When isn't receiving an external clock input, runs off its own internal clock at the last detected BPM.
+
+Generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
 
 Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
 
-Now targets the Arduino Zero / Seeeduino Cortex M0+ boards, probably possible to make it work on a Uno again though with some changes..
-
 Includes a template for FL Studio to make controlling the general and envelope settings easy.
 
-Has an experimental generative euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.
+Has a Euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.  Can configure tracks on/off, change mutation settings, etc, from DAW.  In mutation mode, mutates the rhythm every 2 bars.
 
-NEW: added a 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).
+Plays a "drum fill" for the last bar of every phrase.
+
+A 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).  Notes played in via MIDI determine which notes to use for arpeggiation/chords.
+WIP: autoplay chords or arpeggiator on a second device eg Bitbox or another synth.
 
 Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
 Echoes the MIDI back to the host so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
+
+Outputs 4xClock triggers using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
 # Controls
 
@@ -29,7 +38,7 @@ Echoes the MIDI back to the host so that you can record the rhythms for re-use o
  - When in a Euclidian mode:
    - Press button 2 = enable/disable Euclidian generation (to shut it up but to keep mode)
    - Hold button 2 for > 2 seconds & release = reset Euclidian patterns to initial default. (LEDs will light up red momentarily)
- - When any button is pressed or released, LEDs will light up violet, current mode indicated by a blue LED on first row of pixels, autoplaying status indicated by red/green on first pixel)
+ - When any button is pressed or released, LEDs will light up violet, current mode indicated by a blue LED on first row of pixels, autoplaying status indicated by red/green on last pixel)
 
 # Routing of features
 
@@ -115,7 +124,6 @@ A diagram to help me understand how everything is routed:-
 
  - Shadow triggers with MIDI to trigger Bitbox.  output options - global/per track - muso/bitbox/both.  always/random/alternate/pattern (+euclidian)?  add this to fire_trigger & douse_trigger?
 	- more broadly this is turning into a need to have more of a structure for outputs, for sending to host/midi over multiple channels and can be turned on and off easily
-	- done: basic shadow of triggers+envelopes on the default bitbox pad trigger notes, sending on channel 11
 	- Allow to configure the octave-shifted melody/pad outputs on Channel 3:
 		- configuration of octave shift
 		- option to arpeggiate on None / Channel 2 / Channel 3 / Both
@@ -149,6 +157,7 @@ A diagram to help me understand how everything is routed:-
 
 ### Done list
 
+ - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
  - Make euclidian sequences work off midi clock, fix any bpm issues.
  - Make BPM guesser only work off the last 4 steps, to handle live changes of tempo better (done, but still needs 3 beats before it becomes accurate...?)
  - Fix problem where BPM guesser doesn't reset when stopped? - done i think
@@ -163,7 +172,9 @@ A diagram to help me understand how everything is routed:-
  - Make modulation sync work again
  - Route MIDI on specfic input channel to specific output channel, so can play eg Neutron through same interface
  - LEDs for indication of mode
+ - Shadow triggers with MIDI to trigger Bitbox
+   - done: basic shadow of triggers+envelopes on the default bitbox pad trigger notes, sending on channel 11
  
  ----
  
- If you use or are interested in this project then it would be great to hear from you!
+ If you use or are interested at all in this project then it would be great to hear from you!
