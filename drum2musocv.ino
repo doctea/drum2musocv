@@ -12,6 +12,8 @@
 
 #define ENABLE_BUTTONS
 
+#define CLOCK_TRIGGER_ENABLED
+
 #define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
 
 //#define ENABLE_EEPROM     // untested, not available on SAMD platforms
@@ -76,7 +78,9 @@ void setup() {
 
   initialise_pitch_for_triggers();
 
+#ifdef CLOCK_TRIGGER_ENABLED
   initialise_clock_outputs();
+#endif
 
 #ifdef ENABLE_EEPROM
   initialise_eeprom();

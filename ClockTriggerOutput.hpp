@@ -1,6 +1,8 @@
 #ifndef CLOCKTRIG_INCLUDED
 #define CLOCKTRIG_INCLUDED
 
+#ifdef CLOCK_TRIGGER_ENABLED
+
 #define DEBUG_CLOCKTRIG false //set to true to enable debugging
 
 /// clock stuff (hacky via CD74HC4067 multiplexor output module https://www.amazon.co.uk/dp/B07VF14YNG/ref=pe_3187911_185740111_TE_item)
@@ -101,5 +103,8 @@ void process_clock_triggers(unsigned long received_ticks) {
     }
   //}  
 }
+
+
+#endif
 
 #endif
