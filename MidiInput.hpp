@@ -82,7 +82,9 @@ void handleControlChange(byte channel, byte number, byte value) {
     } else if (handle_ui_ccs(channel, number, value)) {
 
     } else if (handle_midiecho_ccs(channel, number, value)) {
-            
+
+    } else if (harmony.handle_ccs(channel, number, value)) {
+      
     } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     }

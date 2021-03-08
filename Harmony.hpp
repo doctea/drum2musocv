@@ -3,6 +3,25 @@
 
 #include "bass.hpp"       // for access to the bass channel info  -- to be deprecated ? 
 
+#define CC_HARMONY_MELODY_MODE  29
+#define CC_HARMONY_MUTATE_MODE  30
+
+namespace HARMONY {
+  enum MUTATION_MODE { 
+    MUTATION_MODE_NONE,
+    RANDOMISE,
+    MUTATION_MODE_MAX
+  };
+
+  enum MELODY_MODE {
+    MELODY_MODE_NONE,
+    SINGLE,
+    CHORD,
+    ARPEGGIATE,
+    MELODY_MODE_MAX
+  };
+}
+
 // for providing multiple MIDI key outputs ie bass and harmony
 //  todo: properly handle multiple notes being on at the same time for tracking chords
 class MidiKeysOutput {
@@ -12,23 +31,24 @@ class MidiKeysOutput {
       octave_offset = octave_off;
     }
 
-    // send_note_on/off multiplexors
+    // send_note_on/off multiples
     // todo: make this handle velocity per note
-    void send_note_on(int pitch[10], int velocity = 127) { //velocity[10] = { 127, 127, 127, 127, 127, 127, 127, 127, 127, 127 }) {
+    void send_note_on(int *pitches, int velocity = 127) { //velocity[10] = { 127, 127, 127, 127, 127, 127, 127, 127, 127, 127 }) {
       //Serial.printf("send_note_on!\r\n");
       for (int i = 0 ; i < 10 ; i++) {
-        if (pitch[i]>=0) {
-          //Serial.printf("send_note_on %i with list sending %i\r\n", i, pitch[i]);
-          send_note_on(pitch[i], velocity); //velocity[i]);
+        if (pitches[i]>=0) {
+          Serial.printf("send_note_on %i with list sending %i\r\n", i, pitches[i]);
+          send_note_on(pitches[i], velocity); //velocity[i]);
         }
       }
     }
 
-    void send_note_off(int pitch[10], int velocity = 0) {
+    // expects array of size 10
+    void send_note_off(int *pitches, int velocity = 0) {
       for (int i = 0 ; i < 10 ; i++) {
-        if (pitch[i]>=0) {
+        if (pitches[i]>=0) {
           //Serial.printf("send_note_off %i with list sending %i\r\n", i, pitch[i]);
-          send_note_off(pitch[i], velocity); //velocity[i]);
+          send_note_off(pitches[i], velocity); //velocity[i]);
         }
       }
     }
@@ -87,6 +107,8 @@ class Harmony {
     ChannelState&   channel_state;
     MidiKeysOutput& mko_bass;
     MidiKeysOutput& mko_keys;
+    int mutation_mode = HARMONY::MUTATION_MODE::RANDOMISE;
+    int melody_mode =   HARMONY::MELODY_MODE::CHORD;
 
   public:  
     Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_)
@@ -119,10 +141,40 @@ class Harmony {
       if (channel_state.is_note_held()) {
         mko_keys.send_note_on(channel_state.get_held_notes(), 127);  // send all held notes
       } else {
-        //mko_keys.send_note_on(pitch, 127);    // send a single pitch  
-        int pitches[10] = { pitch, pitch + bass_scale_offset[scale_number][2], pitch + bass_scale_offset[scale_number][4], -1, -1, -1, -1, -1, -1, -1 };  // send a triad based on the root
-        mko_keys.send_note_on(pitches, 127);
+        if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
+          // do nothing
+        } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
+          mko_keys.send_note_on(pitch, 127);    // send a single pitch  
+        } else if (melody_mode==HARMONY::MELODY_MODE::CHORD) {
+          Serial.println("using chord mode for melody!");
+          mko_keys.send_note_on(get_chord_for_pitch(pitch), 127);
+        } else if (melody_mode==HARMONY::MELODY_MODE::ARPEGGIATE) {
+          // TODO
+        }
       }
+    }
+
+    // return pointer to array
+    int *get_chord_for_pitch (int pitch) {
+      /*static int pitches[10] = { 
+        pitch, 
+        pitch + bass_scale_offset[scale_number][2], 
+        pitch + bass_scale_offset[scale_number][4], 
+        //pitch + bass_scale_offset[scale_number][6], // 7th chord
+        -1, -1, -1, -1, -1, -1, -1
+      };  // send a triad based on the root*/
+
+      // todo: different chord shapes, inversions etc...
+      
+      static int pitches[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } ;
+      pitches[0] = pitch;
+      pitches[1] = pitch + bass_scale_offset[scale_number][2];
+      pitches[2] = pitch + bass_scale_offset[scale_number][4];
+      //pitches[3] = pitch + bass_scale_offset[scale_number][6]; // add 7th chord
+      //pitches[3] = pitch + bass_scale_offset[scale_number][8]; // add 9th chord
+      //-1, -1, -1, -1, -1, -1, -1
+      
+      return pitches;
     }
     
     void douse_melody () {
@@ -183,17 +235,36 @@ class Harmony {
         mko_keys.send_all_notes_off();
     }
 
-    void randomise() {
-      for (int i = 0 ; i < 4 ; i++) {
-        if (random(10)<2)
-          chord_progression[i] = random(0,8);
-          
-        for (int x = 0 ; x < 4 ; x++) {
-          if (random(10)<5)
-            bass_sequence[i][x] = random(0,8);
+    void mutate() {
+      if (mutation_mode==HARMONY::MUTATION_MODE::RANDOMISE) {
+        for (int i = 0 ; i < 4 ; i++) {
+          if (random(10)<2)
+            chord_progression[i] = random(0,8);
+            
+          for (int x = 0 ; x < 4 ; x++) {
+            if (random(10)<5)
+              bass_sequence[i][x] = random(0,8);
+          }
         }
       }
     }
+
+
+    bool handle_ccs(int channel, int number, int value) {
+      if (channel!=GM_CHANNEL_DRUMS) return false;
+    
+      if (number==CC_HARMONY_MUTATE_MODE) {
+        mutation_mode = value % HARMONY::MUTATION_MODE::MUTATION_MODE_MAX;
+        Serial.printf("Setting harmony mutation_mode to %i\n", mutation_mode);
+        return true;
+      } else if (number==CC_HARMONY_MELODY_MODE) {
+        melody_mode = value % HARMONY::MELODY_MODE::MELODY_MODE_MAX;
+        Serial.printf("Setting melody mode to %i\r\n", melody_mode);
+        //Serial.printf("Sizeof harmony modes is %i\r\n", sizeof(HARMONY::MELODY_MODE));
+        return true;
+      }
+      return false;
+    }    
 };
 
 
