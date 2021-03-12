@@ -1,4 +1,4 @@
-** HARMONY BRANCH WIP TO REFACTOR MIDI OUTPUTS, ARPS AND CHORD PROGRESSIONS **
+*WIP BRANCH FOR HARMONY STUFF*
 
 # drum2musocv
 
@@ -23,7 +23,7 @@ Has a Euclidian rhythm generator with optional mutation mode, so you can play wi
 Plays a "drum fill" for the last bar of every phrase.
 
 A 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).  Notes played in via MIDI determine which notes to use for arpeggiation/chords.
-WIP: autoplay chords or arpeggiator on a second device eg Bitbox or another synth.
+WIP (kinda working but needs some expanding): autoplay chords or arpeggiator on a second device eg Bitbox or another synth.
 
 Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
