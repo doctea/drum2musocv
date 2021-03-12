@@ -1,7 +1,10 @@
 #ifndef EUCLIDIAN_INCLUDED
 #define EUCLIDIAN_INCLUDED
 
-
+#ifndef DEFAULT_MUTATE_MINIMUM_PATTERN
+#define DEFAULT_MUTATE_MINIMUM_PATTERN  0     // all patterns above 0
+//#define DEFAULT_MUTATE_MINIMUM_PATTERN  1   // default to 1 so kick doesn't change
+#endif
 #ifndef DEFAULT_RESET_BEFORE_MUTATE
 #define DEFAULT_RESET_BEFORE_MUTATE   true
 #endif
@@ -38,7 +41,7 @@ int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 
 int euclidian_seed_modifier = 0;
 int euclidian_seed_modifier_2 = 0;
-int euclidian_mutate_minimum_pattern = 1; // default 1 so that kick never mutates
+int euclidian_mutate_minimum_pattern = DEFAULT_MUTATE_MINIMUM_PATTERN; // default 1 so that kick never mutates
 int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
 bool euclidian_seed_use_phrase      = true;

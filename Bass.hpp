@@ -13,6 +13,7 @@
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_AUTO_ARP_ENABLED          true   // choose notes to play from the current sequence (eg incrementing through them)?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
+#define DEFAULT_SCALE 1                          // 0 = major, 1 = minor
 
 //#define BASS_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
@@ -55,6 +56,7 @@ ChannelState autobass_input = ChannelState();   // tracking notes that are held
 #define SCALE_SIZE  7
 
 int bass_scale_offset[][SCALE_SIZE] = {
+  //1  3  5  6  8 10  12
   { 0, 2, 4, 5, 7, 9, 11 },  // major scale
   { 0, 2, 3, 5, 7, 8, 10 },  // // minor scale (? check)
 };
@@ -67,7 +69,8 @@ int bass_sequence[][4]     =   { // degrees of scale to play per chord -- ie, ar
   /*{ 0, 2, 0, 4 },
     { 0, 3, 6, 4 }*/
 };
-int chord_progression[]    =   { 0, 5, 1, 4 };     // chord progression
+//int chord_progression[]    =   { 0, 5, 1, 4 };     // chord progression
+int chord_progression[]    =   { 0, 1, 2, 3 };     // chord progression
 
 #define BASS_NUM_SCALES             (sizeof(bass_scale_offset) / sizeof(bass_scale_offset[0]))      // how many scales we know about in total
 #define BASS_NUM_SEQUENCES          (sizeof(bass_sequence) / sizeof(bass_sequence[0]))              // how many sequences we know about in total
@@ -78,7 +81,7 @@ int chord_progression[]    =   { 0, 5, 1, 4 };     // chord progression
 int bass_counter = 0;               // track current position in arp sequence
 int bass_currently_playing = -1;    // track currently playing note, so that we know which one to turn off
 
-int scale_number = 0;               // index of the current scale we're in
+int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
 int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
 int sequence_number = 0;            // index of the arp sequence that we're currently playing
 
@@ -147,11 +150,12 @@ int get_sequence_number() {
 
 // get the root note for the scale chord -- can go negative/higher than 6 to access other octaves
 // part of harmony
-int bass_get_scale_note(int scale_degree = 0) {
+int bass_get_scale_note(int scale_degree = 0, int chord_number = -100) {
   // todo: move this elsewhere to make this changeable..
   //int scale_number = 0;
   int scale_number = get_scale_number();
-  int chord_number = get_chord_number();
+  if (chord_number==-100) 
+    chord_number = get_chord_number();
 
   // temporary step through chord number based on the current_bar (so resets for each new phrase)
   //scale_degree += chord_number;

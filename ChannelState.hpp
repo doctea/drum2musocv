@@ -18,7 +18,7 @@ private:
 
     // track pitches internally
     void push_note (byte pitch) {
-      Serial.printf("channelstate push_note(%i)\r\n", pitch);
+      //Serial.printf("channelstate push_note(%i)\r\n", pitch);
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==-1) { // free slot so add this new pitch
           held_notes[i] = pitch;
@@ -31,7 +31,7 @@ private:
     }
     
     void pop_note(byte pitch) {
-      Serial.printf("channelstate pop_note(%i)\r\n", pitch);
+      //Serial.printf("channelstate pop_note(%i)\r\n", pitch);
       bool found = false;
       bool found_held = false;
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
@@ -72,13 +72,6 @@ private:
   
   
   public:  
-    int chanindex;
-    ChannelState() {
-      chanindex = channelcount;
-      //Serial.printf("ChannelState() constructed chanindex %i\r\n", chanindex);
-      channelcount++;
-    }
-
     int get_root_note() {
       //Serial.printf("in get_root_note in ChannelState number #%i got: %s\r\n", chanindex, debug_string);
       if (is_note_held()) {
@@ -102,7 +95,7 @@ private:
       return (held_notes[0]!=-1);
     }
     
-    void handle_note_on(byte pitch, byte vel) {
+    void handle_note_on(byte pitch, byte vel = 127) {
       //Serial.printf("got autobass note %i!", pitch);
       if (vel > 0) {
         push_note(pitch);
@@ -117,6 +110,19 @@ private:
       //  auto_note_held = false;
       //debug_notes_held();
       build_notes_held_string();
+    }
+
+    void handle_all_notes_off() {
+      if (is_note_held()) {
+        for (int i = 0 ; i < HELD_NOTES_MAX  ; i++) {
+          if (held_notes[i]>-1)
+            held_notes[i] = -1;
+          else
+            break;
+        }
+        held_notes_count = 0;
+        build_notes_held_string();
+      }
     }
 
     int *get_held_notes() {
