@@ -81,8 +81,8 @@ class Harmony {
         } else if (melody_mode==HARMONY::MELODY_MODE::CHORD) {
           //memcpy(&last_melody_pitches, get_chord_for_pitch(pitch), 10 * sizeof(int));
           //Serial.printf("about to play chord is %i\r\n", );
-          Serial.printf("phrase is %i, beat %i: ", current_phrase, current_beat); 
-          Serial.printf("about to play chord number %i+%i sequence offset\r\n", get_chord_number(), bass_sequence[current_phrase%4][current_beat]);
+          Serial.printf("phrase is %i, beat %i, scale num %i: ", current_phrase, current_beat, get_scale_number()); 
+          Serial.printf("about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), bass_sequence[current_phrase%4][current_beat]);
 
           // todo: move get_chord_number here (all it does is test mode we're in and return chord_progression number or 0?
           // todo: move arping logic here (currently hardcoded to arp thru bass_sequence)
@@ -161,12 +161,14 @@ class Harmony {
 
       int pitch = MIDI_BASS_ROOT_PITCH;       // TODO: adjust pitch if required by the mode
       pitch = channel_state.get_root_note();
+      //pitch = channel_state.get_root_note() + bass_get_scale_note(get_chord_number());
 
       // todo: adjust if arping / progressioning / etc
 
       // get the current chord number
       if (!channel_state.is_note_held()) {
-        pitch = channel_state.get_root_note() + bass_get_scale_note();
+        //pitch = channel_state.get_root_note() + bass_get_scale_note();
+        pitch = channel_state.get_root_note() + bass_get_scale_note(0, get_chord_number());
         //pitch = bass_get_sequence_pitch(bass_counter);
       }
       Serial.printf("harmony.fire_bass() told to fire pitch %i aka %s?\r\n", pitch, get_note_name(pitch).c_str());

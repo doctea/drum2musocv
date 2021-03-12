@@ -13,7 +13,7 @@
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_AUTO_ARP_ENABLED          true   // choose notes to play from the current sequence (eg incrementing through them)?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
-#define DEFAULT_SCALE 1                          // 0 = major, 1 = minor
+#define DEFAULT_SCALE 0                          // 0 = major, 1 = minor
 
 //#define BASS_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
@@ -118,12 +118,12 @@ void initialise_bass() {
 
 // get the currently active scale
 int get_scale_number() {
-  if (bass_auto_scale) {
+  /*if (bass_auto_scale) {
     // automatically change scales based on our current song phrase position
     return scale_number = (0 + current_phrase) % BASS_NUM_SCALES; // todo: make this switchable ..
-  } 
+  }*/
   
-  return 0; // default to major
+  return scale_number; // default to major
 }
 
 // get the currently active chord in the scale
