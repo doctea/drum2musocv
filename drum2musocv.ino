@@ -100,7 +100,7 @@ void setup() {
 
   initialise_euclidian();
 
-  initialise_bass();
+  //initialise_bass();
 
   initialise_envelopes();
 

@@ -7,6 +7,16 @@
   14, 15, 16, 17, 18, 19, 20 = octave +2
 */
 
+/*
+ * 
+ * 
+ * 
+ * DEPRECATED - moved to Harmony.hpp for better or worse
+ * 
+ * 
+ * 
+ * /
+
 #ifndef BASS_INCLUDED
 #define BASS_INCLUDED
 
@@ -53,46 +63,36 @@ ChannelState autobass_input = ChannelState();   // tracking notes that are held
 
 // stuff for handling scales, for automatic bassline/arp generation
 
-#define SCALE_SIZE  7
-
-int bass_scale_offset[][SCALE_SIZE] = {
-  //1  3  5  6  8 10  12
-  { 0, 2, 4, 5, 7, 9, 11 },  // major scale
-  { 0, 2, 3, 5, 7, 8, 10 },  // // minor scale (? check)
-};
-int bass_sequence[][4]     =   { // degrees of scale to play per chord -- ie, arp patterns
+/*int bass_sequence[][4]     =   { // degrees of scale to play per chord -- ie, arp patterns
   { 0, 0, 0, 0 },
   { 0, 0, 0, 1 },
   { 0, 1, 1, 2 },
   { 0, 1, 0, 4 },
   //{ 0, 2, 4, 6 },
-  /*{ 0, 2, 0, 4 },
-    { 0, 3, 6, 4 }*/
-};
+};*/
 //int chord_progression[]    =   { 0, 5, 1, 4 };     // chord progression
-int chord_progression[]    =   { 0, 1, 2, 3 };     // chord progression
+//int chord_progression[]    =   { 0, 1, 2, 3 };     // chord progression
 
-#define BASS_NUM_SCALES             (sizeof(bass_scale_offset) / sizeof(bass_scale_offset[0]))      // how many scales we know about in total
-#define BASS_NUM_SEQUENCES          (sizeof(bass_sequence) / sizeof(bass_sequence[0]))              // how many sequences we know about in total
+
 #define BASS_SCALE_SIZE             ((int)(sizeof(bass_scale_offset[0])/sizeof(bass_scale_offset[0][0])))   // how many notes in each scale
-#define BASS_SEQUENCE_LENGTH        ((int)(sizeof(bass_sequence[0])/sizeof(bass_sequence[0][0])))   // how many notes in arps
-#define BASS_CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
+//#define BASS_SEQUENCE_LENGTH        ((int)(sizeof(bass_sequence[0])/sizeof(bass_sequence[0][0])))   // how many notes in arps
+//#define BASS_CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
 
 int bass_counter = 0;               // track current position in arp sequence
 int bass_currently_playing = -1;    // track currently playing note, so that we know which one to turn off
 
-int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
+/*int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
 int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
-int sequence_number = 0;            // index of the arp sequence that we're currently playing
+int sequence_number = 0;            // index of the arp sequence that we're currently playing*/
 
 // TODO: make these configurable by UI/CC
-bool bass_auto_scale       = false;   // automatically switch scales every phrase
-bool bass_auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
-bool bass_auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
-int  bass_arp_mode         = ARP_MODE_NEXT_ON_NOTE;
-bool bass_only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
+//bool bass_auto_scale       = false;   // automatically switch scales every phrase
+//bool bass_auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
+//bool bass_auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
+//int  bass_arp_mode         = ARP_MODE_NEXT_ON_NOTE;
+//bool bass_only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
 
-
+/*
 void debug_bass_scales() {
   // TODO: make this use the actual functions instead of these tests
   Serial.println("-------\r\ndebug_bass_scales");
@@ -109,47 +109,18 @@ void debug_bass_scales() {
     Serial.println("");
   }
   Serial.println("-------");
-}
+}*/
 
-
+/*
 void initialise_bass() {
   debug_bass_scales();
-}
+}*/
 
-// get the currently active scale
-int get_scale_number() {
-  /*if (bass_auto_scale) {
-    // automatically change scales based on our current song phrase position
-    return scale_number = (0 + current_phrase) % BASS_NUM_SCALES; // todo: make this switchable ..
-  }*/
-  
-  return scale_number; // default to major
-}
 
-// get the currently active chord in the scale
-int get_chord_number() {
-  if (bass_auto_progression) {
-    // automatically change chord based on our current song bar position
-    return chord_progression[current_bar % BASS_CHORD_PROGRESSION_LENGTH] % BASS_SCALE_SIZE; // todo: make this select from lowest held note?
-  } 
-  
-  return 0; // default to root (default or whatever is held)
-}
-
-// get the currently active arp sequence index
-int get_sequence_number() {
-  if (bass_auto_arp) {
-    // choose the arp sequence automatically based on the current song position
-    sequence_number = current_bar % BASS_NUM_SEQUENCES;
-  } else {
-    sequence_number = 0;
-  }
-  
-  return sequence_number;
-}
 
 // get the root note for the scale chord -- can go negative/higher than 6 to access other octaves
 // part of harmony
+/*
 int bass_get_scale_note(int scale_degree = 0, int chord_number = -100) {
   // todo: move this elsewhere to make this changeable..
   //int scale_number = 0;
@@ -178,21 +149,21 @@ int bass_get_scale_note(int scale_degree = 0, int chord_number = -100) {
 
   BASS_printf(" -- final note is %i\r\n", r);
   return r;
-}
+}*/
 
 // get the note to play based on the position in the arp sequence
 // part of harmony generation
-int bass_get_sequence_note(int position = 0) {
+/*int bass_get_sequence_note(int position = 0) {
   if (position % BASS_SEQUENCE_LENGTH == 0) BASS_printf("----- at bass arp sequence start (position %i)\r\n", position);
   int sequence_number = get_sequence_number();
 
   return bass_get_scale_note(
     bass_sequence [sequence_number] [position % BASS_SEQUENCE_LENGTH]
   );
-}
+}*/
 
 // uses channelstate, but is actually part of harmony generation
-int bass_get_sequence_pitch(int position = 0) {
+/*int bass_get_sequence_pitch(int position = 0) {
   //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
   if (autobass_input.is_note_held()) {
     // bass is autoplaying, so ask it for what note it recommends for this position
@@ -200,12 +171,12 @@ int bass_get_sequence_pitch(int position = 0) {
   }
   // else base it on the root note and the sequence's position
   return autobass_input.get_root_note() + bass_get_sequence_note(position);
-}
+}*/
 
 
-void bass_reset_sequence() {
+/*void bass_reset_sequence() {
   bass_counter = 0;
-}
+}*/
 
 /*
 // start note for bass 
@@ -247,6 +218,7 @@ void bass_note_off() {
   bass_currently_playing = -1;
 }*/
 
+/*
 void bass_set_arp_mode(int mode) {
   bass_arp_mode = mode % ARP_MODE_MAX;
   // todo: kill notes that otherwise won't end when this mode changes
@@ -270,22 +242,23 @@ bool handle_bass_ccs(byte channel, byte number, byte value) {
   return false;
 }
 
-
+*/
 
 // get strings about the current scale/sequence/chords settings
+/*
 char *get_bass_info() {
   static char output[20];
 
   sprintf(output, "s%i %i %i:%3s", scale_number, sequence_number, chord_number, get_note_name(bass_currently_playing).c_str());
   return output;
-}
+}*/
 
-char *get_bass_info_2() {
+/*char *get_bass_info_2() {
   static char output[32];
 
   // auto scale, auto arp, auto progression, bass counter
   sprintf(output, "as aa ap bc\n%c  %c  %c  %2i\n", bass_auto_scale ? 'Y' : 'N', bass_auto_arp ? 'Y' : 'N', bass_auto_progression ? 'Y' : 'N', bass_counter);
   return output;
-}
+}*/
 
 #endif

@@ -196,7 +196,7 @@ void process_euclidian(int ticks) {
           EUC_printf("%01X", i); // print as hex
         } else {
           //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
-          EUC_printf("%3s ", get_note_name(bass_currently_playing).c_str()); // for bass note indicator
+          EUC_printf("%3s ", get_note_name(harmony.get_currently_playing_root()).c_str()); // for bass note indicator
         }
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         EUC_printf(" ");

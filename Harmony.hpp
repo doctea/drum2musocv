@@ -1,11 +1,61 @@
 #ifndef HARMONY_INCLUDED
 #define HARMONY_INCLUDED
 
-#include "bass.hpp"       // for access to the bass channel info  -- to be deprecated ? 
+
+#define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
+#define DEFAULT_AUTO_ARP_ENABLED          true   // choose notes to play from the current sequence (eg incrementing through them)?
+#define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
+#define DEFAULT_SCALE 0                          // 0 = major, 1 = minor
+
+
+// CONFIGURATION: messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron (TODO: probably move this to a dedicated config file)
+#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
+#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
+#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+
+#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
+#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+
+
+
+#define ARP_MODE_NONE         0
+#define ARP_MODE_PER_BEAT     1
+#define ARP_MODE_NEXT_ON_NOTE 2
+#define ARP_MODE_MAX          3
+
+//#define BASS_DEBUG
+// handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
+#ifdef HARM_DEBUG
+#define HARM_DEBUG 1
+#else
+#define HARM_DEBUG 0
+#endif
+#define HARM_printf(fmt, ...)   do { if (HARM_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
+#define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
+//debug handling
+
+//#include "bass.hpp"       // for access to the bass channel info  -- to be deprecated ? 
 #include "HarmonyOutput.hpp"
+#include "BPM.hpp"
+#include "ChannelState.hpp"
+
+ChannelState autobass_input = ChannelState();   // tracking notes that are held
 
 #define CC_HARMONY_MELODY_MODE  29
 #define CC_HARMONY_MUTATE_MODE  30
+
+#define CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
+#define NUM_SCALES             (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
+#define NUM_SEQUENCES          (sizeof(sequence) / sizeof(sequence[0]))              // how many sequences we know about in total
+#define HARM_SEQUENCE_LENGTH        ((int)(sizeof(sequence[0])/sizeof(sequence[0][0])))   // how many notes in arps
+
+#define SCALE_SIZE  7
+
+int scale_offset[][SCALE_SIZE] = {
+  //1  3  5  6  8 10  12
+  { 0, 2, 4, 5, 7, 9, 11 },  // major scale
+  { 0, 2, 3, 5, 7, 8, 10 },  // // minor scale (? check)
+};
 
 namespace HARMONY {
   enum MUTATION_MODE { 
@@ -40,8 +90,33 @@ class Harmony {
     ChannelState&   channel_state;
     MidiKeysOutput& mko_bass;
     MidiKeysOutput& mko_keys;
+
+    int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
+    int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
+    int sequence_number = 0;            // index of the arp sequence that we're currently playing
+    int sequence_counter = 0;               // track current position in arp sequence
+
+    
     int mutation_mode = HARMONY::MUTATION_MODE::RANDOMISE;
     int melody_mode =   HARMONY::MELODY_MODE::CHORD;
+    int arp_mode         = ARP_MODE_NEXT_ON_NOTE;
+
+    bool auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
+    bool auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
+    bool auto_scale       = false;   // automatically switch scales every phrase
+    bool only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
+
+
+    int chord_progression[4]    =   { 0, 5, 1, 4 };     // chord progression
+    int sequence[4][4]     =   { // degrees of scale to play per chord -- ie, arp patterns
+      { 0, 0, 0, 0 },
+      { 0, 0, 0, 1 },
+      { 0, 1, 1, 2 },
+      { 0, 1, 0, 4 },
+      //{ 0, 2, 4, 6 },
+      /*{ 0, 2, 0, 4 },
+        { 0, 3, 6, 4 }*/
+    };
 
   public:  
     Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_)
@@ -56,16 +131,28 @@ class Harmony {
       // send notes to melody appropriate for current status
       //  to include options for playing root, full chords or arpeggiation
 
-      if (bass_only_note_held && !channel_state.is_note_held()) {
+      //if (!bpm_internal_mode && bass_only_note_held && !autobass_input.is_note_held())
+      //return;
+      
+      if (only_note_held && !channel_state.is_note_held()) {
         return;
       }
-      
+
+      // todo: make this actually work again.. 
+      if (arp_mode==ARP_MODE_NEXT_ON_NOTE)
+        sequence_counter++;
+      else if (arp_mode==ARP_MODE_PER_BEAT)
+        sequence_counter = current_beat;
+      else if (arp_mode==ARP_MODE_NONE)// dont arp at all
+        sequence_counter = 0;
+
+      // find the pitch to play
       int pitch = MIDI_BASS_ROOT_PITCH;
       pitch = channel_state.get_root_note();
 
       // get the current chord number
       if (!channel_state.is_note_held()) {
-        pitch = channel_state.get_root_note() + bass_get_scale_note(get_chord_number());
+        pitch = channel_state.get_root_note() + get_scale_note(get_chord_number());
         //pitch = bass_get_sequence_pitch(bass_counter);
       }
     
@@ -82,11 +169,23 @@ class Harmony {
           //memcpy(&last_melody_pitches, get_chord_for_pitch(pitch), 10 * sizeof(int));
           //Serial.printf("about to play chord is %i\r\n", );
           Serial.printf("phrase is %i, beat %i, scale num %i: ", current_phrase, current_beat, get_scale_number()); 
-          Serial.printf("about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), bass_sequence[current_phrase%4][current_beat]);
+          Serial.printf("about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), sequence[current_phrase%4][current_beat]);
+
+          int sequence_offset = 0; //sequence[current_phrase%4][current_beat];
+          int chord_number = get_chord_number();
+          int chord_type = current_bar>1 ? HARMONY::CHORD_TYPE::SEVENTH : HARMONY::CHORD_TYPE::TRIAD; 
+          int inversion = current_bar==BARS_PER_PHRASE-1 ? current_beat : 0;
 
           // todo: move get_chord_number here (all it does is test mode we're in and return chord_progression number or 0?
-          // todo: move arping logic here (currently hardcoded to arp thru bass_sequence)
-          memcpy(&last_melody_pitches, get_notes_for_chord(bass_sequence[current_phrase%4][current_beat] + get_chord_number()), 10 * sizeof(int));
+          // todo: move arping logic here (currently hardcoded to arp thru sequence)
+          memcpy(&last_melody_pitches, 
+            get_notes_for_chord(
+              sequence[current_phrase%4][current_beat] + get_chord_number(),
+              chord_type,
+              inversion
+            ), 
+            10 * sizeof(int)
+          );
 
           Serial.println("using chord mode for melody!");
           //mko_keys.send_note_on(get_chord_for_pitch(pitch), 127);
@@ -95,41 +194,6 @@ class Harmony {
           // TODO
         }
       }
-    }
-
-    // return pointer to array
-    int *get_notes_for_chord (int chord, int chord_type = HARMONY::CHORD_TYPE::TRIAD) {
-      /*static int pitches[10] = { 
-        pitch, 
-        pitch + bass_scale_offset[scale_number][2], 
-        pitch + bass_scale_offset[scale_number][4], 
-        //pitch + bass_scale_offset[scale_number][6], // 7th chord
-        -1, -1, -1, -1, -1, -1, -1
-      };  // send a triad based on the root*/
-
-      // todo: different chord shapes, inversions etc...
-      
-      static int pitches[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } ;
-      pitches[0] = channel_state.get_root_note() + bass_get_scale_note(0, chord);
-      /*pitches[1] = pitch + bass_scale_offset[scale_number][2];
-      pitches[2] = pitch + bass_scale_offset[scale_number][4];
-      pitches[3] = current_bar==BARS_PER_PHRASE-1 ? pitch + bass_scale_offset[scale_number][6] : -1; // add 7th chord*/
-      pitches[1] = channel_state.get_root_note() + bass_get_scale_note(2, chord);
-      pitches[2] = channel_state.get_root_note() + bass_get_scale_note(4, chord);
-      pitches[3] = current_bar==BARS_PER_PHRASE-1 ? 
-                   channel_state.get_root_note() + bass_get_scale_note(6, chord) 
-                   : -1; // add SEVENTH 
-/*      pitches[4] = current_bar==BARS_PER_PHRASE-1 ? 
-                   channel_state.get_root_note() + bass_get_scale_note(8, chord) 
-                   : -1; // add NINTH
-      pitches[5] = current_bar==BARS_PER_PHRASE-1 ? 
-                   channel_state.get_root_note() + bass_get_scale_note(12, chord) 
-                   : -1; // add THIRTEEN*/
-
-      //pitches[3] = pitch + bass_scale_offset[scale_number][8]; // add 9th chord
-      //-1, -1, -1, -1, -1, -1, -1
-      
-      return pitches;
     }
     
     void douse_melody () {
@@ -155,7 +219,7 @@ class Harmony {
     void fire_bass () {
       // send notes to bass appropriate for current status
       
-      if (bass_only_note_held && !channel_state.is_note_held()) {
+      if (only_note_held && !channel_state.is_note_held()) {
         return;
       }
 
@@ -168,7 +232,7 @@ class Harmony {
       // get the current chord number
       if (!channel_state.is_note_held()) {
         //pitch = channel_state.get_root_note() + bass_get_scale_note();
-        pitch = channel_state.get_root_note() + bass_get_scale_note(0, get_chord_number());
+        pitch = channel_state.get_root_note() + get_scale_note(0, get_chord_number());
         //pitch = bass_get_sequence_pitch(bass_counter);
       }
       Serial.printf("harmony.fire_bass() told to fire pitch %i aka %s?\r\n", pitch, get_note_name(pitch).c_str());
@@ -177,7 +241,7 @@ class Harmony {
       //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
       mko_bass.send_note_on(pitch, 127);
 
-      bass_counter++;
+      sequence_counter++;
     }
 
     void douse_bass () {
@@ -211,10 +275,151 @@ class Harmony {
             
           for (int x = 0 ; x < 4 ; x++) {
             if (random(10)<5)
-              bass_sequence[i][x] = random(0,8);
+              sequence[i][x] = random(0,8);
           }
         }
       }
+    }
+
+//// chord choosing, note choosing, etc
+
+    int get_sequence_note(int position = 0) {
+      if (position % HARM_SEQUENCE_LENGTH == 0) HARM_printf("----- at bass arp sequence start (position %i)\r\n", position);
+      int sequence_number = get_sequence_number();
+    
+      return get_scale_note(
+        sequence [sequence_number] [position % HARM_SEQUENCE_LENGTH]
+      );
+    }
+
+    int get_sequence_pitch(int position = 0) {
+      //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
+      if (channel_state.is_note_held()) {
+        // bass is autoplaying, so ask it for what note it recommends for this position
+        return channel_state.get_sequence_held_note(position);
+      }
+      // else base it on the root note and the sequence's position
+      return channel_state.get_root_note() + get_sequence_note(position);
+    }
+    
+    // get the currently active scale
+    int get_scale_number() {
+      if (auto_scale) {
+        // automatically change scales based on our current song phrase position
+        return scale_number = (0 + current_phrase) % NUM_SCALES; // todo: make this switchable ..
+      }
+      
+      return scale_number; // default to major
+    }
+    
+    // get the root note for the scale chord -- can go negative/higher than 6 to access other octaves
+    // part of harmony
+    int get_scale_note(int scale_degree = 0, int chord_number = -100) {
+      // todo: move this elsewhere to make this changeable..
+      //int scale_number = 0;
+      int scale_number = get_scale_number();
+      if (chord_number==-100) 
+        chord_number = get_chord_number();
+    
+      // temporary step through chord number based on the current_bar (so resets for each new phrase)
+      //scale_degree += chord_number;
+    
+      int sd = (chord_number + scale_degree);
+      int oct = sd / SCALE_SIZE;
+    
+      HARM_printf("bass_get_scale: in phrase:bar:beat %i:%i:%i, using scale %i ", current_phrase, current_bar, current_beat, scale_number );
+      HARM_printf(" || chord %i, scale degree %i -> got scale offset %i and oct %i -> ",  chord_number, scale_degree, sd, oct);
+      if (sd < 0) {
+        sd = SCALE_SIZE + sd;  // convert to the actual scale degree
+        oct--;                      // account for needing to be one octave below
+      }
+      HARM_printf("final oct:sd is %i:%i", oct, sd);
+    
+      int r = scale_offset[scale_number][sd % SCALE_SIZE]
+              +
+              (oct * 12)
+              ;
+    
+      HARM_printf(" -- final note is %i\r\n", r);
+      return r;
+    }
+
+    // get the currently active arp sequence index
+    int get_sequence_number() {
+      if (auto_arp) {
+        // choose the arp sequence automatically based on the current song position
+        sequence_number = current_bar % NUM_SEQUENCES;
+      } else {
+        sequence_number = 0;
+      }
+      
+      return sequence_number;
+    }
+
+    // get the currently active chord in the scale
+    int get_chord_number() {
+      if (auto_progression) {
+        // automatically change chord based on our current song bar position
+        return chord_progression[current_bar % CHORD_PROGRESSION_LENGTH] % SCALE_SIZE; // todo: make this select from lowest held note?
+      } 
+      
+      return 0; // default to root (default or whatever is held)
+    }
+
+    // return pointer to array
+    int *get_notes_for_chord (int chord, int chord_type = HARMONY::CHORD_TYPE::TRIAD, int inversion = 0) {
+      /*static int pitches[10] = { 
+        pitch, 
+        pitch + scale_offset[scale_number][2], 
+        pitch + scale_offset[scale_number][4], 
+        //pitch + scale_offset[scale_number][6], // 7th chord
+        -1, -1, -1, -1, -1, -1, -1
+      };  // send a triad based on the root*/
+
+      // todo: different chord shapes, inversions etc...
+
+      static int pitches[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } ;
+
+      int p = 0;
+      pitches[p++] = channel_state.get_root_note() + get_scale_note(0, chord);
+      /*pitches[1] = pitch + scale_offset[scale_number][2];
+      pitches[2] = pitch + scale_offset[scale_number][4];
+      pitches[3] = current_bar==BARS_PER_PHRASE-1 ? pitch + scale_offset[scale_number][6] : -1; // add 7th chord*/
+      pitches[p++] = channel_state.get_root_note() + get_scale_note(2, chord);
+      pitches[p++] = channel_state.get_root_note() + get_scale_note(4, chord);
+      
+      if (chord_type==HARMONY::CHORD_TYPE::SEVENTH) {
+        pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
+                     channel_state.get_root_note() + get_scale_note(6, chord);
+                     //: -1; // add SEVENTH 
+      }
+      if (chord_type==HARMONY::CHORD_TYPE::NINETH) {
+        pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
+                   channel_state.get_root_note() + get_scale_note(8, chord) ;
+                   //: -1; // add NINTH
+      }
+      if (chord_type==HARMONY::CHORD_TYPE::THIRTEENTH) {
+        pitches[p++] = //current_bar==BARS_PER_PHRASE-1 ? 
+                   channel_state.get_root_note() + get_scale_note(12, chord) ;
+      }
+
+      //pitches[3] = pitch + scale_offset[scale_number][8]; // add 9th chord
+      //-1, -1, -1, -1, -1, -1, -1
+
+      for (int i = 0 ; i < inversion ; i++) {
+        if (pitches[i]>-1)
+          pitches[i] += 12;
+      }      
+      
+      return pitches;
+    }
+
+    int get_currently_playing_root() {
+      return last_melody_root;
+    }
+
+    void reset_sequence() {
+      sequence_counter = 0;
     }
 
 
@@ -230,9 +435,44 @@ class Harmony {
         Serial.printf("Setting melody mode to %i\r\n", melody_mode);
         //Serial.printf("Sizeof harmony modes is %i\r\n", sizeof(HARMONY::MELODY_MODE));
         return true;
+      } else if (number==CC_BASS_SET_ARP_MODE) {
+        set_arp_mode(value);
+        return true;
+      } else if (number==CC_BASS_ONLY_NOTE_HELD) {
+        set_only_note_held(value>0);
+        return true;
       }
       return false;
     }    
+
+    
+    void set_arp_mode(int mode) {
+      arp_mode = mode % ARP_MODE_MAX;
+      // todo: kill notes that otherwise won't end when this mode changes
+    }
+    
+    void set_only_note_held(int value) {
+      only_note_held = value; //= mode % ARP_MODE_MAX;
+      // todo: kill notes that otherwise won't end when this mode changes
+    }
+
+
+    // get strings about the current scale/sequence/chords settings
+    char *get_bass_info() {
+      static char output[20];
+    
+      sprintf(output, "s%i %i %i:%3s", scale_number, sequence_number, chord_number, get_note_name(get_currently_playing_root()).c_str());
+      return output;
+    }
+
+    /*char *get_bass_info_2() {
+      static char output[32];
+    
+      // auto scale, auto arp, auto progression, bass counter
+      sprintf(output, "as aa ap bc\n%c  %c  %c  %2i\n", bass_auto_scale ? 'Y' : 'N', bass_auto_arp ? 'Y' : 'N', bass_auto_progression ? 'Y' : 'N', bass_counter);
+      return output;
+    }*/
+    
 };
 
 

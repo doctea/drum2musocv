@@ -77,8 +77,8 @@ void handleControlChange(byte channel, byte number, byte value) {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     } else if (handle_euclidian_ccs(channel, number, value)) {
 
-    } else if (handle_bass_ccs(channel, number, value)) {
-      Serial.printf("Handled bass cc channel %i number %i value %i\r\n", channel, number, value);      
+    /*} else if (handle_bass_ccs(channel, number, value)) {
+      Serial.printf("Handled bass cc channel %i number %i value %i\r\n", channel, number, value);      */
     } else if (handle_ui_ccs(channel, number, value)) {
 
     } else if (handle_midiecho_ccs(channel, number, value)) {
