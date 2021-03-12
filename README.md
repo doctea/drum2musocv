@@ -1,5 +1,3 @@
-*WIP BRANCH FOR HARMONY STUFF*
-
 # drum2musocv
 
 Arduino sketch adapting the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-12/) to use General Midi note numbers on MIDI Channel 10, for easy use as a drum machine from a DAW.  
