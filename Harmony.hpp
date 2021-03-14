@@ -48,9 +48,9 @@ ChannelState autobass_input = ChannelState();   // tracking notes that are held
 #define CC_HARMONY_MUTATE_MODE  30
 
 #define CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
-#define NUM_SCALES             (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
-#define NUM_SEQUENCES          (sizeof(sequence) / sizeof(sequence[0]))              // how many sequences we know about in total
-#define HARM_SEQUENCE_LENGTH        ((int)(sizeof(sequence[0])/sizeof(sequence[0][0])))   // how many notes in arps
+#define NUM_SCALES                (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
+#define NUM_SEQUENCES             (sizeof(sequence) / sizeof(sequence[0]))              // how many sequences we know about in total
+#define HARM_SEQUENCE_LENGTH      ((int)(sizeof(sequence[0])/sizeof(sequence[0][0])))   // how many notes in arps
 
 #define SCALE_SIZE  7
 
@@ -156,15 +156,22 @@ class Harmony {
       last_melody_root = pitch;
 
       //if (DEBUG_HARMONY) 
-      Serial.printf("harmony.fire_melody() told to fire at root pitch %s? [%i]\r\n", get_note_name(pitch).c_str(), pitch);
+      Serial.printf("harmony.fire_melody()  told to fire at root pitch %s? [%i]\r\n", get_note_name(pitch).c_str(), pitch);
 
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing
-      } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
+      }/* else if (melody_mode==HARMONY::MELODY_MODE::ARPEGGIATE) {
         //if (DEBUG_HARMONY)
         pitch = channel_state.get_root_note() + get_scale_note(sequence[sequence_number][sequence_counter%HARM_SEQUENCE_LENGTH], get_chord_number());
+        last_melody_pitches[0] = pitch;
 
-        Serial.printf("    using single mode - sending pitch %i\r\n", pitch);
+        Serial.printf("    using arpeggiate mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
+        mko_keys.send_note_on(pitch, 127);    // send a single pitch
+      } */ else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
+        pitch = channel_state.get_root_note();// + get_scale_note(0, get_chord_number());
+        last_melody_pitches[0] = pitch;
+
+        Serial.printf("    using single mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
         mko_keys.send_note_on(pitch, 127);    // send a single pitch
       } else if (melody_mode==HARMONY::MELODY_MODE::CHORD) {
         if (DEBUG_HARMONY) Serial.println("    using chord mode for melody!");
@@ -177,20 +184,22 @@ class Harmony {
           memcpy(&last_melody_pitches, channel_state.get_held_notes(), 10*sizeof(int));
         } else {
           if (DEBUG_HARMONY) Serial.printf("   phrase is %i, beat %i, scale num %i: ", current_phrase, current_beat, get_scale_number()); 
-          if (DEBUG_HARMONY) Serial.printf("   about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), sequence[current_phrase%4][current_beat]);
+          if (DEBUG_HARMONY) Serial.printf("   about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), sequence[get_sequence_number()][sequence_counter]);
 
-          int sequence_offset = 0; //sequence[current_phrase%4][current_beat];
+          //int sequence_offset = 0; //sequence[current_phrase%4][current_beat];
           int chord_number = get_chord_number();
           int chord_type = current_bar%2==1 ?
                            HARMONY::CHORD_TYPE::SEVENTH : 
                            HARMONY::CHORD_TYPE::TRIAD; 
-          int inversion = random(0,2); //0; //current_bar==BARS_PER_PHRASE-1 ? current_beat : 0;
+          int inversion = current_bar==BARS_PER_PHRASE-1 ? current_beat : 0;
+          //int chord_type = 0;
+          //int inversion = 0;          
 
           // todo: move get_chord_number here (all it does is test mode we're in and return chord_progression number or 0?
           // todo: move arping logic here (currently hardcoded to arp thru sequence)
           memcpy(&last_melody_pitches, 
             get_notes_for_chord(
-              sequence[current_phrase%4][current_beat] + get_chord_number(),
+              sequence[get_sequence_number()%NUM_SEQUENCES][sequence_counter%HARM_SEQUENCE_LENGTH] + get_chord_number(),
               chord_type,
               inversion
             ), 
@@ -232,7 +241,7 @@ class Harmony {
       
       if (melody_mode==HARMONY::MELODY_MODE::CHORD) {
         mko_keys.send_note_off(last_melody_pitches, 127);
-      } else {
+      } else /* if (melody_mode==HARMONY::MELODY_MODE::SINGLE || melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE ) */{
         //if (channel_state.is_note_held()) {
           //mko_keys.send_note_off(channel_state.get_held_notes(), 0);
           mko_keys.send_note_off(last_melody_pitches, 0);
@@ -240,7 +249,7 @@ class Harmony {
           if (pitch>-1)
             mko_keys.send_note_off(pitch, 127);
         }*/
-      }
+      } 
       for (int i = 0 ; i < 10 ; i++)  // clear last played memory
         last_melody_pitches[i] = -1;
 
@@ -273,8 +282,8 @@ class Harmony {
         //pitch = channel_state.get_root_note() + bass_get_scale_note();
         // TODO: obey arp mode and adjust note to send accordingly
         if (DEBUG_HARMONY) Serial.printf("fire_bass > current beat is %i: sequence_number is %i, counter is %i, ", current_beat, sequence_number, sequence_counter);
-        if (DEBUG_HARMONY) Serial.printf("   chord number is %i, sequence result is %i, ", get_chord_number(), sequence[sequence_number][sequence_counter%HARM_SEQUENCE_LENGTH]);
-        pitch = channel_state.get_root_note() + get_scale_note(sequence[sequence_number][sequence_counter%HARM_SEQUENCE_LENGTH], get_chord_number());
+        if (DEBUG_HARMONY) Serial.printf("   chord number is %i, sequence result is %i, ", get_chord_number(), sequence[sequence_number%NUM_SEQUENCES][sequence_counter%HARM_SEQUENCE_LENGTH]);
+        pitch = channel_state.get_root_note() + get_scale_note(sequence[sequence_number%NUM_SEQUENCES][sequence_counter%HARM_SEQUENCE_LENGTH], get_chord_number());
         Serial.printf(" fire_bass seq=%i seq_cnt=%i chordnum=%i finds pitch %i\r\n", sequence_number, sequence_counter, get_chord_number(), pitch);
         if (DEBUG_HARMONY) Serial.printf("   resulting pitch is %i aka %s\r\n", pitch, get_note_name(pitch).c_str());
         //pitch = bass_get_sequence_pitch(bass_counter);
@@ -282,7 +291,7 @@ class Harmony {
         pitch = channel_state.get_sequence_held_note(sequence_counter);
       }
       //if (DEBUG_HARMONY) 
-      Serial.printf("harmony.fire_bass() told to fire pitch %i aka %s?\r\n", pitch, get_note_name(pitch).c_str());
+      Serial.printf("harmony.fire_bass()  told to fire pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
 
       //Serial.printf("mko_bass channel is %i\r\n", mko_bass.channel);
 
@@ -325,11 +334,11 @@ class Harmony {
     void mutate() {
       if (mutation_mode==HARMONY::MUTATION_MODE::RANDOMISE) {
         Serial.println("## HARMONY MUTATE - randomise!");
-        for (int i = 0 ; i < 4 ; i++) {
+        for (int i = 0 ; i < CHORD_PROGRESSION_LENGTH ; i++) {
           if (random(10)<2)
             chord_progression[i] = random(0,8);
             
-          for (int x = 0 ; x < 4 ; x++) {
+          for (int x = 0 ; x < HARM_SEQUENCE_LENGTH ; x++) {
             if (random(10)<5)
               sequence[i][x] = random(0,8);
           }
@@ -402,7 +411,7 @@ class Harmony {
 
     // get the currently active arp sequence index
     int get_sequence_number() {
-      if (auto_arp) {
+      if (arp_mode>0) { //auto_arp) {
         // choose the arp sequence automatically based on the current song position
         sequence_number = current_bar % NUM_SEQUENCES;
       } else {
@@ -417,7 +426,7 @@ class Harmony {
       if (auto_progression) {
         // automatically change chord based on our current song bar position
         return chord_progression[current_bar % CHORD_PROGRESSION_LENGTH] % SCALE_SIZE; // todo: make this select from lowest held note?
-      } 
+      }
       
       return 0; // default to root (default or whatever is held)
     }
