@@ -31,6 +31,7 @@ UI.h:#define CC_DEMO_MODE  19
 Bass.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Bass.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Bass.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+ChannelState.hpp:#define DEBUG_CHANNELSTATE  false
 Drums.h:#define GM_CHANNEL_DRUMS 10
 Drums.h:#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)

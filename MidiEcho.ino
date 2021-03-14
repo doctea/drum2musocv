@@ -66,12 +66,16 @@ bool handle_midiecho_ccs(int channel, int number, int value) {
 }
 
 String get_note_name(int pitch) {
+  if (pitch==-1) {
+    String s = "_"; //note_names[chromatic_degree] + String(octave);
+    return s;
+  }
   int octave = pitch / 12;
   int chromatic_degree = pitch % 12; 
   const String note_names[] = {
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
   };
-
+  
   String s = note_names[chromatic_degree] + String(octave);
   return s;
 }
