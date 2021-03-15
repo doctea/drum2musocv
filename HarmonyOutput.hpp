@@ -20,7 +20,7 @@ class MidiKeysOutput : public ChannelState {
       //Serial.printf("send_note_on!\r\n");
       if (DEBUG_HARMONY) Serial.printf(">>> Start ON for multiples on c%i, held: %s\r\n", channel, get_debug_notes_held());
 
-      Serial.printf("   channel %i HarmonyOutput playing chord: [", channel);
+      Serial.printf("   channel %i HarmonyOutput playing chord: [ ", channel);
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]>-1) Serial.printf("%s ", get_note_name(pitches[i]).c_str());
       }
@@ -122,6 +122,11 @@ class MidiKeysOutput : public ChannelState {
         MIDIIN.sendControlChange (123, 0, channel);   // 123 = kill all notes - for midiecho back to host
     }
 
+    void set_octave_offset(int offset) {
+      octave_offset = offset;
+      send_note_off(held_notes);
+      handle_all_notes_off();
+    }
     
   private:
     int channel = 0;

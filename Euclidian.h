@@ -39,12 +39,9 @@ enum mutate_modes : int {
 };
 int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 
-int euclidian_seed_modifier = 0;
-int euclidian_seed_modifier_2 = 0;
 int euclidian_mutate_minimum_pattern = DEFAULT_MUTATE_MINIMUM_PATTERN; // default 1 so that kick never mutates
 int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
-bool euclidian_seed_use_phrase      = true;
 bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
 
 bool mutate_enabled   = false;

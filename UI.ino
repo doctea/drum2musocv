@@ -49,6 +49,10 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
             ui_last_action = ACTION_RESET_EUCLIDIAN;
 
             initialise_euclidian();
+            
+            harmony.reset_progression();
+            harmony.reset_sequence();
+            
           } else if ( event==EVENT_RELEASED && length<=500  ) {
             should_kill = euclidian_set_auto_play(!euclidian_auto_play);
             Serial.printf(">>> UI Setting auto-play in Euclidian mode to %c!\r\n", euclidian_auto_play ? 'Y' : 'N');

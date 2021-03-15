@@ -23,6 +23,9 @@ Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp 
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29
 Harmony.hpp:#define CC_HARMONY_MUTATE_MODE  30
+Harmony.hpp:#define CC_AUTO_PROGRESSION   31
+Harmony.hpp:#define CC_AUTO_CHORD_TYPE    105
+Harmony.hpp:#define CC_AUTO_CHORD_INVERSION    106
 MidiEcho.h:#define CC_MIDIECHO_ENABLED   21
 MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks

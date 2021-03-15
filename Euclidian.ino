@@ -16,6 +16,7 @@
 #define EUC_printf(fmt, ...) do { if (EUC_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
+
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1) {
   // fill pattern_t according to parameters
 
@@ -134,16 +135,18 @@ void process_euclidian(int ticks) {
         EUC_println("Resetting euclidian before mutation!");
         initialise_euclidian();
       }
+      
+      if (euclidian_reset_before_mutate) {
+        harmony.reset_progression();
+        harmony.reset_sequence();
+      }
 
       bool should_mutate = mutate_enabled;
 
       if (should_mutate) {
         harmony.mutate();
-        
-        unsigned long seed = euclidian_seed_modifier;
-        if (euclidian_seed_modifier_2 > 0) seed *= (256 + euclidian_seed_modifier_2 * 2);
-        if (euclidian_seed_use_phrase) seed += current_phrase + 1;
-        if (seed == 0) seed = 1;
+  
+        unsigned long seed = get_euclidian_seed();
         EUC_printf("Euclidian seed: %i\n", seed);
         randomSeed(seed);
   
