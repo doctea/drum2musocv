@@ -66,7 +66,7 @@ bool handle_midiecho_ccs(int channel, int number, int value) {
 }
 
 String get_note_name(int pitch) {
-  if (pitch==-1) {
+  if (pitch==-1 || pitch>127) {
     String s = "_"; //note_names[chromatic_degree] + String(octave);
     return s;
   }

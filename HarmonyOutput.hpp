@@ -20,9 +20,9 @@ class MidiKeysOutput : public ChannelState {
       //Serial.printf("send_note_on!\r\n");
       if (DEBUG_HARMONY) Serial.printf(">>> Start ON for multiples on c%i, held: %s\r\n", channel, get_debug_notes_held());
 
-      Serial.printf("   channel %i HarmonyOutput playing chord: [ ", channel);
+      Serial.printf("   channel %i HarmonyOutput  playing chord: [ ", channel);
       for (int i = 0 ; i < 10 ; i++) {
-        if (pitches[i]>-1) Serial.printf("%s ", get_note_name(pitches[i]).c_str());
+        if (pitches[i]>-1) Serial.printf("%s\t", get_note_name(pitches[i]).c_str());
       }
       Serial.println("]");
       for (int i = 0 ; i < 10 ; i++) {
@@ -42,11 +42,15 @@ class MidiKeysOutput : public ChannelState {
       //Serial.println("--- starting send_note_off [multiple]");
       if (DEBUG_HARMONY) Serial.printf("Begin OFF for channel %i, notes held: %s\r\n", channel, get_debug_notes_held());
 
+      Serial.printf("   channel %i HarmonyOutput stopping chord: [ ", channel);
+      for (int i = 0 ; i < 10 ; i++) {
+        if (pitches[i]>-1) Serial.printf("%s\t", get_note_name(pitches[i]).c_str());
+      }
+      Serial.println("]");
       
       // output debug info about multiple notes off sent
       if (DEBUG_HARMONY) {
         Serial.printf("   channel %i told to turn off notes: [", channel);
-  
         for (int i = 0 ; i < 10 ; i++) {
           if (pitches[i]>-1) Serial.printf("%i, ", pitches[i]);
         }

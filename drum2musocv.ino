@@ -98,6 +98,8 @@ void setup() {
 
   bpm_reset_clock();
 
+  //initialise_harmony();
+
   initialise_euclidian();
 
   //initialise_bass();
@@ -110,6 +112,9 @@ void setup() {
   kill_envelopes();
 
   Serial.println("---> Bambleweeny57 setup done! <---");
+
+  harmony.debug_inversions();
+  
 }
 
 void loop() {
