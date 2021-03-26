@@ -19,6 +19,8 @@ Euclidian.h:#define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pat
 Euclidian.h:#define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
 Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
 Euclidian.h:#define CC_EUCLIDIAN_FILLS                28
+Harmony.hpp:#define CC_CHANNEL_BASS_OUT 12
+Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS 13
 Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29
@@ -26,20 +28,24 @@ Harmony.hpp:#define CC_HARMONY_MUTATE_MODE  30
 Harmony.hpp:#define CC_AUTO_PROGRESSION   31
 Harmony.hpp:#define CC_AUTO_CHORD_TYPE    105
 Harmony.hpp:#define CC_AUTO_CHORD_INVERSION    106
+Harmony.hpp:#define CC_MELODY_OCTAVE_OFFSET   107
+Harmony.hpp:#define CC_MELODY_SCALE   108
+Harmony.hpp:#define CC_MELODY_AUTO_SCALE   109
 MidiEcho.h:#define CC_MIDIECHO_ENABLED   21
 MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks
 UI.h:#define CC_DEMO_MODE  19
+UI.ino:#define CC_CHANNEL_BITBOX_OUT 14
+UI.ino:#define CC_CHANNEL_GATE_OUT   15
 
 Bass.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Bass.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Bass.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
-ChannelState.hpp:#define DEBUG_CHANNELSTATE  false
-Drums.h:#define GM_CHANNEL_DRUMS 10
-Drums.h:#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
-Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Harmony.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Harmony.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
-Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
-MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_OUT 11
-MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT     (harmony.get_midi_channel_bass_out())
+Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
+MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
+MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_OUT (midi_channel_bitbox_out)

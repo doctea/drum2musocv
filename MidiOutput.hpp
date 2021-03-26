@@ -1,10 +1,10 @@
 #ifndef MIDIOUTPUT_INCLUDED
 #define MIDIOUTPUT_INCLUDED
 
-#define BITBOX_NOTE_MINIMUM     36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
-#define BITBOX_KEYS_OCTAVE_OFFSET 2
-#define MIDI_CHANNEL_BITBOX_OUT 11
-#define MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
+#define MIDI_CHANNEL_BITBOX_OUT (midi_channel_bitbox_out)
+
+int midi_channel_bitbox_out = DEFAULT_MIDI_CHANNEL_BITBOX_OUT;
 
 #include "MidiSetup.hpp"
 #include "Envelopes.h"    // for access to envelope info
@@ -23,15 +23,19 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = v > 0; // TRIGGER_IS_ON;
-    MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL);
-    MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    if (MUSO_GATE_CHANNEL>0) 
+      MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL);
+    if (MIDI_CHANNEL_BITBOX_OUT>0) 
+      MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOn(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
   } else if (
     //Serial.printf("is an envelope trigger!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
-    MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
+    if (MUSO_GATE_CHANNEL>0) 
+      update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
+    if (MIDI_CHANNEL_BITBOX_OUT>0) 
+      MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
     //MIDIOUT.sendNoteOn(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);  // also send trigger for the envelopes
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //Serial.printf(">> got BASS trigger!\r\n");
@@ -53,15 +57,19 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
-    MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
-    MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    if (MUSO_GATE_CHANNEL>0) 
+      MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+    if (MIDI_CHANNEL_BITBOX_OUT>0) 
+      MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //Serial.printf("fired a note OFF to bit box: %i\r\n", i);
   } else if (
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
-    MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    if (MUSO_GATE_CHANNEL>0) 
+      update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
+    if (MIDI_CHANNEL_BITBOX_OUT>0) 
+      MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_KEYS);
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     harmony.douse_both(); //bass_note_off();
@@ -110,15 +118,38 @@ void midi_bass_send_note_off(int pitch, int velocity, int channel) {
   // todo: move echo back to host stuff into MidiEcho
 }*/
 
+
+void midi_kill_notes_bitbox() {
+  if (MIDI_CHANNEL_BITBOX_OUT>0) {
+    MIDIOUT.sendControlChange (123, 0, MIDI_CHANNEL_BITBOX_OUT);   // 123 = kill all notes
+    if (midiecho_enabled)
+      MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+  }
+}
+void midi_kill_notes_muso() {
+  if (MUSO_GATE_CHANNEL>0) {
+    MIDIOUT.sendControlChange (123, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
+    if (midiecho_enabled)
+      MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+  }  
+}
+
 void midi_kill_notes() {
-  MIDIOUT.sendControlChange (123, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
-  if (midiecho_enabled)
-    MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+  /*if (MUSO_GATE_CHANNEL>0) {
+    MIDIOUT.sendControlChange (123, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
+    if (midiecho_enabled)
+      MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+  }*/
+  midi_kill_notes_muso();
+  midi_kill_notes_bitbox();
   harmony.kill_notes();
 }
 
+
+
 void kill_notes() {
   // forget which triggers are active
+  Serial.println("!!!! kill_notes called!");
   douse_all_triggers(true);
   //activeNotes = 0;
 

@@ -57,9 +57,10 @@
 #define GM_NOTE_OPEN_TRIANGLE 81
 #define GM_NOTE_MAXIMUM 81
 
-
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
-#define MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
+#define DEFAULT_MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
+int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
+#define MUSO_GATE_CHANNEL   (midi_channel_muso_gate)
 #define MUSO_NOTE_MINIMUM   60
 #define MUSO_NOTE_GATE_1    60
 #define MUSO_NOTE_GATE_2    61

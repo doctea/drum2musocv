@@ -14,7 +14,19 @@
 // CONFIGURATION: messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron (TODO: probably move this to a dedicated config file)
 #define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 #define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
-#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+#define DEFAULT_MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+
+#define MIDI_CHANNEL_BASS_OUT     (harmony.get_midi_channel_bass_out())
+#define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
+
+//BITBOX/melody settings
+#define BITBOX_NOTE_MINIMUM     36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
+#define BITBOX_KEYS_OCTAVE_OFFSET 2
+
+#define CC_CHANNEL_BASS_OUT 12
+#define CC_CHANNEL_BITBOX_KEYS 13
+
 
 #define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 #define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
@@ -70,6 +82,15 @@ int scale_offset[][SCALE_SIZE] = {
   { 0, 3, 5, 6, 7, 10, (12) },  // blues - flavours for matching melody to chords
   // minor pent = natural minor but miss out 2nd and 8th
   // major pent = major but miss out 5th and 11th
+
+  // mode of C - use chord but use the scale of
+  // dorian D E F G A B C D
+  //         2 1 2 2 2 2 2 
+  // 6 modes per scale
+
+  // relative major/minor are modes of each other
+  //    C maj is also A minor
+  
 };
 
 namespace HARMONY {
@@ -158,8 +179,9 @@ class Harmony {
     bool auto_chord_inversion = true;
     bool only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
 
-
-    int default_chord_progression[4]    =   { 0, 5, 1, 4 };     // chord progression
+    int default_chord_progression[4]    =   { 
+      0, 5, 1, 4 
+    };     // chord progression
     int default_sequence[4][4]     =   { // degrees of scale to play per chord -- ie, arp patterns
       { 0, 0, 0, 0 },
       { 0, 0, 0, 1 },
@@ -442,6 +464,7 @@ class Harmony {
     }
 
     void kill_notes() {
+        Serial.println("harmony.kill_notes() called!");
         mko_bass.send_all_notes_off();
         mko_keys.send_all_notes_off();
     }
@@ -876,7 +899,7 @@ class Harmony {
         auto_chord_inversion = value>0;
         return true;
       } else if (number==CC_MELODY_OCTAVE_OFFSET) {
-        mko_keys.set_octave_offset(constrain(value-3, -3, 3));
+        mko_keys.set_octave_offset(constrain(value-2, -2, 3));
         douse_melody();
         return true;
       } else if (number==CC_MELODY_SCALE) {
@@ -889,11 +912,23 @@ class Harmony {
         //mko_keys.set_octave_offset(constrain(value-3, -3, 3));
         auto_scale = value>0;
         return true;
-      } 
+      } else if (number==CC_CHANNEL_BASS_OUT) {
+        mko_bass.set_midi_channel(value);
+        return true;
+      } else if (number==CC_CHANNEL_BITBOX_KEYS) {
+        mko_keys.set_midi_channel(value);
+        return true;
+      }
 
       return false;
     }    
 
+    int get_midi_channel_bass_out() {
+      return mko_bass.channel;
+    }
+    int get_midi_channel_bitbox_keys() {
+      return mko_keys.channel;
+    }
     
     void set_arp_mode(int mode) {
       arp_mode = mode % ARP_MODE_MAX;
@@ -925,8 +960,8 @@ class Harmony {
 };
 
 
-MidiKeysOutput mkob = MidiKeysOutput(MIDI_CHANNEL_BASS_OUT);
-MidiKeysOutput mkok = MidiKeysOutput(MIDI_CHANNEL_BITBOX_KEYS, DEFAULT_MELODY_OFFSET);  // with octave offset
+MidiKeysOutput mkob = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT);
+MidiKeysOutput mkok = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS, DEFAULT_MELODY_OFFSET);  // with octave offset
 
 // for use globally
 
