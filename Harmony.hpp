@@ -251,6 +251,11 @@ class Harmony {
         pitch = channel_state.get_root_note() + get_scale_note(
                         arp_mode>0 ? sequence[ get_sequence_number() ][ sequence_counter%HARM_SEQUENCE_LENGTH ] : 0, 
                         get_chord_number());
+        /*if (arp_mode>0) { // select from the current chord
+          pitch = get_notes_for_chord(get_chord_number()) [ sequence_counter%HARM_SEQUENCE_LENGTH ];
+        } else {
+          pitch = channel_state.get_root_note() + get_scale_note(get_chord_number());
+        }*/
       }
     
       last_melody_root = pitch;
@@ -414,6 +419,11 @@ class Harmony {
                         arp_mode>0 ? sequence[ get_sequence_number() ][ sequence_counter%HARM_SEQUENCE_LENGTH ] : 0, 
                         get_chord_number()
                     );
+        /*if (arp_mode>0) { // select from the current chord
+          pitch = get_notes_for_chord(get_chord_number()) [ sequence_counter%HARM_SEQUENCE_LENGTH ];
+        } else {
+          pitch = channel_state.get_root_note() + get_scale_note(get_chord_number());
+        }*/
         
         if (DEBUG_HARMONY) Serial.printf(" fire_bass : root %i : seq %i : seq_cnt %i : chordnum %i, ", channel_state.get_root_note(), get_sequence_number(), sequence_counter, get_chord_number()  );
         if (DEBUG_HARMONY) Serial.printf("  : scalenote %i : finds pitch %i\r\n", get_scale_note(sequence[get_sequence_number()][sequence_counter%HARM_SEQUENCE_LENGTH]), pitch);
