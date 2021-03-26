@@ -26,7 +26,7 @@
 
 #define CC_CHANNEL_BASS_OUT 12
 #define CC_CHANNEL_BITBOX_KEYS 13
-
+#define CC_MELODY_ROOT 11
 
 #define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 #define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
@@ -917,6 +917,10 @@ class Harmony {
         return true;
       } else if (number==CC_CHANNEL_BITBOX_KEYS) {
         mko_keys.set_midi_channel(value);
+        return true;
+      } else if (number==CC_MELODY_ROOT) {
+        if (channel_state.set_midi_root_pitch(value)) // sets but returns false if no change
+          kill_notes();
         return true;
       }
 

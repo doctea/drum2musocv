@@ -121,16 +121,16 @@ void midi_bass_send_note_off(int pitch, int velocity, int channel) {
 
 void midi_kill_notes_bitbox() {
   if (MIDI_CHANNEL_BITBOX_OUT>0) {
-    MIDIOUT.sendControlChange (123, 0, MIDI_CHANNEL_BITBOX_OUT);   // 123 = kill all notes
+    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_BITBOX_OUT);   // 123 = kill all notes
     if (midiecho_enabled)
-      MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }
 }
 void midi_kill_notes_muso() {
   if (MUSO_GATE_CHANNEL>0) {
-    MIDIOUT.sendControlChange (123, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
+    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
     if (midiecho_enabled)
-      MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
+      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }  
 }
 

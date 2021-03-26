@@ -125,7 +125,7 @@ void process_euclidian(int ticks) {
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
 
-  if (is_bpm_on_step) { 
+  if (is_bpm_on_step) {
     // TODO: configurable mutation frequency
     // start of phrase or middle of phrase
     if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars

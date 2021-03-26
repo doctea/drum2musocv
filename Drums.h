@@ -87,6 +87,9 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 
 #define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 
+
+#define MIDI_CC_ALL_NOTES_OFF 123
+
 // tracking what triggers are currently active, for the sake of pixel output 
 int trigger_status[NUM_TRIGGERS];
 

@@ -69,8 +69,7 @@ class MidiKeysOutput : public ChannelState {
       
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]>=0) {
-          //if (DEBUG_HARMONY) 
-          Serial.printf("send_note_off %i with list, sending %i\r\n", i, pitches[i]);
+          if (DEBUG_HARMONY)  Serial.printf("send_note_off %i with list, sending %i\r\n", i, pitches[i]);
           send_note_off(pitches[i], velocity); //velocity[i]);
         } else {
           break;
@@ -131,13 +130,15 @@ class MidiKeysOutput : public ChannelState {
       handle_all_notes_off();
 
       if (channel>0) {
+        if (is_note_held())
+          send_note_off(held_notes);
         Serial.printf("send_all_notes_off sending off on channel %i!\r\n", channel);
-        MIDIOUT.sendControlChange (123, 0, channel);   // 123 = kill all notes
+        MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
         /*for (int i = 0 ; i < 127 ; i++) {
           MIDIOUT.sendNoteOff(i, 0, channel);
         }*/
         if (midiecho_enabled)
-          MIDIIN.sendControlChange (123, 0, channel);   // 123 = kill all notes - for midiecho back to host
+          MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes - for midiecho back to host
       }
     }
 

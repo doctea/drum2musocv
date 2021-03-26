@@ -13,7 +13,8 @@ class ChannelState {
 
 private:
 #define HELD_NOTES_MAX (sizeof(held_notes)/sizeof(held_notes[0]))
-    
+
+    int midi_root_pitch = MIDI_BASS_ROOT_PITCH;
     int held_notes_count = 0;
     bool note_held = false;
 
@@ -128,8 +129,19 @@ private:
         return lowest;*/
         return held_notes[0];
       } else {
-        return MIDI_BASS_ROOT_PITCH;
+        //return MIDI_BASS_ROOT_PITCH;
+        return midi_root_pitch;
       }
+    }
+
+    // returns true if value was changed
+    bool set_midi_root_pitch(int pitch) {
+      int last_pitch = midi_root_pitch;
+      //if (midi_root_pitch==pitch) return;
+      
+      //harmony.kill_notes();
+      midi_root_pitch = pitch;
+      return last_pitch!=midi_root_pitch;
     }
 
     // is specific pitch currently held?

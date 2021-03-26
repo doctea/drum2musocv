@@ -84,7 +84,9 @@ void handleControlChange(byte channel, byte number, byte value) {
     } else if (handle_midiecho_ccs(channel, number, value)) {
 
     } else if (harmony.handle_ccs(channel, number, value)) {
-      
+
+    } else if (number==MIDI_CC_ALL_NOTES_OFF) {
+      midi_kill_notes();      
     } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
     }

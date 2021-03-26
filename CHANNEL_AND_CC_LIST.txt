@@ -7,6 +7,7 @@ Drums.h:#define MUSO_CC_CV_4  71
 Drums.h:#define MUSO_CC_CV_5  74
 Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
+Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
 Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
@@ -21,6 +22,7 @@ Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed ac
 Euclidian.h:#define CC_EUCLIDIAN_FILLS                28
 Harmony.hpp:#define CC_CHANNEL_BASS_OUT 12
 Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS 13
+Harmony.hpp:#define CC_MELODY_ROOT 11
 Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29
