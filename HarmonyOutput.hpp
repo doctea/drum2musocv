@@ -92,7 +92,8 @@ class MidiKeysOutput : public ChannelState {
         handle_note_on((byte)pitch);
         
         pitch += (12*octave_offset);
-  
+
+        //Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
         MIDIOUT.sendNoteOn(pitch, velocity, channel);
         if (midiecho_enabled)
           MIDIIN.sendNoteOn(pitch, velocity, channel);  // echo back to host
@@ -105,41 +106,41 @@ class MidiKeysOutput : public ChannelState {
       //if (!bass_currently_playing && (!bpm_internal_mode && bass_only_note_held && !autobass_input.is_note_held()))
       //  return;
 
+      if (channel==0) return;
+
       if (pitch==-1) 
         return;
 
       if (is_note_held((int)pitch)) {
         //Serial.printf("actual send_note_off, pitch %i is indeed held\r\n", pitch);
-        if (channel>0) {
-          handle_note_off((byte)pitch);
+        handle_note_off((byte)pitch);
 
-          pitch += (12*octave_offset);
+        pitch += (12*octave_offset);
 
-          //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
-          //Serial.printf("actual send_note_off for pitch %i on channel %i\r\n", pitch, channel);
-          MIDIOUT.sendNoteOff(pitch, velocity, channel);
-          if (midiecho_enabled)
-            MIDIIN.sendNoteOff(pitch, velocity, channel);  // echo back to host 
-        }
+        //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
+        //Serial.printf("actual send_note_off for pitch %i on channel %i\r\n", pitch, channel);
+        MIDIOUT.sendNoteOff(pitch, velocity, channel);
+        if (midiecho_enabled)
+          MIDIIN.sendNoteOff(pitch, velocity, channel);  // echo back to host 
       } else {
         Serial.printf("WARN: send_note_off told to OFF for pitch %i, but we think it isn't held\r\n", pitch);
       }
     }
 
     void send_all_notes_off() {
+      if (channel==0) return;
+      
+      if (is_note_held())
+        send_note_off(held_notes);
+      Serial.printf("send_all_notes_off sending off on channel %i!\r\n", channel);
+      MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
+      /*for (int i = 0 ; i < 127 ; i++) {
+        MIDIOUT.sendNoteOff(i, 0, channel);
+      }*/
+      if (midiecho_enabled)
+        MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes - for midiecho back to host
+      
       handle_all_notes_off();
-
-      if (channel>0) {
-        if (is_note_held())
-          send_note_off(held_notes);
-        Serial.printf("send_all_notes_off sending off on channel %i!\r\n", channel);
-        MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
-        /*for (int i = 0 ; i < 127 ; i++) {
-          MIDIOUT.sendNoteOff(i, 0, channel);
-        }*/
-        if (midiecho_enabled)
-          MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes - for midiecho back to host
-      }
     }
 
     void set_octave_offset(int offset) {

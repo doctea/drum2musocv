@@ -181,9 +181,15 @@ void process_midi() {
           harmony.douse_both(); //bass_note_off();
         }
       }
-    } /*else if (MIDIIN.getChannel()==15) {
-      harmony.debug_inversions();
-    }*/
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   MIDI_CHANNEL_BITBOX_KEYS
+      );
+      /* }else if (MIDIIN.getChannel()==15) {
+      harmony.debug_inversions();*/
+    }
     //todo: accept a note on another channel to set the root..?
     //      or actually, have CCs to set the root note, scale, etc..?
     // have separate midi input channels, one dedicated to triggering the autoplayer, and one for doing direct control, both output to the MIDI_CHANNEL_BASS_OUT

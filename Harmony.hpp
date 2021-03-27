@@ -14,6 +14,7 @@
 // CONFIGURATION: messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron (TODO: probably move this to a dedicated config file)
 #define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 #define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
+#define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords
 #define DEFAULT_MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
 #define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
 

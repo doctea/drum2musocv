@@ -228,6 +228,41 @@ void process_euclidian(int ticks) {
     }
 
     EUC_println("");
+  } else if (ticks%(PPQN/4/2)==0) {  // half-steps
+    //Serial.println("### half-step tick");
+
+    for (int i = 0 ; i < NUM_PATTERNS ; i++) {
+      //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+      if (!patterns[i].active_status) continue;
+      if (patterns[i].duration==0) {
+        Serial.println("########### half-step douse_trigger");
+        douse_trigger(i,127,true);
+      } else {
+        //Serial.printf("skipping %i cos duration is %i", i, patterns[i].duration);
+      }
+
+      /*if (query_pattern(&patterns[i], current_step, 0, current_bar)) {  // step trigger
+        douse_trigger(i, 127, true);
+        fire_trigger(i, 127, true);
+        if (i < 16) {
+          EUC_printf("%01X", i); // print as hex
+        } else {
+          //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
+          EUC_printf("%3s ", get_note_name(harmony.get_currently_playing_root()).c_str()); // for bass note indicator
+        }
+        //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
+        EUC_printf(" ");
+      } else if (query_pattern_note_off(&patterns[i], current_step, current_bar)) {  // step kill
+        douse_trigger(i, 127, true);
+        // TODO: turn off according to some other thing.. eg cut groups?
+        if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
+        EUC_printf(".", i); EUC_printf(" ");
+      } else {
+        EUC_printf("  ");
+        if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
+      }*/
+    }
+    
   }
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
@@ -258,7 +293,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[7],   LEN/4,  2, 3,   DEFAULT_DURATION);    // low tom
   make_euclid(&patterns[8],   LEN/2,  2, 3,   DEFAULT_DURATION);    // pedal hat
   make_euclid(&patterns[9],   LEN,    4, 3,   DEFAULT_DURATION);    // open hat
-  make_euclid(&patterns[10],  LEN,    16, 1,  DEFAULT_DURATION);   // closed hat
+  make_euclid(&patterns[10],  LEN,    16, 0,  0); //DEFAULT_DURATION);   // closed hat
   make_euclid(&patterns[11],  LEN*2,  1 , 1,  DEFAULT_DURATION);   // crash 2
   make_euclid(&patterns[12],  LEN*2,  1 , 5,  DEFAULT_DURATION);   // splash
   make_euclid(&patterns[13],  LEN*2,  1, 9,   DEFAULT_DURATION);    // vibra
