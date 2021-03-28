@@ -53,7 +53,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
 void douse_trigger(byte t, byte v = 0, bool internal = false) {
   byte p = MUSO_NOTE_MINIMUM + t;
   byte b = BITBOX_NOTE_MINIMUM + t;
-  if (
+  if (                                                  // a gate trigger
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
@@ -63,7 +63,7 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
       MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //Serial.printf("fired a note OFF to bit box: %i\r\n", i);
-  } else if (
+  } else if (                                           // an envelope trigger
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     if (MUSO_GATE_CHANNEL>0) 
@@ -71,7 +71,7 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
     if (MIDI_CHANNEL_BITBOX_OUT>0) 
       MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_KEYS);
-  } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+  } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {  // harmony trigger
     harmony.douse_both(); //bass_note_off();
   } else {
     Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
@@ -84,6 +84,7 @@ void douse_all_triggers(bool internal = false) {
   for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES + 1 ; i++) {
     douse_trigger(i, 0, internal);
   }
+  kill_envelopes(); // force envelopes to shush
 }
 
 void midi_send_envelope_level(byte envelope, byte level) {
