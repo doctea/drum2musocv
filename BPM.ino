@@ -2,7 +2,7 @@
 
 #include "MidiInput.hpp"
 
-
+bpm_status bpm = bpm_status();
 
 void bpm_update_status( unsigned int received_ticks ) {
   current_total_step = (received_ticks/TICKS_PER_STEP);

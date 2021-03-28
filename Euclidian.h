@@ -25,6 +25,9 @@
 #define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
 #define CC_EUCLIDIAN_FILLS                28
 
+#define CC_EUCLIDIAN_HIHAT_SHUFF          9
+#define CC_EUCLIDIAN_CLAP_FLAM            8
+
 // so need master "mutate enabled"
 //    and then sub-options within that:-
 //      mutate with masking
@@ -49,6 +52,9 @@ bool mask_enabled     = false;
 bool euclidian_fills_enabled = true;
 
 bool euclidian_auto_play = true;
+
+bool euclidian_shuffle_hats = true;
+bool euclidian_flam_clap = true;
 
 typedef struct {
   bool active_status = true;

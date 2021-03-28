@@ -241,6 +241,8 @@ class Harmony {
         return;
       }
 
+      douse_melody();
+
       // find the pitch to play
       int pitch = MIDI_BASS_ROOT_PITCH;
       pitch = channel_state.get_root_note();
@@ -395,6 +397,7 @@ class Harmony {
         return;
       }
 
+      douse_bass();
 
       // todo: make this actually work again.. 
       if (arp_mode==ARP_MODE_PER_BEAT)
@@ -562,14 +565,14 @@ class Harmony {
       } /*else if (sd>SCALE_SIZE) {
         oct = 1;
       }*/
-      HARM_printf("final oct:sd is %i:%i", oct, sd);
+      HARM_printf("final oct:sd is %i:%i, sdMscale_size %i", oct, sd, sd % SCALE_SIZE);
    
       int r = scale_offset[scale_number][sd % SCALE_SIZE]
               +
               (oct * 12)
               ;
     
-      HARM_printf(" -- final note is %i\r\n", r);
+      HARM_printf(" -- final pitch is %i (%s)\r\n", r, get_note_name(channel_state.get_root_note()+r).c_str());
 //#define HARM_DEBUG 0
       return r;
     }
@@ -769,7 +772,7 @@ class Harmony {
 
       do_inversion(pitches, inversion);
       
-      Serial.printf("get_chord_notes for scale %i : chord %i : inversion %i : chord_type %i : [ ", get_scale_number(), chord, inversion, chord_type);
+      Serial.printf("get_chord_notes for rn %i : scale %i : chord %i : inversion %i : chord_type %i : [ ", channel_state.get_root_note(), get_scale_number(), chord, inversion, chord_type);
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]>-1) Serial.printf("%s ", get_note_name(pitches[i]).c_str());
       }

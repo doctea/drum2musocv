@@ -17,6 +17,8 @@
 #define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
 
+bpm_status bpm_statuses[NUM_PATTERNS];
+
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1) {
   // fill pattern_t according to parameters
 
@@ -181,6 +183,7 @@ void process_euclidian(int ticks) {
       }
     }
 
+    /*
     // its a beat!
     //EUC_printf(" >>STEP %2.2u", current_step);
     //EUC_printf(" >>BEAT %1.1u", current_beat);
@@ -192,7 +195,7 @@ void process_euclidian(int ticks) {
       //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
       if (!patterns[i].active_status) continue;
 
-      if (query_pattern(&patterns[i], current_step, 0 /*offset*/, current_bar)) {  // step trigger
+      if (query_pattern(&patterns[i], current_step, 0 , current_bar)) {  // step trigger
         douse_trigger(i, 127, true);
         fire_trigger(i, 127, true);
         if (i < 16) {
@@ -227,19 +230,21 @@ void process_euclidian(int ticks) {
       EUC_printf(" [%s]", autobass_input.get_debug_notes_held());
     }
 
-    EUC_println("");
+    EUC_println("");*/
+
+    
   } else if (ticks%(PPQN/4/2)==0) {  // half-steps
     //Serial.println("### half-step tick");
 
     for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+      /*//EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
       if (!patterns[i].active_status) continue;
       if (patterns[i].duration==0) {
         Serial.println("########### half-step douse_trigger");
         douse_trigger(i,127,true);
       } else {
         //Serial.printf("skipping %i cos duration is %i", i, patterns[i].duration);
-      }
+      }*/
 
       /*if (query_pattern(&patterns[i], current_step, 0, current_bar)) {  // step trigger
         douse_trigger(i, 127, true);
@@ -264,6 +269,69 @@ void process_euclidian(int ticks) {
     }
     
   }
+
+  for (int i = 0 ; i < NUM_PATTERNS ; i++) {
+    //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
+    if (!patterns[i].active_status) continue;
+    int stutter = 0; //i-NUM_PATTERNS/2;
+    if (euclidian_shuffle_hats) {
+      if (i==10||i==9) { // hats
+        //if (!is_bpm_on_beat && is_bpm_on_step) { // && current_step%2==0) {
+          //stutter = random(-2,2); //1+current_step%STEPS_PER_BEAT;
+          //stutter = current_step%STEPS_PER_BEAT;
+        //}
+        if (!is_bpm_on_beat)
+          stutter = -1 + (current_step%3);
+          //stutter = -2 + (received_ticks-2%(PPQN/TICKS_PER_STEP/2));  // hyperfast !
+          //stutter = (-1*(TICKS_PER_STEP/2)) + (ticks%(TICKS_PER_STEP));  // hyperfast !
+          //stutter = -(TICKS_PER_STEP/2) + (ticks%(TICKS_PER_STEP));  
+          //stutter = (received_ticks%(TICKS_PER_STEP)) - (TICKS_PER_STEP);
+          //stutter = -TICKS_PER_STEP/2 + (received_ticks%(TICKS_PER_STEP));
+      }
+    }
+    if (euclidian_flam_clap) {
+      if (i==2) { // clap
+        if (!is_bpm_on_beat && current_beat>=2) {
+          stutter = +3;
+        }
+      }
+    }
+    bpm_status bs = bpm_status();
+    bs.update(ticks + stutter);
+
+    bool should_douse = false;
+    if (patterns[i].duration==0 && (stutter+ticks)%(PPQN/4/2)==0) {
+      douse_trigger(i, 127, true);
+      should_douse = true;
+    }
+    
+    if(bs.is_bpm_on_step) {
+      /*if (i==10||i==9||i==2) { //stutter!=0) {
+        Serial.printf("stuttering %i for pattern %i !\r\n", stutter, i);
+      }*/
+      if (query_pattern(&patterns[i], bs.current_step, 0 , bs.current_bar)) {  // step trigger
+        //douse_trigger(i, 127, true);
+        fire_trigger(i, 127, true);
+        if (i < 16) {
+          //EUC_printf("%01X", i); // print as hex
+        } else {
+          //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
+          //EUC_printf("%3s ", get_note_name(harmony.get_currently_playing_root()).c_str()); // for bass note indicator
+        }
+        //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
+        //EUC_printf(" ");
+      } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
+        douse_trigger(i, 0, true);
+        // TODO: turn off according to some other thing.. eg cut groups?
+        if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
+        //EUC_printf(".", i); EUC_printf(" ");
+      } else {
+        //EUC_printf("  ");
+        if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
+      }
+    }
+  }
+  
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
@@ -399,6 +467,13 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     return true;
   } else if (number == CC_EUCLIDIAN_FILLS) {
     euclidian_fills_enabled = value > 0;
+    return true;
+  } else if (number == CC_EUCLIDIAN_HIHAT_SHUFF) {
+    euclidian_shuffle_hats = value > 0;
+    return true;
+  } else if (number == CC_EUCLIDIAN_CLAP_FLAM) {
+    euclidian_flam_clap = value >0;
+    return true;
   }
   /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
     euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);

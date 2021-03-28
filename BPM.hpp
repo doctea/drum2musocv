@@ -38,7 +38,6 @@ int current_song_position = 0;
 
 unsigned int song_position; // number of beats in total
 
-
 bool is_bpm_on_beat = false;
 bool is_bpm_on_step = false;
 bool is_bpm_on_bar  = false;
@@ -75,5 +74,45 @@ unsigned int get_euclidian_seed() {
   if (seed == 0) seed = 1;
   return seed;
 }
+
+
+
+class bpm_status {
+public:
+  // for telling the rest of the program about what step and beat we're on
+  int current_total_step = 0;
+  int current_total_beat = 0;
+  int current_total_bar  = 0;
+  int current_step = 0; 
+  int current_beat = 0; 
+  int current_bar  = 0;
+  int current_phrase = 0;
+  int current_song_position = 0;
+    
+  bool is_bpm_on_beat = false;
+  bool is_bpm_on_step = false;
+  bool is_bpm_on_bar  = false;
+  bool is_bpm_on_phrase=false;
+
+  void update( unsigned int received_ticks ) {
+    current_total_step = (received_ticks/TICKS_PER_STEP);
+    current_total_beat = current_total_step / STEPS_PER_BEAT;
+    current_total_bar  = current_total_beat / BARS_PER_PHRASE;
+    current_step    =  current_total_step % SEQUENCE_LENGTH_STEPS;
+    current_beat    =  current_step / STEPS_PER_BEAT; //(ticks/24);//%16;
+    current_bar     =  (received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) % BARS_PER_PHRASE;
+    current_phrase  =  (received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) / BARS_PER_PHRASE;
+    //Serial.printf("bpm_update_status: current_phrase is %i from received_ticks %i\r\n", current_phrase, received_ticks);
+  
+    is_bpm_on_beat   = (0==received_ticks%PPQN);
+    is_bpm_on_step   = (0==received_ticks%TICKS_PER_STEP);
+    is_bpm_on_bar    = is_bpm_on_beat && current_beat == 0;
+    is_bpm_on_phrase = is_bpm_on_bar && (current_bar % BARS_PER_PHRASE) == 0;
+    if (is_bpm_on_beat) {
+      current_song_position = received_ticks/PPQN;  // TODO: need to take into account that song position is set by the DAW sometimes....
+      //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
+    }
+  }
+};
 
 #endif
