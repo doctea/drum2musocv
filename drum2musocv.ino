@@ -1,4 +1,4 @@
-#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
+#define SEEEDUINO // enable seeduino cortex m0+/Arduino Zero compatibility for FastLED (see Pixels.ino)
 
 #ifdef SEEEDUINO
 #define ARDUINO_SAMD_ZERO

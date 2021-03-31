@@ -47,20 +47,21 @@ int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
 bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
 
-bool mutate_enabled   = false;
-bool mask_enabled     = false;
+bool mutate_enabled         = false;
+bool mask_enabled           = false;
 bool euclidian_fills_enabled = true;
 
-bool euclidian_auto_play = true;
+bool euclidian_auto_play    = true;
 
-bool euclidian_shuffle_hats = true;
-bool euclidian_flam_clap = true;
+bool euclidian_shuffle_hats = false; //true;
+bool euclidian_flam_clap    = false; //true;
 
 typedef struct {
   bool active_status = true;
   int steps, pulses, rotation, duration;
   bool stored[32];
   int original_steps;  // for storing the original generated size of the pattern, in case we resize it etc
+  int trigger;
 } pattern_t;
 
 pattern_t patterns[NUM_PATTERNS];
