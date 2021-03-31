@@ -189,6 +189,15 @@ void process_midi() {
       );
       /* }else if (MIDIIN.getChannel()==15) {
       harmony.debug_inversions();*/
+    } else {
+      Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
+      Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+      //if (MIDIIN.getChannel()==1 || MIDIIN.getChannel()==16) {
+        MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   MIDIIN.getChannel());
+      //}
     }
     //todo: accept a note on another channel to set the root..?
     //      or actually, have CCs to set the root note, scale, etc..?
@@ -223,6 +232,8 @@ void setup_midi() {
   MIDIIN.setHandleNoteOff(handleNoteOff);
 
   MIDIIN.setHandleControlChange(handleControlChange);
+
+  MIDIIN.setHandleSystemExclusive(handleSystemExclusive);
 
   MIDIIN.setHandleStop(handleStop);
   MIDIIN.setHandleStart(handleStart);

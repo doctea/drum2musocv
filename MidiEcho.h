@@ -9,6 +9,16 @@ bool handle_midiecho_ccs(int channel, int number, int value);
 
 bool midiecho_enabled = true;
 
+int pitch_for_trigger[NUM_TRIGGERS + NUM_ENVELOPES];
+
+void debug_pitch_for_trigger() {
+  Serial.printf("=== trigger-pitch mapping for mode %i ===\r\n", MUSO_MODE);
+  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
+    Serial.printf("   trigger[%i] = pitch %i\r\n", i, pitch_for_trigger[i]);
+  }
+  Serial.printf("^^^ trigger-pitch mappings ^^^");
+}
+
 //String get_note_name(int pitch);
 
 // TODO: move all this stuff below into some generic midi header

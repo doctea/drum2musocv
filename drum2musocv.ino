@@ -111,6 +111,9 @@ void setup() {
   kill_notes();
   kill_envelopes();
 
+
+  debug_pitch_for_trigger();
+
   Serial.println("---> Bambleweeny57 setup done! <---");
 
   harmony.debug_inversions();

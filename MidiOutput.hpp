@@ -15,7 +15,7 @@ int midi_channel_bitbox_out = DEFAULT_MIDI_CHANNEL_BITBOX_OUT;
 
 static int i = 0;
 void fire_trigger(byte t, byte v, bool internal = false) {
-  //Serial.printf("firing trigger pitch=%i, v=%i\r\n", p, v);
+  Serial.printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
   byte p = MUSO_NOTE_MINIMUM + t;
   byte b = BITBOX_NOTE_MINIMUM + t;
@@ -23,6 +23,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM) {
     trigger_status[p - MUSO_NOTE_MINIMUM] = v > 0; // TRIGGER_IS_ON;
+    Serial.printf("   for trigger %i sending sending muso gate note on pitch %i\r\n", t, p);
     if (MUSO_GATE_CHANNEL>0) 
       MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL);
     if (MIDI_CHANNEL_BITBOX_OUT>0) 

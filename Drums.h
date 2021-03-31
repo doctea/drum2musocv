@@ -58,11 +58,12 @@
 #define GM_NOTE_MAXIMUM 81
 
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
+// for mode 0B (11 gates, 5 CVs + pitch bend)
 #define DEFAULT_MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_GATE_CHANNEL   (midi_channel_muso_gate)
 #define MUSO_NOTE_MINIMUM   60
-#define MUSO_NOTE_GATE_1    60
+#define MUSO_NOTE_GATE_1    60    
 #define MUSO_NOTE_GATE_2    61
 #define MUSO_NOTE_GATE_3    62
 #define MUSO_NOTE_GATE_4    63
@@ -71,11 +72,22 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_NOTE_GATE_7    66
 #define MUSO_NOTE_GATE_8    67
 #define MUSO_NOTE_GATE_9    68
-#define MUSO_NOTE_GATE_10   69
-#define MUSO_NOTE_GATE_11   70
+#define MUSO_NOTE_GATE_10   69    // will lose these in mode 1B
+#define MUSO_NOTE_GATE_11   70    // will lose these in mode 1B
 
+#define MUSO_MODE_0B  1
+#define MUSO_MODE_1B  2
+#define MUSO_MODE_2B  3
+//#define MUSO_MODE     MUSO_MODE_0B    // for all-gates mode
+#define MUSO_MODE     MUSO_MODE_2B      // for two-pitch-outputs mode
+
+#if MUSO_MODE==MUSO_MODE_0B
 #define NUM_TRIGGERS        (MUSO_NOTE_GATE_11 - MUSO_NOTE_MINIMUM + 1)
 #define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
+#elif MUSO_MODE==MUSO_MODE_2B
+#define NUM_TRIGGERS        (MUSO_NOTE_GATE_7 - MUSO_NOTE_MINIMUM + 1)
+#define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
+#endif
 
 // the CC values that the midimuso translates into the CV outputs
 #define MUSO_CC_CV_1  1

@@ -311,7 +311,7 @@ void process_euclidian(int ticks) {
       }*/
       if (query_pattern(&patterns[i], bs.current_step, 0 , bs.current_bar)) {  // step trigger
         //douse_trigger(i, 127, true);
-        fire_trigger(i, 127, true);
+        fire_trigger(get_trigger_for_pattern(i), 127, true);
         if (i < 16) {
           //EUC_printf("%01X", i); // print as hex
         } else {
@@ -321,7 +321,7 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         //EUC_printf(" ");
       } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
-        douse_trigger(i, 0, true);
+        douse_trigger(get_trigger_for_pattern(i), 0, true);
         // TODO: turn off according to some other thing.. eg cut groups?
         if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
         //EUC_printf(".", i); EUC_printf(" ");
@@ -334,6 +334,14 @@ void process_euclidian(int ticks) {
   
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
+}
+
+int get_trigger_for_pattern(int i) {
+#if MUSO_MODE==MUSO_MODE_2B
+  if (i==0) return 3;
+  if (i==3) return 0;
+#endif
+  return i;
 }
 
 void initialise_euclidian() {
@@ -351,23 +359,28 @@ void initialise_euclidian() {
 
   EUC_println("initialising:-");
   //     length, pulses, rotation, duration
-  make_euclid(&patterns[0],   LEN,    4, 1,   DEFAULT_DURATION);    // kick
-  make_euclid(&patterns[1],   LEN,    5, 1,   DEFAULT_DURATION);    // stick
-  make_euclid(&patterns[2],   LEN,    2, 5,   DEFAULT_DURATION);    // clap
-  make_euclid(&patterns[3],   LEN/4,  16,1,   DEFAULT_DURATION);   // snare
-  make_euclid(&patterns[4],   LEN,    3, 3,   DEFAULT_DURATION);    // crash 1
-  make_euclid(&patterns[5],   LEN,    7, 1,   DEFAULT_DURATION);    // tamb
-  make_euclid(&patterns[6],   LEN,    9, 1,   DEFAULT_DURATION);    // hi tom!
-  make_euclid(&patterns[7],   LEN/4,  2, 3,   DEFAULT_DURATION);    // low tom
-  make_euclid(&patterns[8],   LEN/2,  2, 3,   DEFAULT_DURATION);    // pedal hat
-  make_euclid(&patterns[9],   LEN,    4, 3,   DEFAULT_DURATION);    // open hat
-  make_euclid(&patterns[10],  LEN,    16, 0,  0); //DEFAULT_DURATION);   // closed hat
-  make_euclid(&patterns[11],  LEN*2,  1 , 1,  DEFAULT_DURATION);   // crash 2
-  make_euclid(&patterns[12],  LEN*2,  1 , 5,  DEFAULT_DURATION);   // splash
-  make_euclid(&patterns[13],  LEN*2,  1, 9,   DEFAULT_DURATION);    // vibra
-  make_euclid(&patterns[14],  LEN*2,  1, 13,  DEFAULT_DURATION);   // bell
-  make_euclid(&patterns[15],  LEN*2,  5, 13,  DEFAULT_DURATION);   // cymbal
-  make_euclid(&patterns[16],  LEN,    4, 3, STEPS_PER_BEAT / 2);  // bass (neutron) offbeat
+  int i = 0;
+  make_euclid(&patterns[i++],   LEN,    4, 1,   DEFAULT_DURATION);    // kick
+#if MUSO_MODE==MUSO_MODE_0B
+  make_euclid(&patterns[i++],   LEN,    5, 1,   DEFAULT_DURATION);    // stick
+#endif
+  make_euclid(&patterns[i++],   LEN,    2, 5,   DEFAULT_DURATION);    // clap
+  make_euclid(&patterns[i++],   LEN/4,  16,1,   DEFAULT_DURATION);   // snare
+  make_euclid(&patterns[i++],   LEN,    3, 3,   DEFAULT_DURATION);    // crash 1
+#if MUSO_MODE==MUSO_MODE_0B  
+  make_euclid(&patterns[i++],   LEN,    7, 1,   DEFAULT_DURATION);    // tamb
+  make_euclid(&patterns[i++],   LEN,    9, 1,   DEFAULT_DURATION);    // hi tom!
+  make_euclid(&patterns[i++],   LEN/4,  2, 3,   DEFAULT_DURATION);    // low tom
+#endif
+  make_euclid(&patterns[i++],   LEN/2,  2, 3,   DEFAULT_DURATION);    // pedal hat
+  make_euclid(&patterns[i++],   LEN,    4, 3,   DEFAULT_DURATION);    // open hat
+  make_euclid(&patterns[i++],  LEN,    16, 0,  0); //DEFAULT_DURATION);   // closed hat
+  make_euclid(&patterns[i++],  LEN*2,  1 , 1,  DEFAULT_DURATION);   // crash 2
+  make_euclid(&patterns[i++],  LEN*2,  1 , 5,  DEFAULT_DURATION);   // splash
+  make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION);    // vibra
+  make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION);   // bell
+  make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION);   // cymbal
+  make_euclid(&patterns[i++],  LEN,    4, 3, STEPS_PER_BEAT / 2);  // bass (neutron) offbeat
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
