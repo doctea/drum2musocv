@@ -1,6 +1,8 @@
 #ifndef MIDIINPUT_INCLUDED
 #define MIDIINPUT_INCLUDED
 
+#define RELAY_PROGRAM_CHANGE false
+
 #include "MidiSetup.hpp"
 #include "Drums.h"
 #include "MidiOutput.hpp"
@@ -154,8 +156,12 @@ void handleSystemExclusive(byte* array, unsigned size) {
 }
 
 void handleProgramChange(byte channel, byte pcm) {
-  Serial.printf("Sending program change %i on channel %i\r\n", pcm, channel);
-  MIDIOUT.sendProgramChange(pcm, channel);
+  if (RELAY_PROGRAM_CHANGE) {
+    Serial.printf("Sending program change %i on channel %i\r\n", pcm, channel);
+    MIDIOUT.sendProgramChange(pcm, channel);
+  } else {
+    Serial.printf("Ignoring program change %i on channel %i\r\n", pcm, channel);
+  }
 }
 
 // called every loop(), to read incoming midi and route if appropriate
@@ -171,7 +177,10 @@ void process_midi() {
                    MIDIIN.getData2(),
                    MIDI_CHANNEL_BASS_OUT
       );
+    } else if (MIDIIN.getChannel()==GM_CHANNEL_DRUMS) {
+      // ignore so that the handle* functions will deal with this instead
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_AUTO_IN) {
+      // tell the harmony/autobass what notes we wanna play
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         //Serial.println(autobass_input.get_debug_notes_held());
@@ -186,6 +195,7 @@ void process_midi() {
         }
       }
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {
+      // direct melody playing - echo all messages straight through to eg bitbox
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
@@ -194,9 +204,10 @@ void process_midi() {
       /* }else if (MIDIIN.getChannel()==15) {
       harmony.debug_inversions();*/
     } else {
+      // catch all other channels
       //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
       //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
-      /*if (MIDIIN.getChannel()==1 || MIDIIN.getChannel()==2 || MIDIIN.getChannel()==16) {
+      /*if (MIDIIN.getChannel()==1) { // || MIDIIN.getChannel()==2 || MIDIIN.getChannel()==16) {
         MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
