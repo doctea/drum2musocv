@@ -38,22 +38,22 @@ void initialise_pitch_for_triggers() {
 #endif*/
 
   int t = 0;
-#if MUSO_MODE==MUSO_MODE_0B       // include kick and side stick if in all-gates mode
+//#if MUSO_MODE==MUSO_MODE_0B       // include kick and side stick if in all-gates mode
   pitch_for_trigger[t++] = GM_NOTE_ELECTRIC_BASS_DRUM;  //Electric Bass Drum - C5 72  // mode 0B = gate 1 = pin D1      / in mode 2B = pitch gate 1 / in mode 1B = pitch gate 1
   pitch_for_trigger[t++] = GM_NOTE_SIDE_STICK;          //Side Stick - C#5/Db5 73     // mode 0B = gate 2 = pin D2      / in mode 2B = pitch gate 2
-#endif
+//#endif
   pitch_for_trigger[t++] = GM_NOTE_HAND_CLAP;           //Hand Clap - D5 74           // mode 0B = gate 3 = pin D3
   pitch_for_trigger[t++] = GM_NOTE_ELECTRIC_SNARE;      //Electric Snare - D#5/Eb5 75 // mode 0B = gate 4 = pin D4
   pitch_for_trigger[t++] = GM_NOTE_CRASH_CYMBAL_1;      //Crash Cymbal 1 - F#5/Gb5 78 // mode 0B = gate 5 = pin D5
   
   // left-hand column (triggers 11-6 running DOWN)
-#if MUSO_MODE==MUSO_MODE_0B       // include tambourine and high tom if in all-gates mode
+//#if MUSO_MODE==MUSO_MODE_0B       // include tambourine and high tom if in all-gates mode
   pitch_for_trigger[t++]  = GM_NOTE_TAMBOURINE;          //Tambourine - A5 81         // mode 0B = gate 6  = pin B1     / in mode 2B = Pitch 1  / in mode 1B = Pitch 1
   pitch_for_trigger[t++]  = GM_NOTE_HIGH_TOM;            //High Tom - G#5/Ab5 80      // mode 0B = gate 7  = pin B2     / in mode 2B = Pitch 2
   pitch_for_trigger[t++]  = GM_NOTE_LOW_TOM;             //79 //Low Tom - G5          // mode 0B = gate 8  = pin B3     / in mode 2B = gate 4
-#elif MUSO_MODE==MUSO_MODE_2B     // only include kick here if in pitches omde
+/*#elif MUSO_MODE==MUSO_MODE_2B     // only include kick here if in pitches omde
   pitch_for_trigger[t++]  = GM_NOTE_ELECTRIC_BASS_DRUM;  // replace low tom with kick
-#endif
+#endif*/
   pitch_for_trigger[t++]  = GM_NOTE_PEDAL_HI_HAT;        //Pedal Hi-hat - A#5/Bb5 82  // mode 0B = gate 9  = pin B4     / in mode 2B = gate 5
   pitch_for_trigger[t++]  = GM_NOTE_OPEN_HI_HAT;         //77 //Open Hi-hat - F5      // mode 0B = gate 10 = pin B5     / in mode 2B = gate 6
   pitch_for_trigger[t++]  = GM_NOTE_CLOSED_HI_HAT;       //Closed Hi-hat - E5 76      // mode 0B = gate 11 = pin B6     / in mode 2B = gate 7
@@ -67,14 +67,14 @@ void initialise_pitch_for_triggers() {
 
 }
 
-// get the midi note associated with this trigger number, for midi echo
+// get the midi drum note associated with this trigger number, for midi echo
 int get_pitch_for_trigger(int trigger) {
   return pitch_for_trigger[trigger];
 }
 
 // get the trigger number from incoming gm drum midi note
 int get_trigger_for_pitch(int pitch) {
-  debug_pitch_for_trigger();
+  //debug_pitch_for_trigger();
   for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES ; i++) {
     if (pitch_for_trigger[i]==pitch) {
       Serial.printf("get_trigger_for_pitch(%i), returning trigger %i\r\n", pitch, i);

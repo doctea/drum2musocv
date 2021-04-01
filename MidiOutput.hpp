@@ -11,11 +11,37 @@ int midi_channel_bitbox_out = DEFAULT_MIDI_CHANNEL_BITBOX_OUT;
 #include "Harmony.hpp"       // for access to the harmony channel info
 #include "ClockTriggerOutput.hpp"
 
+
+// get the output pitch to use for this trigger
+// take into account that some outputs may be missing or moved when in different muso modes and swap them appropriately
+int get_muso_pitch_for_trigger(int trigger) {
+#if MUSO_MODE==MUSO_MODE_2B // pitches mode
+  int gate;
+  if (trigger==0) gate = 3;
+  else if (trigger==1) gate = -1;
+  else if (trigger==5 || trigger==6 || trigger==7) gate = -1;
+  else if (trigger<=NUM_TRIGGERS) {
+    if (trigger>7) 
+      gate = trigger - 4; 
+    else if (trigger>=2)
+      gate = trigger - 2;
+  }
+
+  Serial.printf("get_muso_pitch_for_trigger(%i) returning gate %i\r\n", trigger, gate);
+  if (gate!=-1)
+    return MUSO_NOTE_MINIMUM + gate;
+  return -1;
+
+#else
+  return MUSO_NOTE_MINIMUM+trigger;
+#endif
+}
+
 // functions for sending MIDI out
 
 static int i = 0;
 void fire_trigger(byte t, byte v, bool internal = false) {
-  Serial.printf("firing trigger=%i, v=%i\r\n", t, v);
+  //Serial.printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
   byte p = MUSO_NOTE_MINIMUM + t;
   byte b = BITBOX_NOTE_MINIMUM + t;
@@ -24,62 +50,62 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     p < MUSO_NOTE_MAXIMUM
   ) {
     Serial.printf("   for trigger %i sending muso gate note on pitch %i\r\n", t, p);
-    trigger_status[p - MUSO_NOTE_MINIMUM] = v > 0; // TRIGGER_IS_ON;
-    Serial.println("set trigger_status to ON");
-    //if (MUSO_GATE_CHANNEL>0)        MIDIOUT.sendNoteOn(p, v, MUSO_GATE_CHANNEL);
-    Serial.println("sent muso_gate_channel");
-    //if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
-    Serial.println("sent both midi notes");
+    trigger_status[t] = v > 0; // TRIGGER_IS_ON;
+    //Serial.println("set trigger_status to ON");
+    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(t)>=0)        {
+      Serial.printf("fire_trigger(%i) sending muso pitch %i\r\n", t, get_muso_pitch_for_trigger(t));
+      MIDIOUT.sendNoteOn(get_muso_pitch_for_trigger(t)/*p*/, v, MUSO_GATE_CHANNEL);
+    }
+    if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    //Serial.println("sent both midi notes");
   } else if (
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES
   ) {
-    Serial.printf("   for trigger %i, is an envelope trigger!\r\n", p);
+    //Serial.printf("   for trigger %i, is an envelope trigger!\r\n", p);
     if (MUSO_GATE_CHANNEL>0)        update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    Serial.printf("   for trigger %i got BASS trigger!\r\n", p);
+    //Serial.printf("   for trigger %i got BASS trigger!\r\n", p);
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     harmony.fire_both(); //bass_note_on_and_next();
     //else
     //  Serial.println("No note held? is_note_held is false");
   } else {
-    Serial.printf("WARNING: fire_trigger not doing anything with pitch %i\r\n", p);
+    Serial.printf("WARNING: fire_trigger not doing anything with trigger %i (pitch %i)\r\n", t, p);
   }
   if (midiecho_enabled)
     if (internal) echo_fire_trigger(p - MUSO_NOTE_MINIMUM, v);
-  Serial.println("finishing fire_trigger");
+  //Serial.println("finishing fire_trigger");
 }
 
 void douse_trigger(byte t, byte v = 0, bool internal = false) {
-  Serial.printf("dousing trigger=%i\r\n", t);
+  //Serial.printf("dousing trigger=%i\r\n", t);
   byte p = MUSO_NOTE_MINIMUM + t;
   byte b = BITBOX_NOTE_MINIMUM + t;
   if (                                                  // a gate trigger
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM
   ) {
-    Serial.printf("   for trigger %i sending muso gate note OFF pitch %i\r\n", t, p);
-    trigger_status[p - MUSO_NOTE_MINIMUM] = TRIGGER_IS_OFF;
-    Serial.println("set trigger_status to OFF");
-    if (MUSO_GATE_CHANNEL>0) 
-      MIDIOUT.sendNoteOff(p, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
-    if (MIDI_CHANNEL_BITBOX_OUT>0) 
-      MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
+    //Serial.printf("   for trigger %i sending muso gate note OFF pitch %i\r\n", t, p);
+    trigger_status[t] = TRIGGER_IS_OFF;
+    //Serial.println("set trigger_status to OFF");
+    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(t)>=0)        MIDIOUT.sendNoteOff(get_muso_pitch_for_trigger(t)/*p*/, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+    if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //Serial.printf("fired a note OFF to bit box: %i\r\n", i);
   } else if (                                           // an envelope trigger
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES
   ) {
-    Serial.printf("   for trigger %i, dousing an envelope trigger!\r\n", p);
+    //Serial.printf("   for trigger %i, dousing an envelope trigger!\r\n", p);
     if (MUSO_GATE_CHANNEL>0)        update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
   } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {  // harmony trigger
-    Serial.printf("   for trigger %i dousing BASS trigger!\r\n", p);
+    //Serial.printf("   for trigger %i dousing BASS trigger!\r\n", p);
     harmony.douse_both();
   } else {
-    Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
+    //Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
   if (midiecho_enabled)
     if (internal) echo_douse_trigger(p - MUSO_NOTE_MINIMUM, v);

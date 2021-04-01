@@ -155,8 +155,8 @@ void process_euclidian(int ticks) {
         randomSeed(seed);
   
         for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
-          EUC_printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern % NUM_PATTERNS);
-          int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern);
+          EUC_printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
+          int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
           EUC_printf("chose pattern %i\r\n", ran);
           randomSeed(seed + ran);
           if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
@@ -173,12 +173,12 @@ void process_euclidian(int ticks) {
       EUC_printf("FILLING at bar %i!\r\n", current_bar);
       randomSeed(current_phrase);
       for (int i = 0 ; i < 3 ; i++) {
-        int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, 1 + euclidian_mutate_maximum_pattern);
+        int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
         patterns[ran].rotation += 2;
         make_euclid(&patterns[ran]);
       }
       for (int i = 0 ; i < 3 ; i++) {
-        int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, 1 + euclidian_mutate_maximum_pattern);
+        int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
         patterns[ran].pulses *= 2;
         if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
         make_euclid(&patterns[ran]);
@@ -274,7 +274,8 @@ void process_euclidian(int ticks) {
 
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
     //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
-    if (!patterns[i].active_status) continue;
+    if (!patterns[i].active_status || patterns[i].trigger==-1) continue;
+    
     int stutter = 0; //i-NUM_PATTERNS/2;
     if (euclidian_shuffle_hats) {
       if (i==10||i==9) { // hats
@@ -308,12 +309,13 @@ void process_euclidian(int ticks) {
     }
     
     if(bs.is_bpm_on_step) {
-      /*if (i==10||i==9||i==2) { //stutter!=0) {
-        Serial.printf("stuttering %i for pattern %i !\r\n", stutter, i);
-      }*/
+      //if (i==10||i==9||i==2) { //stutter!=0) {
+      //  Serial.printf("stuttering %i for pattern %i !\r\n", stutter, i);
+      //}
       if (query_pattern(&patterns[i], bs.current_step, 0 , bs.current_bar)) {  // step trigger
         //douse_trigger(i, 127, true);
-        fire_trigger(get_trigger_for_pattern(i), 127, true);
+        Serial.printf(">> for pattern %i, using trigger number %i\r\n", i, patterns[i].trigger);
+        fire_trigger(patterns[i].trigger, 127, true);
         if (i < 16) {
           //EUC_printf("%01X", i); // print as hex
         } else {
@@ -323,7 +325,7 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         //EUC_printf(" ");
       } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
-        douse_trigger(get_trigger_for_pattern(i), 0, true);
+        douse_trigger(patterns[i].trigger, 0, true);
         // TODO: turn off according to some other thing.. eg cut groups?
         if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
         //EUC_printf(".", i); EUC_printf(" ");
@@ -332,20 +334,21 @@ void process_euclidian(int ticks) {
         if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
       }
     }
-    Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
+    
+    //Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
   }
   
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
 
-int get_trigger_for_pattern(int i) {
+/*int get_trigger_for_pattern(int i) {
 #if MUSO_MODE==MUSO_MODE_2B
   if (i==0) return 3;
   if (i==3) return 0;
 #endif
   return i;
-}
+}*/
 
 void initialise_euclidian() {
 
@@ -364,17 +367,17 @@ void initialise_euclidian() {
   //     length, pulses, rotation, duration
   int i = 0;
   make_euclid(&patterns[i++],   LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
-#if MUSO_MODE==MUSO_MODE_0B
+//#if MUSO_MODE==MUSO_MODE_0B
   make_euclid(&patterns[i++],   LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
-#endif
+//#endif
   make_euclid(&patterns[i++],   LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
   make_euclid(&patterns[i++],   LEN/4,  16,1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
   make_euclid(&patterns[i++],   LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
-#if MUSO_MODE==MUSO_MODE_0B  
-  make_euclid(&patterns[i++],   LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE);    // tamb
-  make_euclid(&patterns[i++],   LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM);    // hi tom!
-  make_euclid(&patterns[i++],   LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM);    // low tom
-#endif
+//#if MUSO_MODE==MUSO_MODE_0B  
+  make_euclid(&patterns[i++],   LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
+  make_euclid(&patterns[i++],   LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
+  make_euclid(&patterns[i++],   LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
+//#endif
   make_euclid(&patterns[i++],   LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
   make_euclid(&patterns[i++],   LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
   make_euclid(&patterns[i++],  LEN,    16, 0,   0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
@@ -384,6 +387,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
   make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT/2, NUM_TRIGGERS+NUM_ENVELOPES);  // bass (neutron) offbeat
+  Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/

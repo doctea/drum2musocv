@@ -11,7 +11,7 @@
 
 #define DEFAULT_DURATION (STEPS_PER_BEAT / STEPS_PER_BEAT)
 
-#define NUM_PATTERNS (NUM_TRIGGERS+NUM_ENVELOPES+1) //17   // 11 triggers + 5 envelopes + 1 midi output
+#define NUM_PATTERNS 17 //(NUM_TRIGGERS+NUM_ENVELOPES+1) //17   // 11 triggers + 5 envelopes + 1 midi output
 #define BASS_PATTERN NUM_PATTERNS //17
 
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS

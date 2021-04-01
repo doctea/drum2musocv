@@ -84,13 +84,13 @@ void update_pixels() {
 // 0-4 inclusive: first 5 triggers, kick -> crash
 // 10-16 inclusive: second 6 triggers, tamb -> ch
 // leaving 5, 6, 7, 8, 9 for envelopes
-#if MUSO_MODE==MUSO_MODE_0B
+//#if MUSO_MODE==MUSO_MODE_0B
 #define TRIGGER_BANK_1_SIZE   5
 #define TRIGGER_BANK_2_SIZE   6
-#elif MUSO_MODE==MUSO_MODE_2B
+/*#elif MUSO_MODE==MUSO_MODE_2B
 #define TRIGGER_BANK_1_SIZE   3
 #define TRIGGER_BANK_2_SIZE   4
-#endif
+#endif*/
 
 // determine which trigger this pixel address is for
 int get_trigger_for_pixel(int p) {

@@ -612,15 +612,15 @@ class Harmony {
           break;
         } else if (pitches[i]==-1) {
           // empty, add
-          Serial.printf("\tinsert_pitch: adding pitch %s [%i] at position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
+          //Serial.printf("\tinsert_pitch: adding pitch %s [%i] at position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
           pitches[i] = pitch;
           break;
         } else if (pitches[i]>pitch) {
           // higher found, insert at i 
-          Serial.printf("\tinsert_pitch: inserting pitch %s [%i] at position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
+          //Serial.printf("\tinsert_pitch: inserting pitch %s [%i] at position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
           //for (int x = i+1 ; x < 10 ; x++) {
           for (int x = 8 ; x > i+1 ; x--) {
-            Serial.printf("\t\tshifting pitch at %i to %i (%i overwrites %i)\r\n", x, x+1, pitches[x-1], pitches[x]);
+            //Serial.printf("\t\tshifting pitch at %i to %i (%i overwrites %i)\r\n", x, x+1, pitches[x-1], pitches[x]);
             pitches[x+1] = pitches[x]; 
           }
           pitches[i] = pitch;
@@ -633,7 +633,7 @@ class Harmony {
     void remove_pitch(int pitches[], int pitch) {
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]==pitch) {
-          Serial.printf("\tremove_pitch: removing pitch %s [%i] from position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
+          //Serial.printf("\tremove_pitch: removing pitch %s [%i] from position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
           // found, remove and shift
           for (int x = i+1 ; x < 10 ; x++) {
             pitches[x-1] = pitches[x];
@@ -699,7 +699,7 @@ class Harmony {
 
 
       if (chord_type==HARMONY::CHORD_TYPE::SEVENTH) {
-        Serial.println("!!! seventh chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! seventh chord?");
         //pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
         insert_pitch(pitches, 
                      channel_state.get_root_note() + get_scale_note(6, chord));
@@ -707,7 +707,7 @@ class Harmony {
         p++;
       }
       if (chord_type==HARMONY::CHORD_TYPE::EIGHTH) {
-        Serial.println("!!! eighth chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! eighth chord?");
 
         //pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
         insert_pitch(pitches, 
@@ -716,7 +716,7 @@ class Harmony {
                    p++;
       }
       if (chord_type==HARMONY::CHORD_TYPE::NINETH) {
-        Serial.println("!!! ninth chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! ninth chord?");
 
         //pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
         insert_pitch(pitches, 
@@ -725,7 +725,7 @@ class Harmony {
                    p++;
       }
       if (chord_type==HARMONY::CHORD_TYPE::TENTH) {
-        Serial.println("!!! tenth chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! tenth chord?");
 
         //pitches[p++] = /*current_bar==BARS_PER_PHRASE-1 ? */
         insert_pitch(pitches, 
@@ -734,7 +734,7 @@ class Harmony {
                    p++;
       }
       if (chord_type==HARMONY::CHORD_TYPE::ELEVENTH) {
-        Serial.println("!!! eleventh chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! eleventh chord?");
         //pitches[p++] = //current_bar==BARS_PER_PHRASE-1 ? 
         insert_pitch(pitches, 
                    channel_state.get_root_note() + get_scale_note(10, chord));
@@ -748,7 +748,7 @@ class Harmony {
                    p++;
       }
       if (chord_type==HARMONY::CHORD_TYPE::THIRTEENTH) {
-        Serial.println("!!! thirteenth chord?");
+        if (DEBUG_HARMONY) Serial.println("!!! thirteenth chord?");
         insert_pitch(pitches, 
         //pitches[p++] = //current_bar==BARS_PER_PHRASE-1 ? 
                    channel_state.get_root_note() + get_scale_note(12, chord) );
@@ -772,11 +772,13 @@ class Harmony {
 
       do_inversion(pitches, inversion);
       
-      Serial.printf("get_chord_notes for rn %i : scale %i : chord %i : inversion %i : chord_type %i : [ ", channel_state.get_root_note(), get_scale_number(), chord, inversion, chord_type);
-      for (int i = 0 ; i < 10 ; i++) {
-        if (pitches[i]>-1) Serial.printf("%s ", get_note_name(pitches[i]).c_str());
+      if (DEBUG_HARMONY) {
+        Serial.printf("get_chord_notes for rn %i : scale %i : chord %i : inversion %i : chord_type %i : [ ", channel_state.get_root_note(), get_scale_number(), chord, inversion, chord_type);
+        for (int i = 0 ; i < 10 ; i++) {
+          if (pitches[i]>-1) Serial.printf("%s ", get_note_name(pitches[i]).c_str());
+        }
+        Serial.println("] ");
       }
-      Serial.println("] ");
       
       return pitches;
     }

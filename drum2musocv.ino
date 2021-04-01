@@ -74,6 +74,9 @@ void setup() {
 
   delay(500); // give half a second grace to allow for programming
 
+  Serial.begin(115200);   // usb serial debug port
+  while (!Serial);
+
   Serial.println("---> Bambleweeny57 starting up! <c> doctea/The Tyrell Corporation 2020+ <---");
 
   initialise_pitch_for_triggers();

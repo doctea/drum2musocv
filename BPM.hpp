@@ -69,8 +69,8 @@ bool euclidian_seed_use_phrase      = true;
 
 unsigned int get_euclidian_seed() {
   int seed = euclidian_seed_modifier;
-  if (euclidian_seed_modifier_2 > 0) seed *= (256 + euclidian_seed_modifier_2 * 2);
-  if (euclidian_seed_use_phrase) seed += current_phrase + 1;
+  if (euclidian_seed_modifier_2 > 0)  seed *= (256 + euclidian_seed_modifier_2 * 2);
+  if (euclidian_seed_use_phrase)      seed += current_phrase + 1;
   if (seed == 0) seed = 1;
   return seed;
 }

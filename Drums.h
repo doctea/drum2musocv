@@ -81,13 +81,13 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 //#define MUSO_MODE     MUSO_MODE_0B    // for all-gates mode
 #define MUSO_MODE     MUSO_MODE_2B      // for two-pitch-outputs mode
 
-#if MUSO_MODE==MUSO_MODE_0B
+//#if MUSO_MODE==MUSO_MODE_0B
 #define NUM_TRIGGERS        (MUSO_NOTE_GATE_11 - MUSO_NOTE_MINIMUM + 1)
 #define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
-#elif MUSO_MODE==MUSO_MODE_2B
+/*#elif MUSO_MODE==MUSO_MODE_2B
 #define NUM_TRIGGERS        (MUSO_NOTE_GATE_7 - MUSO_NOTE_MINIMUM + 1)
 #define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
-#endif
+#endif*/
 
 // the CC values that the midimuso translates into the CV outputs
 #define MUSO_CC_CV_1  1

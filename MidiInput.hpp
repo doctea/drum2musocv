@@ -153,6 +153,10 @@ void handleSystemExclusive(byte* array, unsigned size) {
   MIDIOUT.sendSysEx(size, array, false); // true/false means "array contains start/stop padding" -- think what we receive here is without padding..?
 }
 
+void handleProgramChange(byte channel, byte pcm) {
+  Serial.printf("Sending program change %i on channel %i\r\n", pcm, channel);
+  MIDIOUT.sendProgramChange(pcm, channel);
+}
 
 // called every loop(), to read incoming midi and route if appropriate
 void process_midi() {
@@ -190,14 +194,14 @@ void process_midi() {
       /* }else if (MIDIIN.getChannel()==15) {
       harmony.debug_inversions();*/
     } else {
-      Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
-      Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
-      //if (MIDIIN.getChannel()==1 || MIDIIN.getChannel()==16) {
+      //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
+      //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+      /*if (MIDIIN.getChannel()==1 || MIDIIN.getChannel()==2 || MIDIIN.getChannel()==16) {
         MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
                    MIDIIN.getChannel());
-      //}
+      }*/
     }
     //todo: accept a note on another channel to set the root..?
     //      or actually, have CCs to set the root note, scale, etc..?
@@ -217,10 +221,7 @@ void process_midi() {
 
 void setup_midi() {
   
-#ifdef USB_NATIVE
-  Serial.begin(115200);   // usb serial debug port
-  //while (!Serial);
-  
+#ifdef USB_NATIVE 
   MIDIOUT.begin(MIDI_CHANNEL_OMNI); //GM_CHANNEL_DRUMS);
 #endif
   MIDIIN.begin(MIDI_CHANNEL_OMNI); //GM_CHANNEL_DRUMS);
@@ -234,6 +235,8 @@ void setup_midi() {
   MIDIIN.setHandleControlChange(handleControlChange);
 
   MIDIIN.setHandleSystemExclusive(handleSystemExclusive);
+
+  MIDIIN.setHandleProgramChange(handleProgramChange);
 
   MIDIIN.setHandleStop(handleStop);
   MIDIIN.setHandleStart(handleStart);
