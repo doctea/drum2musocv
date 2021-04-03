@@ -15,8 +15,12 @@
 #define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 #define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 #define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords
-#define DEFAULT_MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
 #define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+#define MIDI_CHANNEL_PAD_ROOT_IN    1
+#define MIDI_CHANNEL_PAD_PITCH_IN   2
+#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
+#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
 
 #define MIDI_CHANNEL_BASS_OUT     (harmony.get_midi_channel_bass_out())
 #define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
@@ -161,6 +165,8 @@ class Harmony {
     ChannelState&   channel_state;
     MidiKeysOutput& mko_bass;
     MidiKeysOutput& mko_keys;
+    MidiKeysOutput& mko_pads_root;
+    MidiKeysOutput& mko_pads_pitch;
 
     int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
     int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
@@ -196,11 +202,13 @@ class Harmony {
     int sequence[4][4];
 
   public:  
-    Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_)
+    Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_, MidiKeysOutput& mko_pads_root_, MidiKeysOutput& mko_pads_pitch_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_), mko_pads_root(mko_pads_root_), mko_pads_pitch(mko_pads_pitch_)
     { // todo: pass in config settings
       channel_state = channel_state_;
       mko_bass = mko_bass_;
       mko_keys = mko_keys_;
+      mko_pads_root = mko_pads_root_;
+      mko_pads_pitch = mko_pads_pitch_;
 
       reset_progression();
       reset_sequence_pattern();
@@ -285,6 +293,7 @@ class Harmony {
 
         if (DEBUG_HARMONY) Serial.printf("    using single mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
         mko_keys.send_note_on(pitch, 127);    // send a single pitch
+        mko_pads_pitch.send_note_on(pitch, 127);
       } else if (melody_mode==HARMONY::MELODY_MODE::CHORD || HARMONY::MELODY_MODE::ARPEGGIATE) {
         if (DEBUG_HARMONY) Serial.println("    using chord mode for melody!");
         
@@ -297,6 +306,7 @@ class Harmony {
             if (last_melody_pitches[i]>-1) last_melody_pitches[i] += 12;
           }
           mko_keys.send_note_on(last_melody_pitches, 127);  // send all held notes
+          mko_pads_pitch.send_note_on(last_melody_pitches, 127);
         } else {
           if (DEBUG_HARMONY) Serial.printf("   phrase is %i, beat %i, scale num %i: ", current_phrase, current_beat, get_scale_number()); 
           if (DEBUG_HARMONY) Serial.printf("   about to play chord number %i(+%i sequence offset)\r\n", get_chord_number(), sequence[get_sequence_number()][sequence_counter]);
@@ -330,9 +340,11 @@ class Harmony {
               last_melody_pitches[i] = -1;
             }
             mko_keys.send_note_on(last_melody_pitches[0], 127);
+            mko_pads_pitch.send_note_on(last_melody_pitches[0], 127);
             
           } else {
-            mko_keys.send_note_on(last_melody_pitches, 127);  // send all notes of generated chord
+            mko_keys.send_note_on(last_melody_pitches, 127);  // send all notes of generated chord_type
+            mko_pads_pitch.send_note_on(last_melody_pitches, 127);
           }
         }
 
@@ -367,11 +379,13 @@ class Harmony {
       }
       
       if (melody_mode==HARMONY::MELODY_MODE::CHORD) {
-        mko_keys.send_note_off(last_melody_pitches, 127);
+        mko_keys.send_note_off(last_melody_pitches, 0);
+        mko_pads_pitch.send_note_off(last_melody_pitches, 0);
       } else /* if (melody_mode==HARMONY::MELODY_MODE::SINGLE || melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE ) */{
         //if (channel_state.is_note_held()) {
           //mko_keys.send_note_off(channel_state.get_held_notes(), 0);
           mko_keys.send_note_off(last_melody_pitches, 0);
+          mko_pads_pitch.send_note_off(last_melody_pitches, 0);
 
           if (melody_mode==HARMONY::MELODY_MODE::ARPEGGIATE) {
             arp_counter++;
@@ -444,6 +458,7 @@ class Harmony {
       if (pitch>-1) {
         last_root = pitch;
         mko_bass.send_note_on(pitch, 127);
+        mko_pads_root.send_note_on(pitch, 127);
       }
     }
 
@@ -451,8 +466,10 @@ class Harmony {
       // send notes to douse bass
       //bass_note_off();
       int pitch = last_root;
-      if (pitch>-1)
+      if (pitch>-1) {
         mko_bass.send_note_off(pitch);
+        mko_pads_root.send_note_off(pitch);
+      }
       last_root = -1;
 
       if (pitch>-1) {
@@ -481,6 +498,8 @@ class Harmony {
         Serial.println("harmony.kill_notes() called!");
         mko_bass.send_all_notes_off();
         mko_keys.send_all_notes_off();
+        mko_pads_root.send_all_notes_off();
+        mko_pads_pitch.send_all_notes_off();
     }
 
     void mutate() {
@@ -982,13 +1001,17 @@ class Harmony {
 
 MidiKeysOutput mkob = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT);
 MidiKeysOutput mkok = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS, DEFAULT_MELODY_OFFSET);  // with octave offset
+MidiKeysOutput mkoe = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT, DEFAULT_MELODY_OFFSET);  // with octave offset
+MidiKeysOutput mkop = MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT);  // with octave offset
 
 // for use globally
 
 Harmony harmony = Harmony(
   autobass_input, 
   mkob,
-  mkok
+  mkok,
+  mkoe,
+  mkop
 );
 
 #endif

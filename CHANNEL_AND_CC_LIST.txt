@@ -48,8 +48,12 @@ Bass.hpp:#define MIDI_CHANNEL_BASS_OUT       2     // channel to output bass not
 Harmony.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Harmony.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Harmony.hpp:#define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords
-Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BASS_OUT       2     // channel to output bass notes on
+Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
 Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_IN    1
+Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_IN   2
+Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
+Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
 Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT     (harmony.get_midi_channel_bass_out())
 Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
 MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums

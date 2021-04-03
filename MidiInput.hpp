@@ -203,6 +203,20 @@ void process_midi() {
       );
       /* }else if (MIDIIN.getChannel()==15) {
       harmony.debug_inversions();*/
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_ROOT_IN) {
+      // for ensemble - send notes to muso on channel 1
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT
+      );
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_PITCH_IN) {
+      // for ensemble - send notes to muso on channel 1
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT
+      );      
     } else {
       // catch all other channels
       //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
@@ -214,6 +228,9 @@ void process_midi() {
                    MIDIIN.getChannel());
       }*/
     }
+    Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
+    Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+    
     //todo: accept a note on another channel to set the root..?
     //      or actually, have CCs to set the root note, scale, etc..?
     // have separate midi input channels, one dedicated to triggering the autoplayer, and one for doing direct control, both output to the MIDI_CHANNEL_BASS_OUT
