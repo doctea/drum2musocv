@@ -75,7 +75,8 @@ void setup() {
   delay(500); // give half a second grace to allow for programming
 
   Serial.begin(115200);   // usb serial debug port
-  while (!Serial);
+  unsigned long started_millis = millis();
+  while (!Serial && millis() < started_millis+500 ) {};  // wait for serial to become available or timeout after half a second
 
   Serial.println("---> Bambleweeny57 starting up! <c> doctea/The Tyrell Corporation 2020+ <---");
 
