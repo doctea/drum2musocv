@@ -335,7 +335,7 @@ void process_euclidian(int ticks) {
       }
     }
 
-    delete bs;
+    //delete bs;
     
     //Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
   }

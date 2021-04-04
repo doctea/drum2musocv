@@ -150,9 +150,6 @@ A diagram to help me understand how everything is routed:-
 	 
  - Add extra output on the pitch bend output (currently using this to replace my broken output cc74)
 
-## Requirements 
-
- - need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to the DebounceEvent library (removes use of delay() by the library)
 
 ### Done list
 
