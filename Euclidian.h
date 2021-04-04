@@ -19,6 +19,7 @@
 #define PATTERN_MELODY (PATTERN_BASS+1)
 
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
+#define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_TRIGGERS) // (50 when num_patterns = 2)
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
 #define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = _NONE, 1 = _SUBTLE, 2 = _TOTAL
 #define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random "bank" X

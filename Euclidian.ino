@@ -334,6 +334,8 @@ void process_euclidian(int ticks) {
         if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
       }
     }
+
+    delete bs;
     
     //Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
   }
