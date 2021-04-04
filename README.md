@@ -79,6 +79,7 @@ A diagram to help me understand how everything is routed:-
 
 # Requirements
 
+ - Use the Seeeduino Zero board profile so that Serial has printf() - install boards from URL https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json and add boards.txt to eg C:\Users\<YOUR_USERNAME>\AppData\Local\Arduino15\packages\Seeeduino\hardware\samd\1.8.1\boards.txt - can edit the USB device name from here
  - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
  - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
  - DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
