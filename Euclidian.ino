@@ -367,17 +367,13 @@ void initialise_euclidian() {
   //     length, pulses, rotation, duration
   int i = 0;
   make_euclid(&patterns[i++],   LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
-//#if MUSO_MODE==MUSO_MODE_0B
   make_euclid(&patterns[i++],   LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
-//#endif
   make_euclid(&patterns[i++],   LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
   make_euclid(&patterns[i++],   LEN/4,  16,1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
   make_euclid(&patterns[i++],   LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
-//#if MUSO_MODE==MUSO_MODE_0B  
   make_euclid(&patterns[i++],   LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
   make_euclid(&patterns[i++],   LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
   make_euclid(&patterns[i++],   LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
-//#endif
   make_euclid(&patterns[i++],   LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
   make_euclid(&patterns[i++],   LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
   make_euclid(&patterns[i++],  LEN,    16, 0,   0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
@@ -386,7 +382,8 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 9,    DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
   make_euclid(&patterns[i++],  LEN*2,  1, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT/2, NUM_TRIGGERS+NUM_ENVELOPES);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT,   PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
   Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling

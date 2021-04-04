@@ -8,7 +8,8 @@ int midi_channel_bitbox_out = DEFAULT_MIDI_CHANNEL_BITBOX_OUT;
 
 #include "MidiSetup.hpp"
 #include "Envelopes.h"    // for access to envelope info
-#include "Harmony.hpp"       // for access to the harmony channel info
+#include "Harmony.hpp"    // for access to the harmony channel info
+#include "Euclidian.h"    // cos we need to know the the number of patterns (actually we dont but..)
 #include "ClockTriggerOutput.hpp"
 
 
@@ -27,7 +28,7 @@ int get_muso_pitch_for_trigger(int trigger) {
       gate = trigger - 2;
   }
 
-  Serial.printf("get_muso_pitch_for_trigger(%i) returning gate %i\r\n", trigger, gate);
+  //Serial.printf("get_muso_pitch_for_trigger(%i) returning gate %i\r\n", trigger, gate);
   if (gate!=-1)
     return MUSO_NOTE_MINIMUM + gate;
   return -1;
@@ -49,11 +50,11 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM
   ) {
-    Serial.printf("   for trigger %i sending muso gate note on pitch %i\r\n", t, p);
+    //Serial.printf("   for trigger %i sending muso gate note on pitch %i\r\n", t, p);
     trigger_status[t] = v > 0; // TRIGGER_IS_ON;
     //Serial.println("set trigger_status to ON");
     if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(t)>=0)        {
-      Serial.printf("fire_trigger(%i) sending muso pitch %i\r\n", t, get_muso_pitch_for_trigger(t));
+      //Serial.printf("fire_trigger(%i) sending muso pitch %i\r\n", t, get_muso_pitch_for_trigger(t));
       MIDIOUT.sendNoteOn(get_muso_pitch_for_trigger(t)/*p*/, v, MUSO_GATE_CHANNEL);
     }
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);
@@ -65,10 +66,11 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     //Serial.printf("   for trigger %i, is an envelope trigger!\r\n", p);
     if (MUSO_GATE_CHANNEL>0)        update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
-  } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    //Serial.printf("   for trigger %i got BASS trigger!\r\n", p);
+  } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+    Serial.printf("   for trigger %i got HARMONY trigger!\r\n", t);
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
-    harmony.fire_both(); //bass_note_on_and_next();
+    //harmony.fire_both(); //bass_note_on_and_next();
+    harmony.fire_for(t - (NUM_TRIGGERS + NUM_ENVELOPES));
     //else
     //  Serial.println("No note held? is_note_held is false");
   } else {
@@ -101,9 +103,10 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
     //Serial.printf("   for trigger %i, dousing an envelope trigger!\r\n", p);
     if (MUSO_GATE_CHANNEL>0)        update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_OUT);
-  } else if (p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {  // harmony trigger
+  } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //Serial.printf("   for trigger %i dousing BASS trigger!\r\n", p);
-    harmony.douse_both();
+    //harmony.douse_both();
+    harmony.douse_for(t - (NUM_TRIGGERS + NUM_ENVELOPES));
   } else {
     //Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
@@ -112,7 +115,7 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
 }
 
 void douse_all_triggers(bool internal = false) {
-  for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES + 1 ; i++) {
+  for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES + NUM_MIDI_OUTS ; i++) {
     douse_trigger(i, 0, internal);
   }
   kill_envelopes(); // force envelopes to shush

@@ -494,6 +494,22 @@ class Harmony {
       if (DEBUG_HARMONY) Serial.println("douse_both<<<<<");
     }
 
+    void fire_for(int output_number) {
+      Serial.printf("fire_for %i\r\n", output_number);
+      if (output_number==0) //PATTERN_BASS)
+        fire_bass();
+      else if (output_number==1) //PATTERN_MELODY) 
+        fire_melody();
+    }
+
+    void douse_for(int output_number) {
+      if (output_number==0) //PATTERN_BASS)
+        douse_bass();
+      else if (output_number==1) //PATTERN_MELODY) 
+        douse_melody();
+    }
+
+
     void kill_notes() {
         Serial.println("harmony.kill_notes() called!");
         mko_bass.send_all_notes_off();
@@ -558,6 +574,14 @@ class Harmony {
       }
       
       return scale_number; // default to major
+    }
+
+    int get_currently_playing_root() {
+      return last_melody_root;
+    }
+
+    void reset_sequence() {
+      sequence_counter = 0;
     }
     
     // get the root note for the scale chord -- can go negative/higher than 6 to access other octaves
@@ -638,7 +662,7 @@ class Harmony {
           // higher found, insert at i 
           //Serial.printf("\tinsert_pitch: inserting pitch %s [%i] at position %i\r\n", get_note_name(pitch).c_str(), pitch, i);
           //for (int x = i+1 ; x < 10 ; x++) {
-          for (int x = 8 ; x > i+1 ; x--) {
+          for (int x = 8 ; x > i+1 ; x--) { // 8 because highest usable index is 9 and we use index+1 below
             //Serial.printf("\t\tshifting pitch at %i to %i (%i overwrites %i)\r\n", x, x+1, pitches[x-1], pitches[x]);
             pitches[x+1] = pitches[x]; 
           }
@@ -671,21 +695,22 @@ class Harmony {
       int type = 0;
       if (auto_chord_type) {
         type = HARMONY::CHORD_TYPE::TRIAD;
-        if (current_bar%2==1) {
+        if (current_bar%2==1) {   // second or fourth bar of a phrase
           type = HARMONY::CHORD_TYPE::SEVENTH;
-          if (current_phrase%2==0)
+          if (current_phrase%2==0)  // every other phrase 
             type = HARMONY::CHORD_TYPE::NINETH;
         }
-        if (current_bar==3) { 
-          type += (current_phrase+current_beat)%HARMONY::CHORD_TYPE::CHORD_TYPE_MAX;
+        if (current_bar==3) { // if its the last bar of a phrase
+          type += (current_phrase+current_beat)%HARMONY::CHORD_TYPE::CHORD_TYPE_MAX;  // mutate the chord type based on current phrase & current beat
         }
         type %= HARMONY::CHORD_TYPE::CHORD_TYPE_MAX;   
-      } else
+      } else                      // standard 
         type = HARMONY::CHORD_TYPE::TRIAD;
         
       return type;
     }
 
+    // what chord inversion we should use right now
     int get_chord_inversion() {
       if (auto_chord_inversion) 
         return (current_bar%2==0 && current_beat+1%2==0) || current_bar==BARS_PER_PHRASE-1 
@@ -774,21 +799,12 @@ class Harmony {
                    p++;
       }
 
-      // do inversions
-      /*for (int i = 0 ; i < inversion ; i++) {
-        if (pitches[i]>-1) {
-          //pitches[i] += 12;
-          int p = pitches[i];
-          remove_pitch(pitches, p);
-          insert_pitch(pitches, p + 12);
-        }
-      }*/
-      //pitches[3] = pitch + scale_offset[scale_number][8]; // add 9th chord
-      //-1, -1, -1, -1, -1, -1, -1
+      // fill the unused notes
       for (int i = p ; i < 10 ; i++) {
         pitches[i] = -1;
       }
 
+      // do inversions
       do_inversion(pitches, inversion);
       
       if (DEBUG_HARMONY) {
@@ -802,13 +818,6 @@ class Harmony {
       return pitches;
     }
 
-    int get_currently_playing_root() {
-      return last_melody_root;
-    }
-
-    void reset_sequence() {
-      sequence_counter = 0;
-    }
 
     /*int inversions[][] = {
       { 0, 1, 2 },
