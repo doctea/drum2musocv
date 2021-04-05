@@ -3,32 +3,94 @@
 
 #define DEBUG_HARMONY false
 
+#include "Harmony.hpp"
 #include "ChannelState.hpp"
+#include "MidiSetup.hpp"
 
 // for providing multiple MIDI key outputs ie bass and harmony
 //  todo: properly handle multiple notes being on at the same time for tracking chords
 class MidiKeysOutput : public ChannelState {
+
+    
+  private:
+
+    //int currently_playing = -1;
+    //int currently_playing[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    int octave_offset = 0;
+    int melody_mode = HARMONY::MELODY_MODE::SINGLE;
+    int arp_counter = 0;
+
   public:
 
     int channel = 0;
+
     
     MidiKeysOutput(int chan, int octave_off = 0) {
       channel = chan;
       octave_offset = octave_off;
     }
 
+    MidiKeysOutput set_melody_mode(int mm) {
+      melody_mode = mm % HARMONY::MELODY_MODE::MELODY_MODE_MAX;
+      return *this;
+    }
+
+
+    void fire_notes(int pitch, int *pitches) {
+      Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
+
+      douse_notes();
+
+      if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
+        // do nothing
+      } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
+        send_note_on(pitch);
+        //if (DEBUG_HARMONY) 
+        Serial.printf("    using single mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
+      } else if (melody_mode==HARMONY::MELODY_MODE::CHORD || HARMONY::MELODY_MODE::ARPEGGIATE) {
+        //if (DEBUG_HARMONY) 
+        
+        //memcpy(&last_melody_pitches, get_chord_for_pitch(pitch), 10 * sizeof(int));
+        //Serial.printf("about to play chord is %i\r\n", );
+
+          //memcpy(&last_melody_pitches, pitches, 10 * sizeof(int) )
+
+        if (melody_mode==HARMONY::MELODY_MODE::ARPEGGIATE) {
+          Serial.println("    using arp mode for melody!");
+          if (pitches[arp_counter]==-1 || arp_counter>=10) {
+            arp_counter = 0;
+          }
+          /*pitches[0] = pitches[arp_counter];
+          for (int i = 1 ; i < 10 ; i++) {
+            pitches[i] = -1;
+          }*/
+          send_note_on(pitches[arp_counter]);
+        } else {
+          Serial.println("    using chord mode for melody!");
+
+          send_note_on(pitches, 127);  // send all notes of generated chord_type
+        }
+      }
+    }
+
+    void douse_notes() {
+      send_note_off(get_held_notes());
+    }
+
+
     // send_note_on/off multiples, expects array of size 10
     // todo: make this handle velocity per note
     void send_note_on(int *pitches, int velocity = 127) { //velocity[10] = { 127, 127, 127, 127, 127, 127, 127, 127, 127, 127 }) {
       //Serial.printf("send_note_on!\r\n");
-      if (DEBUG_HARMONY) Serial.printf(">>> Start ON for multiples on c%i, held: %s\r\n", channel, get_debug_notes_held());
-      if (DEBUG_HARMONY) {
+      //if (DEBUG_HARMONY) 
+      Serial.printf(">>> Start ON for multiples on channel %i, held: %s\r\n", channel, get_debug_notes_held());
+      //if (DEBUG_HARMONY) {
         Serial.printf("   channel %i HarmonyOutput  playing chord: [ ", channel);
         for (int i = 0 ; i < 10 ; i++) {
           if (pitches[i]>-1) Serial.printf("%s\t", get_note_name(pitches[i]).c_str());
         }
         Serial.println("]");
-      }
+      //}
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]>=0) {
           if (DEBUG_HARMONY) Serial.printf("   >about to call send_note_on [%i] from list sending %i\r\n", i, pitches[i]);
@@ -165,12 +227,6 @@ class MidiKeysOutput : public ChannelState {
     }
 
 
-    
-  private:
-
-    //int currently_playing = -1;
-    //int currently_playing[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-    int octave_offset = 0;
 
 };
 

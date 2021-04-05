@@ -191,7 +191,7 @@ void process_midi() {
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         autobass_input.handle_note_off(MIDIIN.getData1());
         if (!autobass_input.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note
-          harmony.douse_both(); //bass_note_off();
+          harmony.douse_all(); //bass_note_off();
         }
       }
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {
