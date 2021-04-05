@@ -3,6 +3,8 @@
 
 #define DEBUG_HARMONY false
 
+#define TIE_PORTA_TICK_LENGTH   TICKS_PER_STEP/4
+
 #include <USB-MIDI.h> 
 #include "Harmony.hpp"
 #include "ChannelState.hpp"
@@ -36,11 +38,43 @@ class MidiKeysOutput : public ChannelState {
       return *this;
     }
 
+    bool tied_status = false;
+    bool tied_started = false;
+    int stored_tied_notes[10];
+    int tied_ttl = 0;
+    void process_tick_ties() {
+      //if (tied_status) Serial.printf("process_tick_ties on a tied note for channel %i, ttl is %i\r\n", channel, tied_ttl);
+      if (tied_status && tied_started && --tied_ttl<=0) {
+        Serial.printf("<<<<TIES: Processing a finished tie, latched note to kill==%i!\r\n", stored_tied_notes[0]);
+        send_note_off(stored_tied_notes);
+        tied_status = false;
+        tied_started = false;
+        for (int i = 0 ; i < 10 ; i++) {
+          stored_tied_notes[i] = -1;
+        }
+        tied_status = false;
+      }
+    }
 
     void fire_notes(int pitch, int *pitches) {
       Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
 
-      if (is_note_held()) douse_notes();
+      if (is_note_held() && !tied_status) {
+        douse_notes();
+      }
+      if (tied_status) {
+        Serial.printf("TIES: fire_notes with tied_status - latched note is %i - STARTING countdown\r\n", stored_tied_notes[0]);
+        // there is a tye pending, so set ttl
+        if (stored_tied_notes[0]==pitch) { // same note, so kill old one first
+          Serial.printf("TIES: fire_notes told to tie same note as already tied, so sending note off for %i first\r\n", stored_tied_notes[0]);
+          send_note_off(stored_tied_notes);
+          tied_started = tied_status = false;
+          tied_ttl = 0;
+        } else {
+          tied_ttl = TIE_PORTA_TICK_LENGTH; //TICKS_PER_STEP/2; //PPQN/2;
+          tied_started = true;
+        }
+      }
 
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing
@@ -75,10 +109,23 @@ class MidiKeysOutput : public ChannelState {
       }
     }
 
-    void douse_notes() {
+    void douse_notes(bool tied = false) {
       Serial.printf("douse_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, get_held_notes()[0]);
+      if (!tied) {
+        Serial.println("\tNot tied, dousing");
+        send_note_off(get_held_notes());
+      } else if (is_note_held()) {
+        //Serial.printf("TIED: not dousing");
+        //Serial.printf("TIES: latching tie -- tying current held note %i\r\n", get_held_notes()[0]);
+        //Serial.printf(" - storing note %i\r\n", get_held_notes()[0]);
 
-      send_note_off(get_held_notes());
+        // note should be tied with previous, so set a flag and wait for next trigger before killing previous notes
+        tied_status = true;
+        //tied_ttl = 6;
+        tied_started = false;
+        memcpy(&stored_tied_notes, get_held_notes(), 10*sizeof(int)); //get_held_notes()[0]));
+        Serial.printf("TIES: latching tie -- stored held note %i\r\n", stored_tied_notes[0]);
+      }
     }
 
 

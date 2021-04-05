@@ -19,10 +19,12 @@
 
 bpm_status bpm_statuses[NUM_PATTERNS];
 
-void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1) {
+void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
 
   if (trigger>=0)   p->trigger = trigger;
+  if (tie_on>=0)    p->tie_on = tie_on;
+
 
   if (steps > 0)    p->steps = steps;
   if (pulses > 0)   p->pulses = pulses;
@@ -280,6 +282,8 @@ void process_euclidian(int ticks) {
     
   }
 
+  harmony.process_ties();
+
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
     //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
     if (!patterns[i].active_status || patterns[i].trigger==-1) continue;
@@ -315,6 +319,7 @@ void process_euclidian(int ticks) {
       douse_trigger(i, 127, true);
       should_douse = true;
     }
+
     
     if(bs.is_bpm_on_step) {
       //if (i==10||i==9||i==2) { //stutter!=0) {
@@ -333,7 +338,12 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         //EUC_printf(" ");
       } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
-        douse_trigger(patterns[i].trigger, 0, true);
+        bool tied = bs.current_step%patterns[i].tie_on==0;
+        if (tied) {
+          Serial.printf("==== step %i with tie_on %i, result %c\r\n", bs.current_step, patterns[i].tie_on, bs.current_step%patterns[i].tie_on==0?'Y':'N');
+          //Serial.printf("   Found tied note for beat %i\r\n", bs.current_beat);
+        }
+        douse_trigger(patterns[i].trigger, 0, true, tied);
         // TODO: turn off according to some other thing.. eg cut groups?
         if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
         //EUC_printf(".", i); EUC_printf(" ");
@@ -367,7 +377,7 @@ void initialise_euclidian() {
   EUC_println("resetting all:-");
   const int LEN = SEQUENCE_LENGTH_STEPS;
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-    make_euclid(&patterns[i], LEN, 0, 1, DEFAULT_DURATION); // initialise patterns to default length, zero pulses, default rotation of '1' and default duration of 1 step
+    make_euclid(&patterns[i], LEN, 0, 1, DEFAULT_DURATION, i); // initialise patterns to default length, zero pulses, default rotation of '1' and default duration of 1 step
     // if we don't do this then this does a bad job of resetting the patterns
   }
 
@@ -392,9 +402,9 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
   make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
-  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS, 4);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY, 3); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
+  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT, 2); // root pad
   Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling

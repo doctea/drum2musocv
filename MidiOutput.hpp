@@ -67,7 +67,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     if (MUSO_GATE_CHANNEL==DEFAULT_MUSO_GATE_CHANNEL)        update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
     if (MIDI_CHANNEL_BITBOX_OUT>0)  MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_OUT);  // also send trigger for the envelopes
   } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    Serial.printf("   for trigger %i got HARMONY instrument %i!\r\n", t, t - (NUM_TRIGGERS + NUM_ENVELOPES));
+    //Serial.printf("   for trigger %i got HARMONY instrument %i!\r\n", t, t - (NUM_TRIGGERS + NUM_ENVELOPES));
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     //harmony.fire_both(); //bass_note_on_and_next();
     harmony.fire_for(t - (NUM_TRIGGERS + NUM_ENVELOPES));
@@ -81,7 +81,7 @@ void fire_trigger(byte t, byte v, bool internal = false) {
   //Serial.println("finishing fire_trigger");
 }
 
-void douse_trigger(byte t, byte v = 0, bool internal = false) {
+void douse_trigger(byte t, byte v = 0, bool internal = false, bool tied = false) {
   //Serial.printf("dousing trigger=%i\r\n", t);
   byte p = MUSO_NOTE_MINIMUM + t;
   byte b = BITBOX_NOTE_MINIMUM + t;
@@ -106,7 +106,8 @@ void douse_trigger(byte t, byte v = 0, bool internal = false) {
   } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //Serial.printf("   for trigger %i dousing BASS trigger!\r\n", p);
     //harmony.douse_both();
-    harmony.douse_for(t - (NUM_TRIGGERS + NUM_ENVELOPES));
+    if (tied) Serial.printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", t - (NUM_TRIGGERS + NUM_ENVELOPES));
+    harmony.douse_for(t - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
   } else {
     //Serial.printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }

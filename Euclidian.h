@@ -72,6 +72,7 @@ typedef struct {
   bool stored[32];
   int original_steps;  // for storing the original generated size of the pattern, in case we resize it etc
   int trigger;
+  int tie_on = 0;
 } pattern_t;
 
 pattern_t patterns[NUM_PATTERNS];

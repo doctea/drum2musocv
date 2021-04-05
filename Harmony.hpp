@@ -239,6 +239,12 @@ class Harmony {
       reset_sequence_pattern();
     }
 
+    void process_ties() {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        mko[i].process_tick_ties();
+      }
+    }
+
     void set_progression(int source[4]) {
       for (int i = 0 ; i < CHORD_PROGRESSION_LENGTH ; i++) {
         chord_progression[i] = source[i];
@@ -301,8 +307,8 @@ class Harmony {
         
     }
 
-    void douse_generic (int output_number) {
-      mko[output_number].douse_notes();
+    void douse_generic (int output_number, bool tied = false) {
+      mko[output_number].douse_notes(tied);
     }
 
 /*
@@ -544,13 +550,13 @@ class Harmony {
     }*/
 
     void fire_for(int output_number) {
-      Serial.printf("fire_for output number %i\r\n", output_number);
+      //Serial.printf("fire_for output number %i\r\n", output_number);
       fire_generic(output_number);
     }
 
-    void douse_for(int output_number) {
-      Serial.printf("douse_for output number %i\r\n", output_number);
-      douse_generic(output_number);
+    void douse_for(int output_number, bool tied = false) {
+      //Serial.printf("douse_for output number %i\r\n", output_number);
+      douse_generic(output_number, tied);
     }
 
     void douse_all() {
