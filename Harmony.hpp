@@ -26,12 +26,14 @@
 #define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
 
 //BITBOX/melody settings
-#define BITBOX_NOTE_MINIMUM     36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
-#define BITBOX_KEYS_OCTAVE_OFFSET 2
+#define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
+#define BITBOX_KEYS_OCTAVE_OFFSET   2
 
-#define CC_CHANNEL_BASS_OUT 12
-#define CC_CHANNEL_BITBOX_KEYS 13
-#define CC_MELODY_ROOT 11
+#define CC_CHANNEL_PAD_ROOT         10
+#define CC_CHANNEL_BASS_OUT         12
+#define CC_CHANNEL_BITBOX_KEYS      13
+#define CC_MELODY_ROOT              11
+
 
 #define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 #define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
@@ -190,7 +192,7 @@ class Harmony {
     int arp_counter = 0;  // todo, probably move this into the MidiKeysOutput..?
     
     int mutation_mode = HARMONY::MUTATION_MODE::RANDOMISE;
-    int melody_mode   = HARMONY::MELODY_MODE::CHORD;
+    //int melody_mode   = HARMONY::MELODY_MODE::CHORD;
     int arp_mode      = DEFAULT_ARP_MODE; //ARP_MODE_NEXT_ON_NOTE;
 
     //bool auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
@@ -974,7 +976,7 @@ class Harmony {
         douse_generic(1);
         mko_keys.set_melody_mode(value); //melody_mode = value % HARMONY::MELODY_MODE::MELODY_MODE_MAX;
         //melody_mode = value % HARMONY::MELODY_MODE::MELODY_MODE_MAX;
-        Serial.printf("Setting melody mode to %i\r\n", melody_mode);
+        Serial.printf("Setting melody mode to %i\r\n", value);
         //Serial.printf("Sizeof harmony modes is %i\r\n", sizeof(HARMONY::MELODY_MODE));
         //if (melody_mode==0)
         return true;
@@ -1013,6 +1015,8 @@ class Harmony {
       } else if (number==CC_CHANNEL_BITBOX_KEYS) {
         mko_keys.set_midi_channel(value);
         return true;
+      } else if (number==CC_CHANNEL_PAD_ROOT) {
+        mko_pads_root.set_midi_channel(value);
       } else if (number==CC_MELODY_ROOT) {
         if (channel_state.set_midi_root_pitch(value)) // sets but returns false if no change
           kill_notes();

@@ -78,9 +78,11 @@ byte cc_value_sync_modifier = 24;  // initial global clock sync modifier -- numb
 envelope_state envelopes[NUM_ENVELOPES];
 
 
-// stubs
+// prototype stubs
 void update_envelope (byte env_num, byte velocity, bool state);
 bool handle_envelope_ccs(byte channel, byte number, byte value);
 void kill_envelopes();
+void initialise_envelopes();
+void process_envelopes(unsigned long now);
   
 #endif

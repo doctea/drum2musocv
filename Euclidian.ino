@@ -161,8 +161,12 @@ void process_euclidian(int ticks) {
           randomSeed(seed + ran);
           if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
             mutate_euclidian_total(ran);
-          else
+          else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
             mutate_euclidian(ran);
+          else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
+            // do nothing
+          } // else and there's room for another mode too...
+
           //debug_patterns();
         }
       }
@@ -314,7 +318,7 @@ void process_euclidian(int ticks) {
       //}
       if (query_pattern(&patterns[i], bs.current_step, 0 , bs.current_bar)) {  // step trigger
         //douse_trigger(i, 127, true);
-        Serial.printf(">> for pattern %i, using trigger number %i\r\n", i, patterns[i].trigger);
+        //Serial.printf(">> for pattern %i, using trigger number %i\r\n", i, patterns[i].trigger);
         fire_trigger(patterns[i].trigger, 127, true);
         if (i < 16) {
           //EUC_printf("%01X", i); // print as hex
@@ -368,24 +372,25 @@ void initialise_euclidian() {
   EUC_println("initialising:-");
   //     length, pulses, rotation, duration
   int i = 0;
-  make_euclid(&patterns[i++],   LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
-  make_euclid(&patterns[i++],   LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
-  make_euclid(&patterns[i++],   LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
-  make_euclid(&patterns[i++],   LEN/4,  16,1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
-  make_euclid(&patterns[i++],   LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
-  make_euclid(&patterns[i++],   LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
-  make_euclid(&patterns[i++],   LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
-  make_euclid(&patterns[i++],   LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
-  make_euclid(&patterns[i++],   LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
-  make_euclid(&patterns[i++],   LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
-  make_euclid(&patterns[i++],  LEN,    16, 0,   0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
-  make_euclid(&patterns[i++],  LEN*2,  1 , 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
-  make_euclid(&patterns[i++],  LEN*2,  1 , 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
-  make_euclid(&patterns[i++],  LEN*2,  1, 9,    DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
-  make_euclid(&patterns[i++],  LEN*2,  1, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
-  make_euclid(&patterns[i++],  LEN*2,  5, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
-  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT-1,   PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
+  make_euclid(&patterns[i++],  LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
+  make_euclid(&patterns[i++],  LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
+  make_euclid(&patterns[i++],  LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
+  make_euclid(&patterns[i++],  LEN/4,  16,1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
+  make_euclid(&patterns[i++],  LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
+  make_euclid(&patterns[i++],  LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
+  make_euclid(&patterns[i++],  LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
+  make_euclid(&patterns[i++],  LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
+  make_euclid(&patterns[i++],  LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
+  make_euclid(&patterns[i++],  LEN,    16, 0,  0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
+  make_euclid(&patterns[i++],  LEN*2,  1 , 1,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
+  make_euclid(&patterns[i++],  LEN*2,  1 , 5,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
+  make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
+  make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
+  make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
+  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
   Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
@@ -454,7 +459,7 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
   if (channel != GM_CHANNEL_DRUMS) return false;
 
-  if (number >= CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
+  if (number >= CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_END) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
     set_pattern_active_status(number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value > 1);
     return true;
   } else if (number == CC_EUCLIDIAN_SET_AUTO_PLAY) {
@@ -494,10 +499,6 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     euclidian_flam_clap = value >0;
     return true;
   }
-  /*else if (number==CC_EUCLIDIAN_SET_MUTATE_MODE) {
-    euclidian_set_mutate_mode(value % EUCLIDIAN_MUTATE_MODE_MAX);
-    return true;
-    }*/
   return false;
 }
 

@@ -3,6 +3,7 @@
 
 #define DEBUG_HARMONY false
 
+#include <USB-MIDI.h> 
 #include "Harmony.hpp"
 #include "ChannelState.hpp"
 #include "MidiSetup.hpp"
@@ -39,7 +40,7 @@ class MidiKeysOutput : public ChannelState {
     void fire_notes(int pitch, int *pitches) {
       Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
 
-      douse_notes();
+      if (is_note_held()) douse_notes();
 
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing

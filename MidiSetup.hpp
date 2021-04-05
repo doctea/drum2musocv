@@ -2,6 +2,8 @@
 #define MIDISETUP_INCLUDED
 // SET UP MIDI PORTS
 
+#include "Config.h"
+
 #define PPQN  24  // midi clock ticks per quarter-note -- ie length in ticks of 1 beat
 
 #ifdef USB_NATIVE  // use native usb version, eg for seeduino or (presumably) other boards with Native USB support

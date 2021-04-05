@@ -11,7 +11,7 @@ Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
 Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
-Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_TRIGGERS) // (50 when num_patterns = 2)
+Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) // (50 when num_patterns = 2)
 Euclidian.h:#define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
 Euclidian.h:#define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = _NONE, 1 = _SUBTLE, 2 = _TOTAL
 Euclidian.h:#define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random "bank" X
@@ -23,9 +23,10 @@ Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed ac
 Euclidian.h:#define CC_EUCLIDIAN_FILLS                28
 Euclidian.h:#define CC_EUCLIDIAN_HIHAT_SHUFF          9
 Euclidian.h:#define CC_EUCLIDIAN_CLAP_FLAM            8
-Harmony.hpp:#define CC_CHANNEL_BASS_OUT 12
-Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS 13
-Harmony.hpp:#define CC_MELODY_ROOT 11
+Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10
+Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12
+Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13
+Harmony.hpp:#define CC_MELODY_ROOT              11
 Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29

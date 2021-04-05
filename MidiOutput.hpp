@@ -161,13 +161,26 @@ void midi_kill_notes_bitbox() {
       MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }
 }
-void midi_kill_notes_muso() {
+void midi_kill_notes_muso_drums() {
   if (MUSO_GATE_CHANNEL>0) {
     MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MUSO_GATE_CHANNEL);   // 123 = kill all notes
     if (midiecho_enabled)
       MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }  
 }
+/*void midi_kill_notes_muso_pads() {
+  if (MIDI_CHANNEL_PAD_ROOT_OUT>0) {
+    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_ROOT_OUT);   // 123 = kill all notes
+    if (midiecho_enabled)
+      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_ROOT_IN);     // 123 = kill all notes - for midiecho to host
+  }  
+  if (MIDI_CHANNEL_PAD_PITCH_OUT>0) {
+    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_PITCH_OUT);   // 123 = kill all notes
+    if (midiecho_enabled)
+      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_PITCH_IN);     // 123 = kill all notes - for midiecho to host
+  }  
+}*/
+
 
 void midi_kill_notes() {
   /*if (MUSO_GATE_CHANNEL>0) {
@@ -175,7 +188,7 @@ void midi_kill_notes() {
     if (midiecho_enabled)
       MIDIIN.sendControlChange (123, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }*/
-  midi_kill_notes_muso();
+  midi_kill_notes_muso_drums();
   midi_kill_notes_bitbox();
   harmony.kill_notes();
 }

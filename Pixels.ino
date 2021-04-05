@@ -1,5 +1,13 @@
+#include "Config.h"
+
 #ifdef ENABLE_PIXELS
 #ifdef ENABLE_PIXELS_FASTLED
+
+#include "Drums.h"
+#include "Envelopes.h"
+#include "UI.h"
+#include "BPM.hpp"
+#include "Euclidian.h"
 
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused

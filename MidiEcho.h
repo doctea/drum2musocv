@@ -1,11 +1,15 @@
 #ifndef MIDIECHO_INCLUDED
 #define MIDIECHO_INCLUDED
 
+#include "Drums.h"
+#include "Euclidian.h"
+
 int get_pitch_for_trigger(int trigger);
 int get_trigger_for_pitch(int pitch);
 void echo_fire_trigger(int trigger, int velocity);
 void echo_douse_trigger(int trigger, int velocity);
 bool handle_midiecho_ccs(int channel, int number, int value);
+void initialise_pitch_for_triggers();
 
 bool midiecho_enabled = true;
 

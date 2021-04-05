@@ -69,8 +69,10 @@ A diagram to help me understand how everything is routed:-
 
 | Type         	| MIDI channel | MIDI number   | Purpose |
 | ------------- | ------------ | ------------- | ------- |
-| Notes/CC/etc 	| 2 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
+| Notes/CC/etc 	| 4 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
 | Notes/CC/etc  | 3     | any | Output bass notes 2 octaves higher, for playing melodies / pads | 
+| Notes/CC/etc  | 1     | any | Output to Muso Pitch 1 |
+| Notes/CC/etc  | 2     | any | Output to Muso Pitch 2 |
 | Notes   	| 11    | 36-51 (C2-D#3) | 'shadow' copy of notes sent to midimuso, starting at C2 so they work with default bitbox pads |
 | Notes 	| 16 	| 60-70 (C4-?) | outputs to MIDI Muso CV-12, gates |
 | CV + pitch 	| 1 	| 1,7,11,71,74+pitch | outputs to MIDI Muso, CV/pitch outputs |
