@@ -13,6 +13,7 @@
 #include "Envelopes.h"
 
 #include "Euclidian.h"
+#include "Pixels.h"
 
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"

@@ -199,9 +199,13 @@ class MidiKeysOutput : public ChannelState {
     void send_all_notes_off() {
       if (channel==0) return;
       
-      if (is_note_held())
+      if (is_note_held()) {
+        Serial.printf("send_all_notes_off on channel %i!\r\n", channel);
         send_note_off(held_notes);
-      Serial.printf("send_all_notes_off sending off on channel %i!\r\n", channel);
+      } else {
+        Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
+      }
+      
       MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
       /*for (int i = 0 ; i < 127 ; i++) {
         MIDIOUT.sendNoteOff(i, 0, channel);
@@ -218,7 +222,7 @@ class MidiKeysOutput : public ChannelState {
       if (octave_offset==offset) return;
       
       send_all_notes_off();
-      handle_all_notes_off();
+      //handle_all_notes_off();
     }
 
     void set_midi_channel(int chan) {
@@ -226,7 +230,7 @@ class MidiKeysOutput : public ChannelState {
       if (chan==channel) return;
       
       send_all_notes_off();
-      handle_all_notes_off();
+      //handle_all_notes_off();
       channel = chan;
     }
 

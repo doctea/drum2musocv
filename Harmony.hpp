@@ -237,8 +237,6 @@ class Harmony {
     Harmony(ChannelState& channel_state_): channel_state(channel_state_) {
       reset_progression();
       reset_sequence_pattern();
-
-
     }
 
     void set_progression(int source[4]) {
@@ -563,7 +561,7 @@ class Harmony {
 
 
     void kill_notes() {
-        Serial.println("harmony.kill_notes() called!");
+        Serial.println(">>>>>> harmony.kill_notes() called");
         mko_bass.send_all_notes_off();
         mko_keys.send_all_notes_off();
         mko_pads_root.send_all_notes_off();

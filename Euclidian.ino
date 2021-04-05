@@ -75,7 +75,11 @@ void rotate_pattern(pattern_t *p, int rotate) {
 
 void set_pattern_active_status(int pattern, bool active) {
   patterns[pattern].active_status = active;
-  douse_trigger(pattern);
+  
+  if (!active) {
+    douse_trigger(patterns[pattern].trigger);
+    Serial.printf("set_pattern_active_status dousing trigger %i for pattern %i\r\n", patterns[pattern].trigger, pattern);
+  }
 }
 
 void mutate_euclidian_total(int pattern) {
@@ -460,6 +464,7 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   if (channel != GM_CHANNEL_DRUMS) return false;
 
   if (number >= CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_END) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
+    Serial.printf("handle_euclidian_ccs(%i, %i) setting pattern number %i to %c\r\n", channel, number, number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value>1?'Y':'N');
     set_pattern_active_status(number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value > 1);
     return true;
   } else if (number == CC_EUCLIDIAN_SET_AUTO_PLAY) {

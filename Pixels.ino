@@ -8,6 +8,7 @@
 #include "UI.h"
 #include "BPM.hpp"
 #include "Euclidian.h"
+#include "MidiInput.hpp"
 
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused

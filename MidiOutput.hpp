@@ -40,7 +40,7 @@ int get_muso_pitch_for_trigger(int trigger) {
 
 // functions for sending MIDI out
 
-static int i = 0;
+//static int i = 0;
 void fire_trigger(byte t, byte v, bool internal = false) {
   //Serial.printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note

@@ -1,5 +1,6 @@
 // functions to help echo whats happening back to the host, eg if we want to MIDI record the euclidian patterns...
 
+#include "MidiEcho.h"
 
 void initialise_pitch_for_triggers() {
 /*#if MUSO_MODE==MUSO_MODE_0B

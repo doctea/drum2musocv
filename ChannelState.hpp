@@ -189,8 +189,8 @@ private:
             break;
         }
         held_notes_count = 0;
-        build_notes_held_string();
       }
+      build_notes_held_string();
     }
 
     int *get_held_notes() {

@@ -1,6 +1,8 @@
 #ifndef ENVELOPES_INCLUDED
 #define ENVELOPES_INCLUDED
 
+#include "MidiSetup.hpp"
+
 // STRUCTS
 
 enum envelope_types : byte {
