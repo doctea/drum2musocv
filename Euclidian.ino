@@ -385,7 +385,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
   make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
-  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT,   PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
+  make_euclid(&patterns[i++],  LEN,    4, 3,    STEPS_PER_BEAT-1,   PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
   Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling

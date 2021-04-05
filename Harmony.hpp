@@ -279,8 +279,8 @@ class Harmony {
 
       // get the current chord number
       if (channel_state.is_note_held()) {
-        pitch = channel_state.get_held_notes()[0];
         notes = channel_state.get_held_notes();
+        pitch = notes[0];
       } else {
         int chord_number = get_chord_number();
         int chord_type = get_chord_type();
@@ -289,8 +289,8 @@ class Harmony {
         pitch = get_current_root_pitch();
 
         notes = get_notes_for_chord(
-            arp_mode>0 ?
-              sequence[get_sequence_number()%NUM_SEQUENCES][sequence_counter%HARM_SEQUENCE_LENGTH] + get_chord_number() :
+            /*arp_mode>0 ?
+              sequence[get_sequence_number()%NUM_SEQUENCES][sequence_counter%HARM_SEQUENCE_LENGTH] + get_chord_number() :*/
               get_chord_number(),
             chord_type,
             inversion
@@ -544,11 +544,12 @@ class Harmony {
     }*/
 
     void fire_for(int output_number) {
-      Serial.printf("fire_for %i\r\n", output_number);
+      Serial.printf("fire_for output number %i\r\n", output_number);
       fire_generic(output_number);
     }
 
     void douse_for(int output_number) {
+      Serial.printf("douse_for output number %i\r\n", output_number);
       douse_generic(output_number);
     }
 

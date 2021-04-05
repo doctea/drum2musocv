@@ -56,7 +56,6 @@ class MidiKeysOutput : public ChannelState {
           //memcpy(&last_melody_pitches, pitches, 10 * sizeof(int) )
 
         if (melody_mode==HARMONY::MELODY_MODE::ARPEGGIATE) {
-          Serial.println("    using arp mode for melody!");
           if (pitches[arp_counter]==-1 || arp_counter>=10) {
             arp_counter = 0;
           }
@@ -64,7 +63,9 @@ class MidiKeysOutput : public ChannelState {
           for (int i = 1 ; i < 10 ; i++) {
             pitches[i] = -1;
           }*/
+          Serial.printf("    using arp mode for melody - arp_counter %i so pitch %s!\r\n", arp_counter, get_note_name(pitches[arp_counter]).c_str());
           send_note_on(pitches[arp_counter]);
+          arp_counter++;    // TODO: test arp mode as appropriate
         } else {
           Serial.println("    using chord mode for melody!");
 
@@ -74,6 +75,8 @@ class MidiKeysOutput : public ChannelState {
     }
 
     void douse_notes() {
+      Serial.printf("douse_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, get_held_notes()[0]);
+
       send_note_off(get_held_notes());
     }
 
