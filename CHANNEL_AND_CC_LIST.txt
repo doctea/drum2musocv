@@ -29,6 +29,7 @@ Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13
 Harmony.hpp:#define CC_MELODY_ROOT              11
 Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+Harmony.hpp:#define CC_BASS_SET_TIE_ON    6
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29
 Harmony.hpp:#define CC_HARMONY_MUTATE_MODE  30
 Harmony.hpp:#define CC_AUTO_PROGRESSION   31

@@ -34,9 +34,10 @@
 #define CC_CHANNEL_BITBOX_KEYS      13
 #define CC_MELODY_ROOT              11
 
-
 #define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 #define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+
+#define CC_BASS_SET_TIE_ON    6
 
 #define ARP_MODE_NONE         0
 #define ARP_MODE_PER_BEAT     1
@@ -1021,9 +1022,14 @@ class Harmony {
         return true;
       } else if (number==CC_CHANNEL_PAD_ROOT) {
         mko_pads_root.set_midi_channel(value);
+        return true;
       } else if (number==CC_MELODY_ROOT) {
         if (channel_state.set_midi_root_pitch(value)) // sets but returns false if no change
           kill_notes();
+        return true;
+      } else if (number==CC_BASS_SET_TIE_ON) {
+        Serial.printf("### TIE: Setting tie_on for pattern %i to %i\r\n", PATTERN_BASS, value);
+        patterns[PATTERN_BASS].tie_on = value;
         return true;
       }
 

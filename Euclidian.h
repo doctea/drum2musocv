@@ -23,6 +23,10 @@
 #define PATTERN_MELODY (PATTERN_BASS+1)
 #define PATTERN_PAD_ROOT  (PATTERN_MELODY+1)
 
+#if PATTERN_PAD_ROOT != NUM_PATTERNS-1
+gobblydook
+#endif
+
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 #define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) // (50 when num_patterns = 2)
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM

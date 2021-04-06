@@ -338,9 +338,9 @@ void process_euclidian(int ticks) {
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         //EUC_printf(" ");
       } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
-        bool tied = bs.current_step%patterns[i].tie_on==0;
+        bool tied = patterns[i].tie_on>0 && bs.current_step%patterns[i].tie_on==0;
         if (tied) {
-          Serial.printf("==== step %i with tie_on %i, result %c\r\n", bs.current_step, patterns[i].tie_on, bs.current_step%patterns[i].tie_on==0?'Y':'N');
+          Serial.printf("==== pattern %i at step %i with tie_on %i, result %c\r\n", i, bs.current_step, patterns[i].tie_on, bs.current_step%patterns[i].tie_on==0?'Y':'N');
           //Serial.printf("   Found tied note for beat %i\r\n", bs.current_beat);
         }
         douse_trigger(patterns[i].trigger, 0, true, tied);
@@ -402,9 +402,9 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
   make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS, 4);  // bass (neutron) offbeat
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY, 3); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
-  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT, 2); // root pad
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
+  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
   Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling

@@ -3,7 +3,7 @@
 
 #define DEBUG_HARMONY false
 
-#define TIE_PORTA_TICK_LENGTH   TICKS_PER_STEP/4
+#define TIE_PORTA_TICK_LENGTH   TICKS_PER_STEP
 
 #include <USB-MIDI.h> 
 #include "Harmony.hpp"
