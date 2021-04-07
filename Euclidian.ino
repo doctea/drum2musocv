@@ -314,12 +314,12 @@ void process_euclidian(int ticks) {
     bpm_status bs = bpm_status();
     bs.update(ticks + stutter);
 
+    // handle duration of 0 as duration of half a step
     bool should_douse = false;
-    if (patterns[i].duration==0 && (stutter+ticks)%(PPQN/4/2)==0) {
+    if (patterns[i].duration==0 && (stutter+ticks)%(TICKS_PER_STEP/2)==0) {
       douse_trigger(i, 127, true);
       should_douse = true;
     }
-
     
     if(bs.is_bpm_on_step) {
       //if (i==10||i==9||i==2) { //stutter!=0) {
@@ -389,7 +389,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
   make_euclid(&patterns[i++],  LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
   make_euclid(&patterns[i++],  LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
-  make_euclid(&patterns[i++],  LEN/4,  16,1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
+  make_euclid(&patterns[i++],  LEN,    3, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
   make_euclid(&patterns[i++],  LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
   make_euclid(&patterns[i++],  LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
   make_euclid(&patterns[i++],  LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
@@ -397,8 +397,8 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
   make_euclid(&patterns[i++],  LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
   make_euclid(&patterns[i++],  LEN,    16, 0,  0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
-  make_euclid(&patterns[i++],  LEN*2,  1 , 1,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
-  make_euclid(&patterns[i++],  LEN*2,  1 , 5,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
+  make_euclid(&patterns[i++],  LEN*2,  1, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
+  make_euclid(&patterns[i++],  LEN*2,  1, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
   make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
   make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal

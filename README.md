@@ -86,6 +86,16 @@ A diagram to help me understand how everything is routed:-
  - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
  - DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
 
+
+# FL Studio DAW Control Surface preset
+
+ - *Euclidian settings.fst* is an FL Studio Patcher preset for controlling the Euclidian settings (screenshot below).
+ - *Drum2MusoCV - Bamblweeny.fst* is an FL Studio MIDI Out preset for controlling the drum triggers and envelope settings. 
+
+![Euclidian settings FL preset screenshot](DAW Templates/Euclidian settings.png)
+
+
+
 # TODO / future plans + ideas
 
  - Replace DebounceEvent library with one that doesn't need patching
