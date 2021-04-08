@@ -135,152 +135,66 @@ void process_euclidian(int ticks) {
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
 
-  if (is_bpm_on_step) {
-    // TODO: configurable mutation frequency
-    // start of phrase or middle of phrase
-    if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+  // TODO: configurable mutation frequency
+  // start of phrase or middle of phrase
+  if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
 
-      // always reset even if not in mutate mode, so that fills work
-      if (euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
-        EUC_println("Resetting euclidian before mutation!");
-        initialise_euclidian();
-      }
-      
-      if (euclidian_reset_before_mutate) {
-        harmony.reset_progression();
-        harmony.reset_sequence();
-      }
-
-      bool should_mutate = mutate_enabled;
-
-      if (should_mutate) {
-        harmony.mutate();
-  
-        unsigned long seed = get_euclidian_seed();
-        EUC_printf("Euclidian seed: %i\n", seed);
-        randomSeed(seed);
-  
-        for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
-          EUC_printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
-          int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
-          EUC_printf("chose pattern %i\r\n", ran);
-          randomSeed(seed + ran);
-          if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
-            mutate_euclidian_total(ran);
-          else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
-            mutate_euclidian(ran);
-          else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
-            // do nothing
-          } // else and there's room for another mode too...
-
-          //debug_patterns();
-        }
-      }
+    // always reset even if not in mutate mode, so that fills work
+    if (euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
+      EUC_println("Resetting euclidian before mutation!");
+      initialise_euclidian();
+    }
+    
+    if (euclidian_reset_before_mutate) {
+      harmony.reset_progression();
+      harmony.reset_sequence();
     }
 
-    // fills on last bar of phrase if enabled
-    if (euclidian_fills_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && ((is_bpm_on_bar && current_bar == (BARS_PER_PHRASE - 1)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
-      EUC_printf("FILLING at bar %i!\r\n", current_bar);
-      randomSeed(current_phrase);
-      for (int i = 0 ; i < 3 ; i++) {
-        int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
-        patterns[ran].rotation += 2;
-        make_euclid(&patterns[ran]);
-      }
-      for (int i = 0 ; i < 3 ; i++) {
+    bool should_mutate = mutate_enabled;
+
+    if (should_mutate) {
+      harmony.mutate();
+
+      unsigned long seed = get_euclidian_seed();
+      EUC_printf("Euclidian seed: %i\n", seed);
+      randomSeed(seed);
+
+      for (int i = 0 ; i < 3 ; i++) { // TODO: make the number of mutations configurable
+        EUC_printf("Picking random mutation pattern between %i (incl) and %i (excl).. ", euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
         int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
-        patterns[ran].pulses *= 2;
-        if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
-        make_euclid(&patterns[ran]);
+        EUC_printf("chose pattern %i\r\n", ran);
+        randomSeed(seed + ran);
+        if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
+          mutate_euclidian_total(ran);
+        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
+          mutate_euclidian(ran);
+        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
+          // do nothing
+        } // else and there's room for another mode too...
+
+        //debug_patterns();
       }
     }
-
-    /*
-    // its a beat!
-    //EUC_printf(" >>STEP %2.2u", current_step);
-    //EUC_printf(" >>BEAT %1.1u", current_beat);
-    EUC_printf("[EUC] [mode %i] ", demo_mode );
-    EUC_printf(" (ticks = %5u", ticks); EUC_printf(") ");
-    EUC_printf(" >>BPM %3.3f >>STEP %i:%i:%2.2u.%1.2u ", bpm_current, current_phrase, current_bar, current_beat, current_step);
-    EUC_printf("[ ");
-    for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
-      if (!patterns[i].active_status) continue;
-
-      if (query_pattern(&patterns[i], current_step, 0 , current_bar)) {  // step trigger
-        douse_trigger(i, 127, true);
-        fire_trigger(i, 127, true);
-        if (i < 16) {
-          EUC_printf("%01X", i); // print as hex
-        } else {
-          //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
-          EUC_printf("%3s ", get_note_name(harmony.get_currently_playing_root()).c_str()); // for bass note indicator
-        }
-        //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
-        EUC_printf(" ");
-      } else if (query_pattern_note_off(&patterns[i], current_step, current_bar)) {  // step kill
-        douse_trigger(i, 127, true);
-        // TODO: turn off according to some other thing.. eg cut groups?
-        if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
-        EUC_printf(".", i); EUC_printf(" ");
-      } else {
-        EUC_printf("  ");
-        if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
-      }
-    }
-    EUC_printf("]  ");
-    //EUC_printf("bass playing pitch %2i ", bass_currently_playing);
-    EUC_printf (is_bpm_on_beat ? "<<<<BEAT!" : "<<  STEP");
-    if (current_beat == 0) {
-      EUC_printf(" (first beat of bar)");
-    }
-    if (is_bpm_on_beat && is_bpm_on_bar && is_bpm_on_phrase) {
-      EUC_printf(" (first beat of phrase!)");
-    }
-
-    if (autobass_input.is_note_held()) {
-      EUC_printf(" [%s]", autobass_input.get_debug_notes_held());
-    }
-
-    EUC_println("");*/
-
-    
-  } else if (ticks%(PPQN/4/2)==0) {  // half-steps
-    //Serial.println("### half-step tick");
-
-    for (int i = 0 ; i < NUM_PATTERNS ; i++) {
-      /*//EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
-      if (!patterns[i].active_status) continue;
-      if (patterns[i].duration==0) {
-        Serial.println("########### half-step douse_trigger");
-        douse_trigger(i,127,true);
-      } else {
-        //Serial.printf("skipping %i cos duration is %i", i, patterns[i].duration);
-      }*/
-
-      /*if (query_pattern(&patterns[i], current_step, 0, current_bar)) {  // step trigger
-        douse_trigger(i, 127, true);
-        fire_trigger(i, 127, true);
-        if (i < 16) {
-          EUC_printf("%01X", i); // print as hex
-        } else {
-          //EUC_printf("{%01i}", bass_currently_playing); // for bass note indicator
-          EUC_printf("%3s ", get_note_name(harmony.get_currently_playing_root()).c_str()); // for bass note indicator
-        }
-        //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
-        EUC_printf(" ");
-      } else if (query_pattern_note_off(&patterns[i], current_step, current_bar)) {  // step kill
-        douse_trigger(i, 127, true);
-        // TODO: turn off according to some other thing.. eg cut groups?
-        if (i == 16) EUC_printf("..."); // add extra dots for bass note indicator
-        EUC_printf(".", i); EUC_printf(" ");
-      } else {
-        EUC_printf("  ");
-        if (i == 16) EUC_printf("   "); // add extra spaces for bass note indicator
-      }*/
-    }
-    
   }
+
+  // fills on last bar of phrase if enabled
+  if (euclidian_fills_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && ((is_bpm_on_bar && current_bar == (BARS_PER_PHRASE - 1)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+    EUC_printf("FILLING at bar %i!\r\n", current_bar);
+    randomSeed(current_phrase);
+    for (int i = 0 ; i < 3 ; i++) {
+      int ran = random(0/*euclidian_mutate_minimum_pattern % NUM_PATTERNS*/, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
+      patterns[ran].rotation += 2;
+      make_euclid(&patterns[ran]);
+    }
+    for (int i = 0 ; i < 3 ; i++) {
+      int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
+      patterns[ran].pulses *= 2;
+      if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
+      make_euclid(&patterns[ran]);
+    }
+  }
+
+  // old euclidian trigger loop went here
 
   harmony.process_ties();
 
@@ -362,14 +276,6 @@ void process_euclidian(int ticks) {
   last_processed = ticks;
 }
 
-/*int get_trigger_for_pattern(int i) {
-#if MUSO_MODE==MUSO_MODE_2B
-  if (i==0) return 3;
-  if (i==3) return 0;
-#endif
-  return i;
-}*/
-
 void initialise_euclidian() {
 
   EUC_println("initialise_euclidian():");
@@ -409,26 +315,6 @@ void initialise_euclidian() {
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
-
-  /*make_euclid(&patterns[0], 16, 16, 0);
-    make_euclid(&patterns[1], 13, 8, 0);
-    make_euclid(&patterns[2], 16, 4, 0);
-    make_euclid(&patterns[3], 16, 2, 0);
-    make_euclid(&patterns[4], 16, 3, 1);*/
-  /*make_euclid(&patterns[5], 16, 5, 0);
-    make_euclid(&patterns[6], 13, 6, 5);
-    make_euclid(&patterns[7], 16, 7, 0);
-    make_euclid(&patterns[8], 12, 9, 3);
-    make_euclid(&patterns[9], 16, 10, 0);
-    make_euclid(&patterns[10], 16, 11, 1);
-
-    make_euclid(&patterns[11], 16, 1, 1);
-    make_euclid(&patterns[12], 16, 1, 5);
-    make_euclid(&patterns[13], 16, 1, 9);
-    make_euclid(&patterns[14], 16, 1, 13);
-    make_euclid(&patterns[15], 16, 1, 3);*/
-  //delay(100);
-  //debug_patterns();
 }
 
 

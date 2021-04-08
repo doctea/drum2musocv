@@ -136,25 +136,6 @@ void midi_send_envelope_level(byte envelope, byte level) {
   }
 }
 
-/*
-void midi_bass_send_note_on(int pitch, int velocity, int channel) {
-  MIDIOUT.sendNoteOn(pitch, velocity, channel);
-  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output to separate channel an octave up
-  if (midiecho_enabled)
-    MIDIIN.sendNoteOn(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
-  //Serial.printf("midi_bass_send_note_on(%i, %i, %i)\n", pitch, velocity, MIDI_CHANNEL_BASS_OUT);
-  // todo: move echo back to host stuff into MidiEcho
-}
-
-void midi_bass_send_note_off(int pitch, int velocity, int channel) {
-  MIDIOUT.sendNoteOff(pitch, velocity, channel);
-  MIDIOUT.sendNoteOn(pitch + (12*BITBOX_KEYS_OCTAVE_OFFSET), velocity, MIDI_CHANNEL_BITBOX_KEYS); // output an octave up for bitbox keys
-  if (midiecho_enabled)
-    MIDIIN.sendNoteOff(pitch, velocity, MIDI_CHANNEL_BASS_OUT);  // echo back to host
-  // todo: move echo back to host stuff into MidiEcho
-}*/
-
-
 void midi_kill_notes_bitbox() {
   if (MIDI_CHANNEL_BITBOX_OUT>0) {
     MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_BITBOX_OUT);   // 123 = kill all notes
@@ -169,19 +150,6 @@ void midi_kill_notes_muso_drums() {
       MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, GM_CHANNEL_DRUMS);     // 123 = kill all notes - for midiecho to host
   }  
 }
-/*void midi_kill_notes_muso_pads() {
-  if (MIDI_CHANNEL_PAD_ROOT_OUT>0) {
-    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_ROOT_OUT);   // 123 = kill all notes
-    if (midiecho_enabled)
-      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_ROOT_IN);     // 123 = kill all notes - for midiecho to host
-  }  
-  if (MIDI_CHANNEL_PAD_PITCH_OUT>0) {
-    MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_PITCH_OUT);   // 123 = kill all notes
-    if (midiecho_enabled)
-      MIDIIN.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, MIDI_CHANNEL_PAD_PITCH_IN);     // 123 = kill all notes - for midiecho to host
-  }  
-}*/
-
 
 void midi_kill_notes() {
   /*if (MUSO_GATE_CHANNEL>0) {
@@ -194,8 +162,6 @@ void midi_kill_notes() {
   harmony.kill_notes();
 }
 
-
-
 void kill_notes() {
   // forget which triggers are active
   Serial.println("!!!! kill_notes called!");
@@ -204,7 +170,6 @@ void kill_notes() {
 
   midi_kill_notes();
 }
-
 
 static unsigned long last_clock_ticked;
 void midi_send_clock(unsigned long received_ticks) {

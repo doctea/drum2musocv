@@ -33,15 +33,6 @@ unsigned long time_last; // last time main loop was run, for calculating elapsed
 
 #include "BPM.hpp"
 
-// override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
-// however this doesn't work like i need it to
-/*struct MySettings : public midi::DefaultSettings {
-    static const long BaudRate = 31250;
-    const bool HandleNullVelocityNoteOnAsNoteOff = false;
-};
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
-
-
 
 #ifdef ENABLE_PIXELS
 long last_updated_pixels_at = 0;
@@ -132,7 +123,7 @@ void loop() {
         douse_trigger(last_played_trigger, 0, true);
         last_played_trigger = -1;
       } else {
-        last_played_trigger = random(0,NUM_TRIGGERS+NUM_ENVELOPES);
+        last_played_trigger = random(0,NUM_TRIGGERS+NUM_ENVELOPES+NUM_MIDI_OUTS);
         //Serial.printf("noteon = %i\r\n", last_played_pitch);
         fire_trigger(last_played_trigger,random(1,127), true);
       }

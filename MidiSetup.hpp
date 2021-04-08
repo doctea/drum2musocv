@@ -20,6 +20,14 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, midiB);
 
 #else              // arduino uno / serial midi version (for USBMidiKlik)
 
+// override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
+// however this doesn't work like i need it to
+/*struct MySettings : public midi::DefaultSettings {
+    static const long BaudRate = 31250;
+    const bool HandleNullVelocityNoteOnAsNoteOff = false;
+};
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
+
 MIDI_CREATE_DEFAULT_INSTANCE();
 #define MIDIOUT MIDI
 #define MIDIIN  MIDI

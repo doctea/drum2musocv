@@ -169,15 +169,7 @@ void process_midi() {
   if (MIDIIN.read()) {
     //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
     //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
-    if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {
-      // relay all incoming messages for the Neutron/bass
-      //Serial.println("Received a message targeted at the neutron directly: %0x, %0x, %0x\n", MIDIIN.getType(), MIDIIN.getData1(), MIDIIN.getData2());
-      MIDIOUT.send(MIDIIN.getType(),
-                   MIDIIN.getData1(),
-                   MIDIIN.getData2(),
-                   MIDI_CHANNEL_BASS_OUT
-      );
-    } else if (MIDIIN.getChannel()==GM_CHANNEL_DRUMS) {
+    if (MIDIIN.getChannel()==GM_CHANNEL_DRUMS) {
       // ignore so that the handle* functions will deal with this instead
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_AUTO_IN) {
       // tell the harmony/autobass what notes we wanna play
@@ -194,23 +186,29 @@ void process_midi() {
           harmony.douse_all(); //bass_note_off();
         }
       }
-    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {            // forward bass input unchanged
+      // relay all incoming messages for the Neutron/bass
+      //Serial.println("Received a message targeted at the neutron directly: %0x, %0x, %0x\n", MIDIIN.getType(), MIDIIN.getData1(), MIDIIN.getData2());
+      MIDIOUT.send(MIDIIN.getType(),
+                   MIDIIN.getData1(),
+                   MIDIIN.getData2(),
+                   MIDI_CHANNEL_BASS_OUT
+      );
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {       // forward channel 3 unchanged
       // direct melody playing - echo all messages straight through to eg bitbox
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
                    MIDI_CHANNEL_BITBOX_KEYS
       );
-      /* }else if (MIDIIN.getChannel()==15) {
-      harmony.debug_inversions();*/
-    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_ROOT_IN) {
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_ROOT_IN) {     // forward channel 1 unchanged
       // for ensemble - send notes to muso on channel 1
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
                    DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT
       );
-    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_PITCH_IN) {
+    } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_PITCH_IN) {    // forward channel 2 unchanged
       // for ensemble - send notes to muso on channel 1
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
@@ -230,20 +228,6 @@ void process_midi() {
     }
     //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
     //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
-    
-    //todo: accept a note on another channel to set the root..?
-    //      or actually, have CCs to set the root note, scale, etc..?
-    // have separate midi input channels, one dedicated to triggering the autoplayer, and one for doing direct control, both output to the MIDI_CHANNEL_BASS_OUT
-    //      so root note set by MIDI CC (0-127?) ie - 'middle C' or 'high F'
-    //      another CC to set the scale (0 = major, 1 = minor, ...etc...)
-    //      on the 'autobass' channel, track what keys are held
-    //        lowest held note relative to scale root = chord number, so when triggered play appropriate note from the chord number
-    //          if note isn't in scale then????
-    //        highest held note relative to scale root = arp distance?  
-    //      orrr
-    //        lowest held note relative to scale root = chord number
-    //          further held notes (in order of pressing?) = bass_sequence, used to play through sequence as needed..
-    
   }
 }
 
@@ -275,84 +259,5 @@ void setup_midi() {
   MIDIIN.setHandleSongPosition(handleSongPosition);
 
 }
-
-
-
-// -----------------------------------------------------------------------------
-/*
-byte convert_drum_pitch(byte pitch) {
-  // in mode 0x0b there are 11 triggers available and a pitch out
-  byte p;
-  if (pitch >= GM_NOTE_MINIMUM && pitch <= GM_NOTE_MAXIMUM) {   // only process notes within GM drumkit range
-    p = pitch;
-    switch (pitch) {
-      // right-hand column (triggers 1-5 running down)
-      case GM_NOTE_ELECTRIC_BASS_DRUM:  p = MUSO_NOTE_GATE_1;   break; //Electric Bass Drum - C5 72
-      case GM_NOTE_SIDE_STICK:          p = MUSO_NOTE_GATE_2;   break; //Side Stick - C#5/Db5 73
-      case GM_NOTE_HAND_CLAP:           p = MUSO_NOTE_GATE_3;   break; //Hand Clap - D5 74
-      case GM_NOTE_ELECTRIC_SNARE:      p = MUSO_NOTE_GATE_4;   break; //Electric Snare - D#5/Eb5 75
-      case GM_NOTE_CRASH_CYMBAL_1:      p = MUSO_NOTE_GATE_5;   break; //Crash Cymbal 1 - F#5/Gb5 78
-      
-      // left-hand column (triggers 11-6 running down)
-      case GM_NOTE_CLOSED_HI_HAT:       p = MUSO_NOTE_GATE_11;  break; //Closed Hi-hat - E5 76
-      case GM_NOTE_OPEN_HI_HAT:         p = MUSO_NOTE_GATE_10;  break; //77 //Open Hi-hat - F5
-      case GM_NOTE_PEDAL_HI_HAT:        p = MUSO_NOTE_GATE_9;   break; //Pedal Hi-hat - A#5/Bb5 82
-
-      case GM_NOTE_LOW_TOM:             p = MUSO_NOTE_GATE_8;   break; //79 //Low Tom - G5
-      case GM_NOTE_HIGH_TOM:            p = MUSO_NOTE_GATE_7;   break; //High Tom - G#5/Ab5 80
-      case GM_NOTE_TAMBOURINE:          p = MUSO_NOTE_GATE_6;   break; //Tambourine - A5 81
-      //case GM_NOTE_RIDE_BELL:           p = MUSO_GATE_12; break; //Ride Bell - B5 83  // there is no gate 12!
-      //default: p = pitch + 12; //itch = 72; break;
-      default:                          p = pitch;              break; // pass thru other notes unmodified
-    }
-  }
-  return p;
-}
-
-
-
-bool process_triggers_for_pitch(byte pitch, byte velocity, bool state) {
-  // in the 0x0b midimuso-cv mode, there are 5 CV outputs and a clock output
-  // the mapping is currently all hardcoded here and in Drums.h
-  // TODO: some way to link envelopes/triggers so as to be able to 'cut by' or choke/release hihats
-  byte p;
-  int trig = get_trigger_for_pitch(pitch);
-  if (trig>NUM_TRIGGERS) {
-    update_envelope(trig-NUM_TRIGGERS, velocity, state);
-    return true;
-  }
-  return false;
-
-  // previously ..
-  switch (pitch) {
-    //case GM_NOTE_PEDAL_HI_HAT:  // TODO: figure out how to link pedal hihat with envelopes so as to choke?  would need an envelope dedicated to the open hats i guess...
-    //  return true 
-    //  break;
-    case GM_NOTE_CRASH_CYMBAL_2:  // cymbal crash 2
-      // trigger envelope
-      update_envelope(ENV_CRASH, velocity, state);
-      return true;
-      break;
-    case GM_NOTE_SPLASH_CYMBAL:  // splash cymbal
-      update_envelope(ENV_SPLASH, velocity, state);
-      return true;
-      break;
-      //case GM_NOTE_:  // TODO: add more envelopes
-      //  break;
-    case GM_NOTE_VIBRA_SLAP:    
-      update_envelope(ENV_WOBBLY, velocity, state);
-      return true;
-    case GM_NOTE_RIDE_BELL:
-      update_envelope(ENV_RIDE_BELL, velocity, state);
-      return true;
-    case GM_NOTE_RIDE_CYMBAL_1:
-      update_envelope(ENV_RIDE_CYMBAL, velocity, state);
-      return true;
-  }
-  return false;
-}
-*/
-
-
 
 #endif
