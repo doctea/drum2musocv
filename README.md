@@ -1,31 +1,32 @@
 # drum2musocv
 
-Arduino sketch adapting the MidiMuso CV-12 (http://midimuso.co.uk/index.php/cv-12/) to use General Midi note numbers on MIDI Channel 10, for easy use as a drum machine from a DAW.  
+A USB MIDI interface, originally for adapting the [MidiMuso CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes), but now with many added features.
 
-Now targets the Arduino Zero / Seeeduino Cortex M0+ boards, probably possible to make it work on a Uno again though with some changes + testing.  (interested in this?  let me know)
+Currently targerts Arduino Zero/Cortex M0+ boards, originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
 
-This allows you to play the modular drum machine using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
+Drum pitch mapping allows you to play the CV-12 using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-Could also be used to add Euclidian rhythms to any MIDI device (drum machine etc) if reconfigured to use different output note mappings.
+When it isn't receiving an external clock input, runs off its own internal clock at the last detected BPM.
 
-When isn't receiving an external clock input, runs off its own internal clock at the last detected BPM.
+Implements 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
 
-Generates 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
-Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library.
-
-Includes a template for FL Studio to make controlling the general and envelope settings easy.
+Includes a template for FL Studio to make controlling the general, Euclidian and envelope settings easy and saveable/recallable per-project.
 
 Has a Euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.  Can configure tracks on/off, change mutation settings, etc, from DAW.  In mutation mode, mutates the rhythm every 2 bars.
 
-Plays a "drum fill" for the last bar of every phrase.
+Could also be used to add generative/mutating Euclidian rhythms to any MIDI device (drum machine etc) if reconfigured to use different output note mappings.
 
-A 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).  Notes played in via MIDI determine which notes to use for arpeggiation/chords.
-WIP (kinda working but needs some expanding): autoplay chords or arpeggiator on a second device eg Bitbox or another synth.
+Plays bass, chords/arped chords and additional midi channels from Euclidian and with auto-generated chord changes and inversions.  Allows tied notes.
+
+Plays a "drum fill" for the last bar of every phrase by mutating the Euclidian rhythms.
+
+A 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).  If notes are played in via MIDI determine which notes to use for arpeggiation/chords.  Plays chords and additional midi channels with auto-generated chord changes and inversions.
 
 Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
-Echoes the MIDI back to the host so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
+Echoes the MIDI output back to the host, so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
 
 Outputs 4xClock triggers using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
@@ -104,11 +105,7 @@ A diagram to help me understand how everything is routed:-
 
  - LFOs
 
- - TODO: make modulation sync more featureful... set upper/lower limits to modulation, elapsed-based scaling of modulation
-
  - TODO: Make euclidian sequences changeable on the fly/configurable, saveable
-
- - TODO: find out whether my output on '74'/Ride Cymbal 1 is broken due to code, panel mislabelling, or a problem with my midimuso-cv
 
  - Add more physical buttons to provide greater control over modes  
 
@@ -119,8 +116,6 @@ A diagram to help me understand how everything is routed:-
    - make this so can switch between modes...
  
  - Replace DebounceEvent library with one that doesn't need patching
-
- - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
 
  - Latency/flam/swing on euclidian tracks.  Adjust the euclidian loop to check a copy of received_ticks that is adjusted by the appropriate latency
 	- ie if latency is set to -6, then remove 6 from received_ticks before tests is on bar etc
@@ -140,7 +135,7 @@ A diagram to help me understand how everything is routed:-
 		- option to arpeggiate on None / Channel 2 / Channel 3 / Both
 		- option to play full-chord / arp / root-only on Channel 3
 
- - set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits.
+ - Set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits or notes.
 	- turn one into a bar-synced LFO
 
  - Bitbox recording mode? ie send all triggers necessary to record a sample.  buttons to trigger recording?
@@ -158,9 +153,9 @@ A diagram to help me understand how everything is routed:-
 
  - Save config options (RGB settings, envelope settings, euclidian patterns etc) to the flash memory and allow configuration via sysex / CCs.
 	 - Started adding this, but isn't supported on SAMD platforms, so aborted (untested code remains)
-	 - support FRAM over SPI?
+	 - support FRAM over SPI, or saving to SD card?
 	 
- - Add extra output on the pitch bend output (currently using this to replace my broken output cc74)
+ - Add extra envelope output on the pitch bend output (but currently using this to replace my broken output C6/cc74)
 
 
 ### Done list
@@ -182,7 +177,11 @@ A diagram to help me understand how everything is routed:-
  - LEDs for indication of mode
  - Shadow triggers with MIDI to trigger Bitbox
    - done: basic shadow of triggers+envelopes on the default bitbox pad trigger notes, sending on channel 11
+ - Latency/flam/swing on euclidian tracks.  Adjust the euclidian loop to check a copy of received_ticks that is adjusted by the appropriate latency
+        - ie if latency is set to -6, then remove 6 from received_ticks before tests is on bar etc
+                - gonna need to restructure slightly for this, or maybe just make some defines for testing like IS_ON_BAR(ticks), IS_ON_STEP(ticks)?
+                - will need to turn the loops inside out and iterate over tracks before checking if theyre on beat
  
- ----
+----
  
- If you use or are interested at all in this project then it would be great to hear from you!
+Would love if people found a use for this, so if you are interested at all in this project then it would be great to hear from you!
