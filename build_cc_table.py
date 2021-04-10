@@ -48,7 +48,8 @@ for line in fileinput.input():
 #pprint(table)
 
 
-print ("| File\t| CC\t| Name\t| Comment\t|")
+print ("| File | CC | Name | Comment |")
+print ("| ---- | -- | ---- | ------- |")
 for key in sorted(table):
     #print (key, table[key])
-    print ("| %s\t| %s\t| `%s`\t| %s\t|" % (table[key]['file'], key, table[key]['defname'], table[key]['comment']))
+    print ("| `%s` | `%s` | `%s` | `%s` |" % (table[key]['file'], key, table[key]['defname'], table[key]['comment']))
