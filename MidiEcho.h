@@ -37,7 +37,7 @@ String get_note_name(int pitch);
 
 #define MIDI_BASS_ROOT_PITCH  MIDI_C3
 
-#define CC_MIDIECHO_ENABLED   21
+#define CC_MIDIECHO_ENABLED   21      // enable echoing of output back to DAW over USB
 
 // from https://github.com/FortySevenEffects/arduino_midi_library/blob/master/src/midi_Defs.h
 /*! Enumeration of MIDI types */

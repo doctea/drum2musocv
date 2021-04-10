@@ -23,24 +23,24 @@
 #define PATTERN_MELODY (PATTERN_BASS+1)
 #define PATTERN_PAD_ROOT  (PATTERN_MELODY+1)
 
-#if PATTERN_PAD_ROOT != NUM_PATTERNS-1
-gobblydook
+#if (PATTERN_PAD_ROOT != NUM_PATTERNS-1)
+COMPILE FAIL -- NUM_PATTERNS doesnt match PATTERN_PAD_ROOT !
 #endif
 
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 #define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) // (50 when num_patterns = 2)
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
-#define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = _NONE, 1 = _SUBTLE, 2 = _TOTAL
+#define CC_EUCLIDIAN_SET_MUTATE_MODE      20    // 0 = NONE, 1 = SUBTLE, 2 = TOTAL
 #define CC_EUCLIDIAN_SEED_MODIFIER        22    // euclidian random "bank" X
 #define CC_EUCLIDIAN_SEED_MODIFIER_2      23    // euclidian random "bank" Y
 #define CC_EUCLIDIAN_RESET_BEFORE_MUTATE  24    // reset sequences to 0 before mutation?
 #define CC_EUCLIDIAN_SET_MINIMUM_PATTERN  25    // lowest number pattern to automutate
 #define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
 #define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
-#define CC_EUCLIDIAN_FILLS                28
+#define CC_EUCLIDIAN_FILLS                28    // enable/disable fills on last bar of phrase, 0=off
 
-#define CC_EUCLIDIAN_HIHAT_SHUFF          9
-#define CC_EUCLIDIAN_CLAP_FLAM            8
+#define CC_EUCLIDIAN_HIHAT_SHUFF          9     // enable/disable hihat shuffle, 0=off
+#define CC_EUCLIDIAN_CLAP_FLAM            8     // enable/disable clap flam, 0=off
 
 // so need master "mutate enabled"
 //    and then sub-options within that:-

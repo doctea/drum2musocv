@@ -16,8 +16,8 @@ unsigned long last_input_at = 0;  // timestamp we last received midi from host
 // DEFINES
 
 //TODO: make these CC values sensible and map them in FL
-#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation
-#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks
+#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation in ticks, default 24
+#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks, default 1
 
 // IMPORTS
 

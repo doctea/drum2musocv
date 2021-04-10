@@ -5,8 +5,8 @@
 #include "UI.h"
 #include "Euclidian.h"
 
-#define CC_CHANNEL_BITBOX_OUT 14
-#define CC_CHANNEL_GATE_OUT   15
+#define CC_CHANNEL_BITBOX_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
+#define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
 DebounceEvent button1 = DebounceEvent(BUTTON_PIN_1, handleButtonPressed, BUTTON_PUSHBUTTON, 50);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
 DebounceEvent button2 = DebounceEvent(BUTTON_PIN_2, handleButtonPressed, BUTTON_PUSHBUTTON, 50); // | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;

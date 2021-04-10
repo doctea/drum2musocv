@@ -18,7 +18,7 @@
 #define ACTION_MODE_CHANGE      1
 #define ACTION_RESET_EUCLIDIAN  2
 
-#define CC_DEMO_MODE  19
+#define CC_DEMO_MODE  19        // choose playback mode - 0=None, 1=Euclidian, 2=Euclidian with mutation, 3=Random triggers
 
 short demo_mode = 0;
 

@@ -29,15 +29,15 @@
 #define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 #define BITBOX_KEYS_OCTAVE_OFFSET   2
 
-#define CC_CHANNEL_PAD_ROOT         10
-#define CC_CHANNEL_BASS_OUT         12
-#define CC_CHANNEL_BITBOX_KEYS      13
-#define CC_MELODY_ROOT              11
+#define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to output the pad root on (default 1)
+#define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
+#define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)
+#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
 
 #define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 #define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 
-#define CC_BASS_SET_TIE_ON    6
+#define CC_BASS_SET_TIE_ON    6     // set which steps the Euclidian bass should tie on
 
 #define ARP_MODE_NONE         0
 #define ARP_MODE_PER_BEAT     1
@@ -93,15 +93,15 @@ namespace HARMONY {
 
 ChannelState autobass_input = ChannelState();   // tracking notes that are held
 
-#define CC_HARMONY_MELODY_MODE  29
-#define CC_HARMONY_MUTATE_MODE  30
+#define CC_HARMONY_MELODY_MODE  29          // set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_HARMONY_MUTATE_MODE  30          // harmony mutation mode, 0=None, 1=Randomise
 
-#define CC_AUTO_PROGRESSION   31
-#define CC_AUTO_CHORD_TYPE    105
-#define CC_AUTO_CHORD_INVERSION    106
-#define CC_MELODY_OCTAVE_OFFSET   107
-#define CC_MELODY_SCALE   108
-#define CC_MELODY_AUTO_SCALE   109
+#define CC_AUTO_PROGRESSION   31            // enable/disable playing auto chord progression
+#define CC_AUTO_CHORD_TYPE    105           // enable/disable playing automatic chord types (ie stacking triads)
+#define CC_AUTO_CHORD_INVERSION    106      // enable/disable playing automatic chord inversions
+#define CC_MELODY_OCTAVE_OFFSET   107       // octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
+#define CC_MELODY_SCALE   108               // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
+#define CC_MELODY_AUTO_SCALE   109          // enable/disable automatic changing of scale every phrase
 
 #define CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
 #define NUM_SCALES                (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
@@ -130,10 +130,6 @@ int scale_offset[][SCALE_SIZE] = {
   //    C maj is also A minor
   
 };
-
-
-
-
 
 // qsort requires you to create a sort function
 int sort_pitch(const void *cmp1, const void *cmp2)
@@ -165,14 +161,8 @@ void sort_pitches(int pitches[], int len) {
 class Harmony {
 
   private:
-    /*int last_root = -1;
-    int last_melody_root = -1;
-    int last_melody_pitches[10];*/
     ChannelState&   channel_state;
-    /*MidiKeysOutput& mko_bass;
-    MidiKeysOutput& mko_keys;
-    MidiKeysOutput& mko_pads_root;
-    MidiKeysOutput& mko_pads_pitch;*/
+
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
@@ -185,10 +175,10 @@ class Harmony {
 #define mko_pads_root mko[2]
 #define mko_pads_pitch mko[3]
 
-    int scale_number = DEFAULT_SCALE;               // index of the current scale we're in
+    int scale_number = DEFAULT_SCALE;   // index of the current scale we're in
     int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
     int sequence_number = 0;            // index of the arp sequence that we're currently playing
-    int sequence_counter = 0;               // track current position in arp sequence
+    int sequence_counter = 0;           // track current position in arp sequence
 
     int arp_counter = 0;  // todo, probably move this into the MidiKeysOutput..?
     
