@@ -1,4 +1,5 @@
 | File	| CC	| Name	| Comment	|
+| ----	| --	| ----	| \------	|
 | Harmony.hpp	| 6	| `CC_BASS_SET_TIE_ON`	| 	|
 | Euclidian.h	| 8	| `CC_EUCLIDIAN_CLAP_FLAM`	| 	|
 | Euclidian.h	| 9	| `CC_EUCLIDIAN_HIHAT_SHUFF`	| 	|
