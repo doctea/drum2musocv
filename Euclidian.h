@@ -17,14 +17,15 @@
 
 // bass, melody
 
-#define NUM_MIDI_OUTS 3
+#define NUM_MIDI_OUTS 4
 #define NUM_PATTERNS (NUM_TRIGGERS+NUM_ENVELOPES+NUM_MIDI_OUTS) //(NUM_TRIGGERS+NUM_ENVELOPES+1) //17   // 11 triggers + 5 envelopes + 2 midi output
 #define PATTERN_BASS (NUM_TRIGGERS+NUM_ENVELOPES)
 #define PATTERN_MELODY (PATTERN_BASS+1)
 #define PATTERN_PAD_ROOT  (PATTERN_MELODY+1)
+#define PATTERN_PAD_PITCH (PATTERN_MELODY+2)
 
-#if (PATTERN_PAD_ROOT != NUM_PATTERNS-1)
-COMPILE FAIL -- NUM_PATTERNS doesnt match PATTERN_PAD_ROOT !
+#if (PATTERN_PAD_PITCH != NUM_PATTERNS-1)
+COMPILE FAIL -- NUM_PATTERNS doesnt match PATTERN_PAD_PITCH !
 #endif
 
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS

@@ -29,6 +29,7 @@
 #define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 #define BITBOX_KEYS_OCTAVE_OFFSET   2
 
+#define CC_CHANNEL_PAD_PITCH        5     // set the MIDI channel to output the pads pitch on (default 2)
 #define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to output the pad root on (default 1)
 #define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
 #define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)
@@ -167,7 +168,7 @@ class Harmony {
     MidiKeysOutput mko[NUM_MKO] = {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT, DEFAULT_MELODY_OFFSET),
+        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE),
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT)  // with octave offset
     }; 
 #define mko_bass mko[0]
@@ -209,22 +210,7 @@ class Harmony {
     int sequence[4][4];
 
   public:  
-
-//#include "HarmonyOutputTypes.h"
-  
-    /*Harmony(ChannelState& channel_state_, MidiKeysOutput& mko_bass_, MidiKeysOutput& mko_keys_, MidiKeysOutput& mko_pads_root_, MidiKeysOutput& mko_pads_pitch_): channel_state(channel_state_), mko_bass(mko_bass_), mko_keys(mko_keys_), mko_pads_root(mko_pads_root_), mko_pads_pitch(mko_pads_pitch_)
-    { // todo: pass in config settings
-      channel_state = channel_state_;
-      mko_bass = mko_bass_;
-      mko_keys = mko_keys_;
-      mko_pads_root = mko_pads_root_;
-      mko_pads_pitch = mko_pads_pitch_;
-
-      reset_progression();
-      reset_sequence_pattern();
-
-      //debug_inversions();
-    }*/
+ 
     Harmony(ChannelState& channel_state_): channel_state(channel_state_) {
       reset_progression();
       reset_sequence_pattern();
@@ -241,7 +227,7 @@ class Harmony {
         chord_progression[i] = source[i];
       }
     }
-    void reset_progression() { //&default_chord_progression) {
+    void reset_progression() { 
       //chord_progression[4]    =   { 0, 5, 1, 4 };
       set_progression(default_chord_progression);
     }
@@ -774,6 +760,9 @@ class Harmony {
         return true;
       } else if (number==CC_CHANNEL_PAD_ROOT) {
         mko_pads_root.set_midi_channel(value);
+        return true;
+      } else if (number==CC_CHANNEL_PAD_PITCH) {
+        mko_pads_pitch.set_midi_channel(value);
         return true;
       } else if (number==CC_MELODY_ROOT) {
         if (channel_state.set_midi_root_pitch(value)) // sets but returns false if no change

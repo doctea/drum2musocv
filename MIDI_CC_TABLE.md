@@ -1,5 +1,6 @@
 | File | CC | Name | Comment |
 | ---- | -- | ---- | ------- |
+| `Harmony.hpp` | `5` | `CC_CHANNEL_PAD_PITCH` | ` set the MIDI channel to output the pads pitch on (default 2)` |
 | `Harmony.hpp` | `6` | `CC_BASS_SET_TIE_ON` | ` set which steps the Euclidian bass should tie on` |
 | `Euclidian.h` | `8` | `CC_EUCLIDIAN_CLAP_FLAM` | ` enable/disable clap flam, 0=off` |
 | `Euclidian.h` | `9` | `CC_EUCLIDIAN_HIHAT_SHUFF` | ` enable/disable hihat shuffle, 0=off` |
@@ -44,6 +45,7 @@
 | `Euclidian.h` | `48` | `Euclidian on/off for pattern 16` | `` |
 | `Euclidian.h` | `49` | `Euclidian on/off for pattern 17` | `` |
 | `Euclidian.h` | `50` | `Euclidian on/off for pattern 18` | `` |
+| `Euclidian.h` | `51` | `Euclidian on/off for pattern 19` | `` |
 | `Envelopes.h` | `64` | `Envelope 0 ATTACK` | `` |
 | `Envelopes.h` | `65` | `Envelope 0 HOLD` | `` |
 | `Envelopes.h` | `66` | `Envelope 0 DECAY` | `` |

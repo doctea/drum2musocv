@@ -36,7 +36,7 @@ int get_trigger_for_pitch(int pitch) {
   //debug_pitch_for_trigger();
   for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES ; i++) {
     if (pitch_for_trigger[i]==pitch) {
-      Serial.printf("get_trigger_for_pitch(%i), returning trigger %i\r\n", pitch, i);
+      //Serial.printf("get_trigger_for_pitch(%i), returning trigger %i\r\n", pitch, i);
       return i;
     }
   }

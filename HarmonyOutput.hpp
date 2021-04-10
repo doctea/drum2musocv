@@ -110,9 +110,9 @@ class MidiKeysOutput : public ChannelState {
     }
 
     void douse_notes(bool tied = false) {
-      Serial.printf("douse_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, get_held_notes()[0]);
+      //Serial.printf("douse_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, get_held_notes()[0]);
       if (!tied) {
-        Serial.println("\tNot tied, dousing");
+        //Serial.println("\tNot tied, dousing");
         send_note_off(get_held_notes());
       } else if (is_note_held()) {
         //Serial.printf("TIED: not dousing");

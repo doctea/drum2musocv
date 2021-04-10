@@ -21,6 +21,7 @@ Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed ac
 Euclidian.h:#define CC_EUCLIDIAN_FILLS                28    // enable/disable fills on last bar of phrase, 0=off
 Euclidian.h:#define CC_EUCLIDIAN_HIHAT_SHUFF          9     // enable/disable hihat shuffle, 0=off
 Euclidian.h:#define CC_EUCLIDIAN_CLAP_FLAM            8     // enable/disable clap flam, 0=off
+Harmony.hpp:#define CC_CHANNEL_PAD_PITCH        5     // set the MIDI channel to output the pads pitch on (default 2)
 Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to output the pad root on (default 1)
 Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
 Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)

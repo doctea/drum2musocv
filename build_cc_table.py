@@ -4,7 +4,7 @@ from pprint import pprint
 
 NUM_ENVS = 5
 ENV_SPAN = 8
-NUM_PATTERNS = 19
+NUM_PATTERNS = 20
 
 table = {}
 
