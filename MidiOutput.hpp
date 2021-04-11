@@ -6,8 +6,7 @@
   // weirdly, the midimuso seems to miss note offs sent for Harmony outputs if lots of note offs are sent rapidly to the bitbox *drums* output, 
   // as happens when stopping play or switching autoplay on/off rapidly etc
 
-#define OUT_DEBUG
-
+//#define OUT_DEBUG
 #ifdef OUT_DEBUG
 #define OUT_DEBUG 1
 #else
