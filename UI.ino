@@ -1,13 +1,15 @@
-#ifdef ENABLE_BUTTONS
 
 #include <DebounceEvent.h>
 
 #include "UI.h"
 #include "Euclidian.h"
+#include "Harmony.hpp"
+#include "MidiOutput.hpp"
 
-#define CC_CHANNEL_BITBOX_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
+#define CC_CHANNEL_BITBOX_DRUMS_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
 #define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
+#ifdef ENABLE_BUTTONS
 DebounceEvent button1 = DebounceEvent(BUTTON_PIN_1, handleButtonPressed, BUTTON_PUSHBUTTON, 50);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
 DebounceEvent button2 = DebounceEvent(BUTTON_PIN_2, handleButtonPressed, BUTTON_PUSHBUTTON, 50); // | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
 
@@ -20,7 +22,6 @@ void update_buttons() {
   button1.loop();
   button2.loop();
 }
-
 
 bool first_ignored = false;
 void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
@@ -69,6 +70,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
     }
 
 }
+#endif
 
 // return true if need to kill playing notes due to change
 bool set_demo_mode(int mode) {
@@ -109,12 +111,12 @@ bool handle_ui_ccs(int channel, int number, int value) {
       kill_envelopes();
     }
     return true;
-  } else if (number==CC_CHANNEL_BITBOX_OUT) {
-    if (midi_channel_bitbox_out==value) return true;
+  } else if (number==CC_CHANNEL_BITBOX_DRUMS_OUT) {
+    if (MIDI_CHANNEL_BITBOX_DRUMS_OUT==value) return true;
     
-    midi_kill_notes_bitbox();
+    midi_kill_notes_bitbox_drums();
     kill_envelopes(); // todo: only kill the envelopes going out to bitbox (ie shadow triggers)
-    midi_channel_bitbox_out = value;
+    MIDI_CHANNEL_BITBOX_DRUMS_OUT = value;
     return true;
   } else if (number==CC_CHANNEL_GATE_OUT) {
     if (midi_channel_muso_gate==value) return true;
@@ -126,5 +128,3 @@ bool handle_ui_ccs(int channel, int number, int value) {
 
   return false;
 }
-
-#endif

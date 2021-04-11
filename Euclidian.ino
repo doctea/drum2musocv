@@ -231,8 +231,9 @@ void process_euclidian(int ticks) {
     // handle duration of 0 as duration of half a step
     bool should_douse = false;
     if (patterns[i].duration==0 && (stutter+ticks)%(TICKS_PER_STEP/2)==0) {
-      douse_trigger(i, 127, true);
-      should_douse = true;
+      douse_trigger(patterns[i].trigger, 0, true);
+      //should_douse = true;
+      //continue
     }
     
     if(bs.is_bpm_on_step) {
@@ -251,7 +252,7 @@ void process_euclidian(int ticks) {
         }
         //EUC_printf("%c", 97 + i); // print a...q (65 for uppercase)
         //EUC_printf(" ");
-      } else if (should_douse || query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
+      } else if (/*should_douse ||*/ query_pattern_note_off(&patterns[i], bs.current_step, bs.current_bar)) {  // step kill
         bool tied = patterns[i].tie_on>0 && bs.current_step%patterns[i].tie_on==0;
         if (tied) {
           Serial.printf("==== pattern %i at step %i with tie_on %i, result %c\r\n", i, bs.current_step, patterns[i].tie_on, bs.current_step%patterns[i].tie_on==0?'Y':'N');
@@ -343,8 +344,10 @@ bool euclidian_set_auto_play (bool enable) {
   bool current_mode = euclidian_auto_play;
   euclidian_auto_play = enable; //!euclidian_auto_play;
   if (bpm_internal_mode && !euclidian_auto_play && current_mode != euclidian_auto_play) {
+    Serial.println("euclidian_set_auto_play returning TRUE!");
     return true;
   }
+  Serial.println("euclidian_set_auto_play returning FALSE!");
   return false;
 }
 
@@ -368,6 +371,7 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     if (euclidian_set_auto_play (value > 0)) {
       kill_notes();
       kill_envelopes();
+      harmony.douse_all();
     }
     return true;
   } else if (number == CC_EUCLIDIAN_SEED_MODIFIER) {

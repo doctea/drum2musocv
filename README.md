@@ -95,6 +95,9 @@ A diagram to help me understand how everything is routed:-
 
 ![Euclidian settings FL preset screenshot](DAW%20templates/Euclidian%20settings.png)
 
+# Issues
+
+ - Problems with midimuso pitch gates missing note-off messages when stopping everything, when a lot of notes need to be told to go off.  workaround by defining WORKAROUND_MISSED_NOTEOFFS in MidiOutput.hpp to insert short delay()s sometimes when sending a lot of messages during douse_all_trigger() calls.  Tried increasing TX buffer size but makes no difference, this seems to fix things in 99% of cases altho still sometimes misses the messages..
 
 
 # TODO / future plans + ideas

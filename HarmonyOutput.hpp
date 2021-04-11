@@ -13,10 +13,7 @@
 // for providing multiple MIDI key outputs ie bass and harmony
 //  todo: properly handle multiple notes being on at the same time for tracking chords
 class MidiKeysOutput : public ChannelState {
-
-    
   private:
-
     //int currently_playing = -1;
     //int currently_playing[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
     int octave_offset = 0;
@@ -24,9 +21,7 @@ class MidiKeysOutput : public ChannelState {
     int arp_counter = 0;
 
   public:
-
-    int channel = 0;
-
+    byte channel = 0;
     
     MidiKeysOutput(int chan, int octave_off = 0) {
       channel = chan;
@@ -79,6 +74,7 @@ class MidiKeysOutput : public ChannelState {
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing
       } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
+        arp_counter = 0;
         send_note_on(pitch);
         //if (DEBUG_HARMONY) 
         Serial.printf("    using single mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
@@ -111,10 +107,11 @@ class MidiKeysOutput : public ChannelState {
 
     void douse_notes(bool tied = false) {
       //Serial.printf("douse_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, get_held_notes()[0]);
-      if (!tied) {
-        //Serial.println("\tNot tied, dousing");
+      if (!tied && is_note_held()) {
+        Serial.printf("\tNot tied, dousing lowest %i [%s]\r\n", get_held_notes()[0], get_note_name(get_held_notes()[0]).c_str());
         send_note_off(get_held_notes());
-      } else if (is_note_held()) {
+        //send_all_notes_off();
+      } else if (tied && is_note_held()) {
         //Serial.printf("TIED: not dousing");
         //Serial.printf("TIES: latching tie -- tying current held note %i\r\n", get_held_notes()[0]);
         //Serial.printf(" - storing note %i\r\n", get_held_notes()[0]);
@@ -185,9 +182,14 @@ class MidiKeysOutput : public ChannelState {
       
       for (int i = 0 ; i < 10 ; i++) {
         if (pitches[i]>=0) {
-          if (DEBUG_HARMONY)  Serial.printf("send_note_off %i with list, sending %i\r\n", i, pitches[i]);
-          send_note_off(pitches[i], velocity); //velocity[i]);
+          //if (DEBUG_HARMONY)  
+          Serial.printf("\tsend_note_off %i from list, sending %i [%s]\r\n", i, pitches[i], get_note_name(pitches[i]).c_str());
+          if (is_note_held(pitches[i])) {
+            send_note_off(pitches[i], velocity); //velocity[i]);
+            i--;
+          }
         } else {
+          //Serial.printf("\tbreaking at %i cos pitch is %i\r\n", i, pitches[i]);
           break;
         }
       }
@@ -210,9 +212,10 @@ class MidiKeysOutput : public ChannelState {
         pitch += (12*octave_offset);
 
         //Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
-        MIDIOUT.sendNoteOn(pitch, velocity, channel);
+        Serial.printf("\t\tactual send_note_on  on channel %i for pitch %i [%s] at velocity %i\r\n", (byte)channel, pitch, get_note_name(pitch).c_str(), velocity);
+        MIDIOUT.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);
         if (midiecho_enabled)
-          MIDIIN.sendNoteOn(pitch, velocity, channel);  // echo back to host
+          MIDIIN.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);  // echo back to host
       }
     }
  
@@ -234,7 +237,7 @@ class MidiKeysOutput : public ChannelState {
         pitch += (12*octave_offset);
 
         //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
-        //Serial.printf("actual send_note_off for pitch %i on channel %i\r\n", pitch, channel);
+        Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);
         MIDIOUT.sendNoteOff(pitch, velocity, channel);
         if (midiecho_enabled)
           MIDIIN.sendNoteOff(pitch, velocity, channel);  // echo back to host 
@@ -244,16 +247,18 @@ class MidiKeysOutput : public ChannelState {
     }
 
     void send_all_notes_off() {
+      
       if (channel==0) return;
       
       if (is_note_held()) {
-        Serial.printf("send_all_notes_off on channel %i!\r\n", channel);
-        send_note_off(held_notes);
+        Serial.printf("send_all_notes_off on channel %i! ", channel);
+        debug_notes_held();
+        send_note_off(get_held_notes());
       } else {
         Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
       }
       
-      MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
+      //MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
       /*for (int i = 0 ; i < 127 ; i++) {
         MIDIOUT.sendNoteOff(i, 0, channel);
       }*/
@@ -276,6 +281,7 @@ class MidiKeysOutput : public ChannelState {
       //send_note_off(held_notes);
       if (chan==channel) return;
       
+      Serial.printf("#### set_midi_channel was %i, now %i\r\n", channel, chan);
       send_all_notes_off();
       //handle_all_notes_off();
       channel = chan;

@@ -26,9 +26,11 @@ Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to
 Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
 Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)
 Harmony.hpp:#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
-Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
 Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_BASS_SET_TIE_ON    6     // set which steps the Euclidian bass should tie on
+Harmony.hpp:#define CC_BASS_MELODY_MODE 2
+Harmony.hpp:#define CC_PAD_PITCH_MELODY_MODE  3
+Harmony.hpp:#define CC_PAD_PITCH_OCTAVE_OFFSET  4
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29          // set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 Harmony.hpp:#define CC_HARMONY_MUTATE_MODE  30          // harmony mutation mode, 0=None, 1=Randomise
 Harmony.hpp:#define CC_AUTO_PROGRESSION   31            // enable/disable playing auto chord progression
@@ -41,7 +43,7 @@ MidiEcho.h:#define CC_MIDIECHO_ENABLED   21      // enable echoing of output bac
 MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation in ticks, default 24
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks, default 1
 UI.h:#define CC_DEMO_MODE  19        // choose playback mode - 0=None, 1=Euclidian, 2=Euclidian with mutation, 3=Random triggers
-UI.ino:#define CC_CHANNEL_BITBOX_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
+UI.ino:#define CC_CHANNEL_BITBOX_DRUMS_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
 UI.ino:#define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
 Harmony.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
@@ -53,7 +55,9 @@ Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_IN    1
 Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_IN   2
 Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
 Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
-Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT     (harmony.get_midi_channel_bass_out())
-Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS  (harmony.get_midi_channel_bitbox_keys())
+Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())
+Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())
+Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())
+Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())
 MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
-MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_OUT (midi_channel_bitbox_out)
+MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)

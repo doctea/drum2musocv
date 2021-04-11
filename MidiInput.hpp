@@ -137,9 +137,11 @@ void handleStop() {
   MIDIOUT.sendStop();
   // TODO: stop+reset LFOs
   Serial.println("Received STOP -- killing envelopes / notes / resetting clock !");
-  douse_all_triggers();
-  kill_envelopes();
   kill_notes();
+  kill_envelopes();
+  //douse_all_triggers(true); // is done in kill_notes
+  harmony.kill_notes();
+
   bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   last_input_at = millis();
   
@@ -206,14 +208,14 @@ void process_midi() {
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
-                   DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT
+                   MIDI_CHANNEL_PAD_ROOT_OUT
       );
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_PITCH_IN) {    // forward channel 2 unchanged
       // for ensemble - send notes to muso on channel 1
       MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
-                   DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT
+                   MIDI_CHANNEL_PAD_PITCH_OUT
       );      
     } else {
       // catch all other channels

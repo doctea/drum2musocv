@@ -1,5 +1,8 @@
 | File | CC | Name | Comment |
 | ---- | -- | ---- | ------- |
+| `Harmony.hpp` | `2` | `CC_BASS_MELODY_MODE` | `` |
+| `Harmony.hpp` | `3` | `CC_PAD_PITCH_MELODY_MODE` | `` |
+| `Harmony.hpp` | `4` | `CC_PAD_PITCH_OCTAVE_OFFSET` | `` |
 | `Harmony.hpp` | `5` | `CC_CHANNEL_PAD_PITCH` | ` set the MIDI channel to output the pads pitch on (default 2)` |
 | `Harmony.hpp` | `6` | `CC_BASS_SET_TIE_ON` | ` set which steps the Euclidian bass should tie on` |
 | `Euclidian.h` | `8` | `CC_EUCLIDIAN_CLAP_FLAM` | ` enable/disable clap flam, 0=off` |
@@ -8,10 +11,9 @@
 | `Harmony.hpp` | `11` | `CC_MELODY_ROOT` | ` set the MIDI note to use as the root pitch, 48=C4` |
 | `Harmony.hpp` | `12` | `CC_CHANNEL_BASS_OUT` | ` set the MIDI channel to output the bass on (default 4)` |
 | `Harmony.hpp` | `13` | `CC_CHANNEL_BITBOX_KEYS` | ` set the MIDI channel to output the chords on (default 3)` |
-| `UI.ino` | `14` | `CC_CHANNEL_BITBOX_OUT` | ` set the MIDI channel to output the shadow drum triggers (default 11)` |
+| `UI.ino` | `14` | `CC_CHANNEL_BITBOX_DRUMS_OUT` | ` set the MIDI channel to output the shadow drum triggers (default 11)` |
 | `UI.ino` | `15` | `CC_CHANNEL_GATE_OUT` | ` set the MIDI channel to output the Muso drum triggers (default 16)` |
 | `Euclidian.h` | `16` | `CC_EUCLIDIAN_SET_AUTO_PLAY` | ` enable/disable autoplaying on internal BPM` |
-| `Harmony.hpp` | `17` | `CC_BASS_SET_ARP_MODE` | ` cc to set the bass arp mode` |
 | `Harmony.hpp` | `18` | `CC_BASS_ONLY_NOTE_HELD` | ` cc to set bass to only play in external mode if note is held` |
 | `UI.h` | `19` | `CC_DEMO_MODE` | ` choose playback mode - 0=None, 1=Euclidian, 2=Euclidian with mutation, 3=Random triggers` |
 | `Euclidian.h` | `20` | `CC_EUCLIDIAN_SET_MUTATE_MODE` | ` 0 = NONE, 1 = SUBTLE, 2 = TOTAL` |

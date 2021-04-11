@@ -15,7 +15,7 @@ private:
 #define HELD_NOTES_MAX (sizeof(held_notes)/sizeof(held_notes[0]))
 
     int midi_root_pitch = MIDI_BASS_ROOT_PITCH;
-    int held_notes_count = 0;
+    //int held_notes_count = 0;
     bool note_held = false;
 
     // track pitches internally
@@ -25,7 +25,7 @@ private:
         if (held_notes[i]==-1) { // free slot so add this new pitch
           if (DEBUG_CHANNELSTATE) Serial.printf("   >adding note %i at %i\r\n", pitch, i);
           held_notes[i] = pitch;
-          held_notes_count++;
+          //held_notes_count++;
           break;
         } else if (held_notes[i]>pitch) { // insert
           if (DEBUG_CHANNELSTATE) Serial.printf("   >inserting note %i at %i\r\n", pitch, i);
@@ -36,7 +36,7 @@ private:
           }
           if (DEBUG_CHANNELSTATE) Serial.printf("     >and setting %i to %i\r\n", i, pitch);
           held_notes[i] = pitch;
-          held_notes_count++;
+          //held_notes_count++;
           break;
         } else if (held_notes[i]==pitch) {
           break;  // dont duplicate notes
@@ -76,12 +76,18 @@ private:
       } else {
         Serial.printf("     > didn't find pitch %i!\r\n", pitch);
       }*/
-
+#define DEBUG_POP_NOTE false
+      if (DEBUG_POP_NOTE) {
+        Serial.printf("Before\tpop_note algo, held is "); 
+        debug_notes_held();
+      }
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==pitch) {
-          if (DEBUG_CHANNELSTATE) Serial.printf("   > found at %i, removing...\r\n", i);
-          held_notes_count--;
+          //if (DEBUG_CHANNELSTATE) 
+          if (DEBUG_POP_NOTE) Serial.printf("\t\t\t> found pitch %i at %i, removing...\r\n", pitch, i);
+          //held_notes_count--;
           for (int x = i ; x < HELD_NOTES_MAX-1 ; x++) {
+            if (DEBUG_POP_NOTE) Serial.printf("\t\t\t\tmoving pitch %i at %i to overwrite pitch %i at %i\r\n", held_notes[x+1], x+1, held_notes[x], x);
             held_notes[x] = held_notes[x+1];
           }
           held_notes[HELD_NOTES_MAX-1] = -1;
@@ -89,26 +95,48 @@ private:
           break;
         }
       }
+      if (DEBUG_POP_NOTE) {
+        Serial.printf("After\tpop_note algo, held is "); 
+        debug_notes_held();
+      }
       //auto_note_held = true;
       //debug_notes_held();
     }
 
+    int get_held_notes_count() {
+      for (int i = 0 ; i < 10 ; i++) {
+        if (held_notes[i]==-1) {
+          return i;
+        }
+      }
+    }
 
     char debug_string[30];
     const char* build_notes_held_string() {
-      String s;
+      String s = "";
+      int held_notes_count = 0;
     
       bool found = false;
-      for (int i = 0 ; i < held_notes_count ; i++) {
+      for (int i = 0 ; i < 10 ; i++) {
         if (held_notes[i]!=-1) {
           //sprintf(debug_string, "%s, ", get_note_name(held_notes[i]).c_str());
+          /*s += i + ":";
           s += get_note_name(held_notes[i]);
-          s += " ";
+          s += " ";*/
+          //s = s + (i + ":" + get_note_name(held_notes[i]) + " ");
+          //s.concat((i + ":")); // + get_note_name(held_notes[i]) + " "));
+          s.concat(get_note_name(held_notes[i]));
+          s.concat(" ");
+          //Serial.printf("build_notes_held_string(): found held note at index %i: %i\r\n", i, held_notes[i]);
+        } else {
+          held_notes_count = i;
+          break;
         }
       }
-      if (DEBUG_CHANNELSTATE) sprintf(debug_string, "%s", s.c_str());
-      if (held_notes_count>0)
-        debug_string[strlen(debug_string)-1] = '\0';
+      //if (DEBUG_CHANNELSTATE) 
+      sprintf(debug_string, "%s", s.c_str());
+      //if (held_notes_count>0)
+      //  debug_string[strlen(debug_string)-1] = '\0';
       return (char *)debug_string;
     }
   
@@ -188,7 +216,7 @@ private:
           else
             break;
         }
-        held_notes_count = 0;
+        //held_notes_count = 0;
       }
       build_notes_held_string();
     }
@@ -198,12 +226,12 @@ private:
     }
     
     int get_sequence_held_note(int position) {
-      return held_notes[position % held_notes_count];
+      return held_notes[position % get_held_notes_count()];
     }
 
     void debug_notes_held() {
-      Serial.printf("held %i: ", held_notes_count);
-      Serial.println(get_debug_notes_held());
+      Serial.printf("\t\theld %i notes: [ %s ]\r\n", get_held_notes_count(), get_debug_notes_held());
+      //Serial.println(get_debug_notes_held());
     }
 
     const char* get_debug_notes_held() {
