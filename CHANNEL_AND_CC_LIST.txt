@@ -21,24 +21,25 @@ Euclidian.h:#define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed ac
 Euclidian.h:#define CC_EUCLIDIAN_FILLS                28    // enable/disable fills on last bar of phrase, 0=off
 Euclidian.h:#define CC_EUCLIDIAN_HIHAT_SHUFF          9     // enable/disable hihat shuffle, 0=off
 Euclidian.h:#define CC_EUCLIDIAN_CLAP_FLAM            8     // enable/disable clap flam, 0=off
-Harmony.hpp:#define CC_CHANNEL_PAD_PITCH        5     // set the MIDI channel to output the pads pitch on (default 2)
-Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to output the pad root on (default 1)
-Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
-Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)
+Harmony.hpp:#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
+Harmony.hpp:#define CC_HARMONY_MUTATE_MODE      30    // overall harmony mutation mode, 0=None, 1=Randomise
+Harmony.hpp:#define CC_AUTO_PROGRESSION         31    // enable/disable playing auto chord progression
+Harmony.hpp:#define CC_AUTO_CHORD_TYPE          105   // enable/disable playing automatic chord types (ie stacking triads)
+Harmony.hpp:#define CC_AUTO_CHORD_INVERSION     106   // enable/disable playing automatic chord inversions
+Harmony.hpp:#define CC_MELODY_SCALE             108   // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
+Harmony.hpp:#define CC_MELODY_AUTO_SCALE        109   // enable/disable automatic changing of scale every phrase
 Harmony.hpp:#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
-Harmony.hpp:#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
-Harmony.hpp:#define CC_BASS_SET_TIE_ON    6     // set which steps the Euclidian bass should tie on
-Harmony.hpp:#define CC_BASS_MELODY_MODE 2
-Harmony.hpp:#define CC_PAD_PITCH_MELODY_MODE  3
-Harmony.hpp:#define CC_PAD_PITCH_OCTAVE_OFFSET  4
-Harmony.hpp:#define CC_HARMONY_MELODY_MODE  29          // set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
-Harmony.hpp:#define CC_HARMONY_MUTATE_MODE  30          // harmony mutation mode, 0=None, 1=Randomise
-Harmony.hpp:#define CC_AUTO_PROGRESSION   31            // enable/disable playing auto chord progression
-Harmony.hpp:#define CC_AUTO_CHORD_TYPE    105           // enable/disable playing automatic chord types (ie stacking triads)
-Harmony.hpp:#define CC_AUTO_CHORD_INVERSION    106      // enable/disable playing automatic chord inversions
-Harmony.hpp:#define CC_MELODY_OCTAVE_OFFSET   107       // octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
-Harmony.hpp:#define CC_MELODY_SCALE   108               // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
-Harmony.hpp:#define CC_MELODY_AUTO_SCALE   109          // enable/disable automatic changing of scale every phrase
+Harmony.hpp:#define CC_HARMONY_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12    // output 0: set the MIDI channel to output the bass on (default 4)
+Harmony.hpp:#define CC_BASS_MELODY_MODE         2     // output 0: set mode to use for the bass output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+Harmony.hpp:#define CC_BASS_SET_TIE_ON          6     // output 0: set which steps the Euclidian bass should tie on
+Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: set the MIDI channel to output the chords on (default 3)
+Harmony.hpp:#define CC_HARMONY_MELODY_MODE      29    // output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+Harmony.hpp:#define CC_MELODY_OCTAVE_OFFSET     107   // output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
+Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // output 2: set the MIDI channel to output the pad root on (default 1)
+Harmony.hpp:#define CC_CHANNEL_PAD_PITCH        5     // output 3: set the MIDI channel to output the pads pitch on (default 2)
+Harmony.hpp:#define CC_PAD_PITCH_MELODY_MODE    3     // output 3: set mode to use for the pitch output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+Harmony.hpp:#define CC_PAD_PITCH_OCTAVE_OFFSET  4     // output 3: set octave offset (-2 to +3)
 MidiEcho.h:#define CC_MIDIECHO_ENABLED   21      // enable echoing of output back to DAW over USB
 MidiInput.hpp:#define CC_SYNC_RATIO         110   // sync ratio of the envelope modulation in ticks, default 24
 MidiInput.hpp:#define CC_CLOCK_TICK_RATIO   111   // send a clock tick for every X clock ticks, default 1
@@ -55,9 +56,9 @@ Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_IN    1
 Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_IN   2
 Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
 Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
-Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())
-Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())
-Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())
-Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())
+Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())       // output 0
+Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())    // output 1
+Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())      // output 2
+Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
 MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)

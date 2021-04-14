@@ -364,7 +364,7 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   if (channel != GM_CHANNEL_DRUMS) return false;
 
   if (number >= CC_EUCLIDIAN_ACTIVE_STATUS_START && number <= CC_EUCLIDIAN_ACTIVE_STATUS_END) { // + (ENV_CC_SPAN*NUM_ENVELOPES)) {
-    Serial.printf("handle_euclidian_ccs(%i, %i) setting pattern number %i to %c\r\n", channel, number, number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value>1?'Y':'N');
+    EUC_printf("handle_euclidian_ccs(%i, %i) setting pattern number %i to %c\r\n", channel, number, number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value>1?'Y':'N');
     set_pattern_active_status(number - CC_EUCLIDIAN_ACTIVE_STATUS_START, value > 1);
     return true;
   } else if (number == CC_EUCLIDIAN_SET_AUTO_PLAY) {

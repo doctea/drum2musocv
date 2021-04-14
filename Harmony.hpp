@@ -2,6 +2,16 @@
 #define HARMONY_INCLUDED
 
 #define DEBUG_HARMONY false
+//#define HARM_DEBUG
+// handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
+#ifdef HARM_DEBUG
+#define HARM_DEBUG 1
+#else
+#define HARM_DEBUG 0
+#endif
+#define HARM_printf(fmt, ...)   do { if (HARM_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
+#define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
+//debug handling
 
 #define DEFAULT_MELODY_OFFSET   1
 
@@ -22,43 +32,25 @@
 #define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
 #define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
 
-#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())
-#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())
-#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())
-#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())
+// channels that the outputs use
+#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())       // output 0
+#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())    // output 1
+#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())      // output 2
+#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
 
 //BITBOX/melody settings
 #define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 #define BITBOX_KEYS_OCTAVE_OFFSET   2
 
-#define CC_CHANNEL_PAD_PITCH        5     // set the MIDI channel to output the pads pitch on (default 2)
-#define CC_CHANNEL_PAD_ROOT         10    // set the MIDI channel to output the pad root on (default 1)
-#define CC_CHANNEL_BASS_OUT         12    // set the MIDI channel to output the bass on (default 4)
-#define CC_CHANNEL_BITBOX_KEYS      13    // set the MIDI channel to output the chords on (default 3)
-#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
-
-//#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
-#define CC_BASS_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
-
-#define CC_BASS_SET_TIE_ON    6     // set which steps the Euclidian bass should tie on
-
-/*#define ARP_MODE_NONE         0
+/*
+// deprecated arpegiation settings
+#define ARP_MODE_NONE         0
 #define ARP_MODE_PER_BEAT     1
 #define ARP_MODE_NEXT_ON_NOTE 2
 #define ARP_MODE_MAX          3
-#define DEFAULT_ARP_MODE          ARP_MODE_NONE   // choose notes to play from the current sequence (eg incrementing through them)?*/
-
-//#define BASS_DEBUG
-// handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
-#ifdef HARM_DEBUG
-#define HARM_DEBUG 1
-#else
-#define HARM_DEBUG 0
-#endif
-#define HARM_printf(fmt, ...)   do { if (HARM_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
-#define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
-//debug handling
-
+#define DEFAULT_ARP_MODE          ARP_MODE_NONE   // choose notes to play from the current sequence (eg incrementing through them)?
+#define CC_BASS_SET_ARP_MODE        17    // cc to set the bass arp mode
+*/
 
 namespace HARMONY {
   enum MUTATION_MODE { 
@@ -94,21 +86,46 @@ namespace HARMONY {
 #include "BPM.hpp"
 #include "ChannelState.hpp"
 
-ChannelState autobass_input = ChannelState();   // tracking notes that are held
+ChannelState autobass_input = ChannelState();   // global tracking notes that are held on incoming bass channel
 
-#define CC_BASS_MELODY_MODE 2
-#define CC_PAD_PITCH_MELODY_MODE  3
-#define CC_PAD_PITCH_OCTAVE_OFFSET  4
 
-#define CC_HARMONY_MELODY_MODE  29          // set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
-#define CC_HARMONY_MUTATE_MODE  30          // harmony mutation mode, 0=None, 1=Randomise
+///////////////////// overall harmony settings /////////////////////
+#define CC_HARMONY_MUTATE_MODE      30    // overall harmony mutation mode, 0=None, 1=Randomise
+#define CC_AUTO_PROGRESSION         31    // enable/disable playing auto chord progression
+#define CC_AUTO_CHORD_TYPE          105   // enable/disable playing automatic chord types (ie stacking triads)
+#define CC_AUTO_CHORD_INVERSION     106   // enable/disable playing automatic chord inversions
+#define CC_MELODY_SCALE             108   // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
+#define CC_MELODY_AUTO_SCALE        109   // enable/disable automatic changing of scale every phrase
 
-#define CC_AUTO_PROGRESSION   31            // enable/disable playing auto chord progression
-#define CC_AUTO_CHORD_TYPE    105           // enable/disable playing automatic chord types (ie stacking triads)
-#define CC_AUTO_CHORD_INVERSION    106      // enable/disable playing automatic chord inversions
-#define CC_MELODY_OCTAVE_OFFSET   107       // octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
-#define CC_MELODY_SCALE   108               // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
-#define CC_MELODY_AUTO_SCALE   109          // enable/disable automatic changing of scale every phrase
+#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
+#define CC_HARMONY_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+
+///////////////////// output-specific harmony settings /////////////////////
+//// output 0 (bass)
+#define CC_CHANNEL_BASS_OUT         12    // output 0: set the MIDI channel to output the bass on (default 4)
+#define CC_BASS_MELODY_MODE         2     // output 0: set mode to use for the bass output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_BASS_SET_TIE_ON          6     // output 0: set which steps the Euclidian bass should tie on
+// not implemented: output 0 octave offset
+
+//// output 1 (bitbox)
+#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: set the MIDI channel to output the chords on (default 3)
+#define CC_HARMONY_MELODY_MODE      29    // output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_MELODY_OCTAVE_OFFSET     107   // output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
+// not implemented: output 1 tie-on 
+
+//// output 2 (muso/ensemble root)
+#define CC_CHANNEL_PAD_ROOT         10    // output 2: set the MIDI channel to output the pad root on (default 1)
+// not implemented: output 2 melody mode
+// not implemented: output 2 octave offset
+// not implemented: output 2 tie-on 
+
+//// output 3 (muso/ensemble pitch)
+#define CC_CHANNEL_PAD_PITCH        5     // output 3: set the MIDI channel to output the pads pitch on (default 2)
+#define CC_PAD_PITCH_MELODY_MODE    3     // output 3: set mode to use for the pitch output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_PAD_PITCH_OCTAVE_OFFSET  4     // output 3: set octave offset (-2 to +3)
+// not implemented: output 3 tie-on 
+
+
 
 #define CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
 #define NUM_SCALES                (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
@@ -135,10 +152,9 @@ int scale_offset[][SCALE_SIZE] = {
 
   // relative major/minor are modes of each other
   //    C maj is also A minor
-  
 };
 
-// qsort requires you to create a sort function
+// for use by qsort
 int sort_pitch(const void *cmp1, const void *cmp2)
 {
   // Need to cast the void * to int *
@@ -154,10 +170,7 @@ int sort_pitch(const void *cmp1, const void *cmp2)
           (a > b ? 
               1 : // a < b
               0); // equal
-  // A simpler, probably faster way:
-  //return b - a;
 }
-
 
 void sort_pitches(int pitches[], int len) {
   qsort(pitches, len, sizeof(pitches[0]), sort_pitch);
@@ -190,10 +203,10 @@ class Harmony {
     //int arp_counter = 0;  // todo, probably move this into the MidiKeysOutput..?
     
     int mutation_mode = HARMONY::MUTATION_MODE::RANDOMISE;
-    //int melody_mode   = HARMONY::MELODY_MODE::CHORD;
-    //int arp_mode      = DEFAULT_ARP_MODE; //ARP_MODE_NEXT_ON_NOTE;
+    //int melody_mode   = HARMONY::MELODY_MODE::CHORD;  // deprecated, is now per-output
+    //int arp_mode      = DEFAULT_ARP_MODE; //ARP_MODE_NEXT_ON_NOTE;  // deprecated, is now per-output
+    //bool auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // deprecated. choose notes to play from the current sequence (eg incrementing through them)
 
-    //bool auto_arp         = DEFAULT_AUTO_ARP_ENABLED;   // choose notes to play from the current sequence (eg incrementing through them)
     bool auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
     bool auto_scale       = DEFAULT_AUTO_SCALE_ENABLED;   // automatically switch scales every phrase
     bool auto_chord_type  = true;
@@ -202,8 +215,9 @@ class Harmony {
 
     int default_chord_progression[4]    =   { 
       0, 5, 1, 4 
-    };     // chord progression
-    int default_sequence[4][4]     =   { // degrees of scale to play per chord -- ie, arp patterns
+    };     // default chord progression
+
+    int default_sequence[4][4]     =   { // degrees of scale to play per chord -- ie, arp patterns .. deprecated now?
       { 0, 0, 0, 0 },
       { 0, 0, 0, 1 },
       { 0, 1, 1, 2 },
@@ -213,7 +227,7 @@ class Harmony {
         { 0, 3, 6, 4 }*/
     };
     int chord_progression[4];
-    int sequence[4][4];
+    int sequence[4][4];   // deprecated now?
 
   public:  
  
@@ -238,6 +252,7 @@ class Harmony {
       set_progression(default_chord_progression);
     }
 
+    // may be deprecated?
     void reset_sequence_pattern( int source[4][4]) {
       for (int i = 0 ; i < NUM_SEQUENCES ; i++) {
         for (int x = 0 ; x < HARM_SEQUENCE_LENGTH ; x++) {
@@ -249,11 +264,12 @@ class Harmony {
       reset_sequence_pattern(default_sequence);
     }
 
-
+    // get the root pitch of the current chord.. TODO: may need to look at this to see if this is doing the right thing?
     int get_current_chord_root_pitch() {
      return channel_state.get_root_note() + get_scale_note(0, get_chord_number());
     }
 
+    // trigger current pitch/chord on the specified harmony output
     void fire_for(int output_number) {
       //Serial.printf("fire_for output number %i\r\n", output_number);
    
@@ -268,9 +284,11 @@ class Harmony {
 
       // get the current chord number
       if (channel_state.is_note_held()) {
+        // incoming keys held, so use lowest as our current pitch
         notes = channel_state.get_held_notes();
         pitch = notes[0];
       } else {
+        // no notes held so find current notes to use based on autoharmony chord
         int chord_number = get_chord_number();
         int chord_type = get_chord_type();
         int inversion = get_chord_inversion();
@@ -288,26 +306,29 @@ class Harmony {
     }
 
     void douse_for(int output_number, bool tied = false) {
-      Serial.printf("douse_for output number %i - channel %i\r\n", output_number, mko[output_number].channel);
+      HARM_printf("douse_for output number %i - channel %i\r\n", output_number, mko[output_number].channel);
       mko[output_number].douse_notes(tied);   // erm this doesnt seem to affect anything?!
     }
 
+    // douse all harmony output notes by calling douse_for
     void douse_all() {
       for (int i = 0 ; i < NUM_MKO ; i++) {
         douse_for(i);
       }
     }
 
+    // kill all harmony output notes by calling send_all_notes_off
     void kill_notes() {
-        Serial.println(">>>>>> harmony.kill_notes() called");
+        HARM_println(">>>>>> harmony.kill_notes() called");
         for (int i = 0 ; i < NUM_MKO ; i++) {
           mko[i].send_all_notes_off();
         }
     }
 
+    // mutate harmony chord progression / sequence
     void mutate() {
       if (mutation_mode==HARMONY::MUTATION_MODE::RANDOMISE) {
-        Serial.println("## HARMONY MUTATE - randomise!");
+        HARM_println("## HARMONY MUTATE - randomise!");
         randomSeed(get_euclidian_seed());
         for (int i = 0 ; i < 4/*CHORD_PROGRESSION_LENGTH*/ ; i++) {
           if (random(0,10)<4) {
@@ -332,9 +353,10 @@ class Harmony {
       }
     }
 
-//// chord choosing, note choosing, etc
+    /////// chord choosing, note choosing, etc
 
-    int get_sequence_note(int position = 0) {
+    // might be deprecated now?
+    int get_sequence_note(int position = 0) { 
       if (position % HARM_SEQUENCE_LENGTH == 0) HARM_printf("----- at bass arp sequence start (position %i)\r\n", position);
       int sequence_number = get_sequence_number();
     
@@ -343,7 +365,8 @@ class Harmony {
       );
     }
 
-    int get_sequence_pitch(int position = 0) {
+    // might be deprecated now?
+    int get_sequence_pitch(int position = 0) {  
       //bass_root = MIDI_BASS_ROOT_PITCH;// + current_phrase;
       if (channel_state.is_note_held()) {
         // bass is autoplaying, so ask it for what note it recommends for this position
@@ -407,7 +430,7 @@ class Harmony {
       return r;
     }
 
-    // get the currently active arp sequence index
+    // get the currently active arp sequence index - might be deprecated now?
     int get_sequence_number() {
       /*if (arp_mode>0) { //auto_arp) {
         // choose the arp sequence automatically based on the current song position
@@ -419,7 +442,7 @@ class Harmony {
       return sequence_number;
     }
 
-    // get the currently active chord in the scale
+    // get the currently active chord number in the scale based on autoharmony progression, or 0
     int get_chord_number() {
       if (auto_progression) {
         // automatically change chord based on our current song bar position
@@ -431,6 +454,8 @@ class Harmony {
       return 0; // default to root (default or whatever is held)
     }
 
+    // todo: can probably do away with all this by qsorting the pitches after adding/removal
+    // todo: move this to ChannelState
     void replace_pitch(int pitches[], int pitch_search, int pitch_replace) {
       remove_pitch(pitches, pitch_search);
       insert_pitch(pitches, pitch_replace);
@@ -478,6 +503,7 @@ class Harmony {
       }
     }
 
+    // determine current chord type to use, ie any extensions, otherwise triad
     int get_chord_type() {
       int type = 0;
       if (auto_chord_type) {
@@ -491,8 +517,9 @@ class Harmony {
           type += (current_phrase+current_beat)%HARMONY::CHORD_TYPE::CHORD_TYPE_MAX;  // mutate the chord type based on current phrase & current beat
         }
         type %= HARMONY::CHORD_TYPE::CHORD_TYPE_MAX;   
-      } else                      // standard 
+      } else {                     // default
         type = HARMONY::CHORD_TYPE::TRIAD;
+      }
         
       return type;
     }
@@ -506,7 +533,7 @@ class Harmony {
         return 0;
     }
 
-    // return pointer to array
+    // return pointer to array of the notes to use in specified chord number+type+inversion based on current root
     int *get_notes_for_chord (int chord, int chord_type = HARMONY::CHORD_TYPE::TRIAD, int inversion = 0) {
       /*static int pitches[10] = { 
         pitch, 
@@ -605,11 +632,7 @@ class Harmony {
       return pitches;
     }
 
-
-    /*int inversions[][] = {
-      { 0, 1, 2 },
-    }*/
-
+    // invert a chord
     void do_inversion(int pitches[10], int i) {
         int lowestpitch = pitches[0];
         
@@ -699,7 +722,7 @@ class Harmony {
       }
     }
 
-
+    // handle CCs for harmony options
     bool handle_ccs(int channel, int number, int value) {
       if (channel!=GM_CHANNEL_DRUMS) return false;
     
@@ -726,7 +749,7 @@ class Harmony {
       /*} else if (number==CC_BASS_SET_ARP_MODE) {
         set_arp_mode(value);
         return true;*/
-      } else if (number==CC_BASS_ONLY_NOTE_HELD) {
+      } else if (number==CC_HARMONY_ONLY_NOTE_HELD) {
         set_only_note_held(value>0);
         return true;
       } else if (number==CC_AUTO_PROGRESSION) {
@@ -782,6 +805,7 @@ class Harmony {
       return false;
     }    
 
+    // only used by MIDI_CHANNEL_* defines - todo: refactor
     int get_midi_channel_bass_out() {
       return mko_bass.channel;
     }
@@ -795,16 +819,11 @@ class Harmony {
       return mko_pads_root.channel;
     }
     
-    /*void set_arp_mode(int mode) {
-      arp_mode = mode % ARP_MODE_MAX;
-      // todo: kill notes that otherwise won't end when this mode changes
-    }*/
-    
+    // enable/disable restricting harmony to only playing when notes are held on input
     void set_only_note_held(int value) {
       only_note_held = value; //= mode % ARP_MODE_MAX;
       // todo: kill notes that otherwise won't end when this mode changes
     }
-
 
     // get strings about the current scale/sequence/chords settings
     char *get_bass_info() {
@@ -825,7 +844,6 @@ class Harmony {
 };
 
 // for use globally
-
 Harmony harmony = Harmony(autobass_input);
 
 #endif
