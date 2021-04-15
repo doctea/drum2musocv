@@ -28,6 +28,8 @@
 #define DATA_PIN 9
 //#define CLOCK_PIN 13
 
+long last_updated_pixels_at = 0;
+
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
@@ -80,8 +82,11 @@ void setup_pixels() {
 }*/
 
 
-void update_pixels() {
-  update_pixels_triggers();
+void update_pixels(unsigned long now_ms) {
+  if (now_ms - last_updated_pixels_at >= PIXEL_REFRESH) {
+    last_updated_pixels_at = now_ms;
+    update_pixels_triggers();
+  }
 } 
 
 #define STRIP_LENGTH  (NUM_LEDS/2)

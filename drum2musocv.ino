@@ -15,6 +15,8 @@
 #include "Euclidian.h"
 #include "Pixels.h"
 
+#include "Harmony.hpp"
+
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
 #endif
@@ -35,7 +37,6 @@ unsigned long time_last; // last time main loop was run, for calculating elapsed
 
 
 #ifdef ENABLE_PIXELS
-long last_updated_pixels_at = 0;
 #endif
 
 
@@ -134,10 +135,7 @@ void loop() {
   process_envelopes(now);
 
 #ifdef ENABLE_PIXELS
-  if (now_ms - last_updated_pixels_at >= PIXEL_REFRESH) {
-    last_updated_pixels_at = now_ms;
-    update_pixels();
-  } 
+    update_pixels(now_ms);
 #endif
 
   time_last = now_ms;
