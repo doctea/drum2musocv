@@ -36,7 +36,8 @@ enum stage : byte {
   RELEASE,
   //END = 0
   LFO_SYNC_RATIO_HOLD_AND_DECAY,
-  LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE
+  LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE,
+  ASSIGN_HARMONY_OUTPUT
 };
 // above enums also used as the envelope CC offsets
 
@@ -67,6 +68,8 @@ typedef struct envelope_state {
   unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
 
+  int trigger_on_channel = 0;
+
   byte midi_cc;
 
   byte last_sent_lvl;
@@ -86,5 +89,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value);
 void kill_envelopes();
 void initialise_envelopes();
 void process_envelopes(unsigned long now);
+void fire_envelope_for_channel(int channel, int velocity = 127);
+void douse_envelope_for_channel(int channel, int velocity = 0);
   
 #endif

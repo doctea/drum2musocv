@@ -91,6 +91,16 @@ void handleControlChange(byte channel, byte number, byte value) {
       midi_kill_notes();      
     } else {
       //MIDI.sendControlChange(number, value, 1); // pass thru unhandled CV
+      if (number==0x7B) {// || // intercept 'all notes off', 
+            // TODO: have i commented out the wrong lines here? ^^^
+            kill_notes(); // added
+            kill_envelopes();
+      } else if (number==0x07) {
+          //number==0x65 || // RPN MSB
+          //number==0x07*/) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
+          //TODO: do i need to also ignore the others (1,7,11,71,74)?
+          //TODO: or... use them as offsets so can modulate...?
+      }
     }
     last_input_at = millis();
   } /*(else {

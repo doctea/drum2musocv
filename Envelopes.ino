@@ -50,20 +50,12 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
       envelopes[env_num].lfo_sync_ratio_hold_and_decay = constrain(1+value,1,128);
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
+    } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
+      envelopes[env_num].trigger_on_channel = value % 16;
     }
     return true;
   }
-  if (number==0x7B) {// || // intercept 'all notes off', 
-        // TODO: have i commented out the wrong lines here? ^^^
-        kill_envelopes();
-        return true;
-  } else if (number==0x07) {
-      //number==0x65 || // RPN MSB
-      //number==0x07*/) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
-      //TODO: do i need to also ignore the others (1,7,11,71,74)?
-      //TODO: or... use them as offsets so can modulate...?
-      return true;
-  }  
+
   return false;
 }
 
@@ -307,3 +299,25 @@ void process_envelope(byte i, unsigned long now) {
     }
 
 }
+
+// trigger any envelopes that have been told to respond to given channel
+void fire_envelope_for_channel(int channel, int velocity) {
+  if (channel==0) return;
+
+  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+    if (envelopes[i].trigger_on_channel==channel) {
+      update_envelope(i, velocity, true);
+    }
+  }
+}
+
+void douse_envelope_for_channel(int channel, int velocity) {
+  if (channel==0) return;
+
+  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+    if (envelopes[i].trigger_on_channel==channel) {
+      update_envelope(i, velocity, false);
+    }
+  }
+}
+
