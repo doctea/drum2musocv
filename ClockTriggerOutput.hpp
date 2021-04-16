@@ -1,7 +1,9 @@
 #ifndef CLOCKTRIG_INCLUDED
 #define CLOCKTRIG_INCLUDED
 
-#ifdef CLOCK_TRIGGER_ENABLED
+#include "Config.h"
+
+#ifdef ENABLE_CLOCK_TRIGGER
 
 #define DEBUG_CLOCKTRIG false //set to true to enable debugging
 

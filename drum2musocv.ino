@@ -55,7 +55,7 @@ void setup() {
 
   initialise_pitch_for_triggers();
 
-#ifdef CLOCK_TRIGGER_ENABLED
+#ifdef ENABLE_CLOCK_TRIGGER
   initialise_clock_outputs();
 #endif
 

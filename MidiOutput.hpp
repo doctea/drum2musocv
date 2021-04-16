@@ -212,7 +212,7 @@ void midi_send_clock(unsigned long received_ticks) {
     last_clock_ticked = received_ticks;
   } 
 
-#ifdef CLOCK_TRIGGER_ENABLED
+#ifdef ENABLE_CLOCK_TRIGGER
   process_clock_triggers(received_ticks);
 #endif
 
