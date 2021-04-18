@@ -1,34 +1,32 @@
 # drum2musocv
 
-A USB MIDI interface, originally for adapting the [MidiMuso CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes), but now with many added features.
+* A USB MIDI interface, originally for adapting the [MidiMuso CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes), but now with many added features.
 
-Currently targerts Arduino Zero/Cortex M0+ boards, originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
+* Currently targerts Arduino Zero/Cortex M0+ boards, originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
 
-Drum pitch mapping allows you to play the CV-12 using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
+* **Drum pitch mapping** allows you to play the CV-12 using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
-When it isn't receiving an external clock input, runs off its own internal clock at the last detected BPM.
+* When it isn't receiving an **external clock input**, runs off its own **internal clock** at the last detected BPM.
 
-Implements 5 triggerable envelopes with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+* Implements **5 triggerable envelopes** with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
 
-Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
+* **Visual feedback**: Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
-Includes a template for FL Studio to make controlling the general, Euclidian and envelope settings easy and saveable/recallable per-project.
+* Includes a **control surface preset for FL Studio** to make controlling the general, Euclidian and envelope settings easy and saveable/recallable per-project.
 
-Has a Euclidian rhythm generator with optional mutation mode, so you can play with your synth without loading a DAW.  Can configure tracks on/off, change mutation settings, etc, from DAW.  In mutation mode, mutates the rhythm every 2 bars.
+* Has a 19-track **Euclidian rhythm generator** with optional mutation mode, so you can play with your synth without loading a DAW.  Can configure tracks on/off, change mutation settings, etc, from DAW.  In mutation mode, mutates the rhythm every 2 bars, with options on mutation.
+ * Could also be used to add generative/mutating Euclidian rhythms to any MIDI device (drum machine etc) if reconfigured to use different output note mappings.
 
-Could also be used to add generative/mutating Euclidian rhythms to any MIDI device (drum machine etc) if reconfigured to use different output note mappings.
+* **Plays bass, chords/arped chords and additional pitched midi channels** from Euclidian patterns, and with **auto-generated chord changes and inversions**.  Allows **tied notes**.
+ * If notes are played in via MIDI determine which notes to use for arpeggiation/chords.  Plays chords and additional midi channels with auto-generated chord changes and inversions.
 
-Plays bass, chords/arped chords and additional midi channels from Euclidian and with auto-generated chord changes and inversions.  Allows tied notes.
+* Plays a **"drum fill"** for the last bar of every phrase by mutating the Euclidian rhythms.
 
-Plays a "drum fill" for the last bar of every phrase by mutating the Euclidian rhythms.
+* Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
-A 'bass' input/output MIDI channel and corresponding Euclidian rhythm track, so it'll autoplay beat & bass rhythms (using it with my Neutron but could also be used with a 303-alike or anything really..).  If notes are played in via MIDI determine which notes to use for arpeggiation/chords.  Plays chords and additional midi channels with auto-generated chord changes and inversions.
+* **Echoes the MIDI output back to the host**, so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
 
-Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
-
-Echoes the MIDI output back to the host, so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
-
-Outputs 4xClock triggers using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
+* Outputs **4xClock triggers** using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
 # Controls
 
@@ -84,7 +82,7 @@ A diagram to help me understand how everything is routed:-
 # Requirements
 
  - Use the Seeeduino Zero board profile so that Serial has printf() - install boards from URL https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json and add contents of the included [boards.txt](boards.txt) to the end of eg `C:\Users\\<YOUR_USERNAME>\AppData\Local\Arduino15\packages\Seeeduino\hardware\sam\1.8.1\boards.txt`.  You can then edit the USB device name and IDs in that file.
- - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.  (hasn't been tested on board without native USB for a while so this is likely cbroken currently)
+ - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.  (hasn't been tested on board without native USB for a while so this is likely broken currently)
  - Uses the FortySevenEffects MIDI library and FastLED library (with alternative experimental support for the Adafruit NeoPixel library).
  - Stock DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
 
