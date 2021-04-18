@@ -1,0 +1,36 @@
+# Seeeduino Zero
+# ---------------------------------------
+arduino_zero_bamble.name=Seeeduino Zero (Bambleweeny)
+arduino_zero_bamble.vid.0=0x2886
+arduino_zero_bamble.pid.0=0x800B
+arduino_zero_bamble.vid.1=0x2886
+arduino_zero_bamble.pid.1=0x000B
+
+arduino_zero_bamble.upload.tool=bossac
+arduino_zero_bamble.upload.protocol=sam-ba
+arduino_zero_bamble.upload.maximum_size=262144
+arduino_zero_bamble.upload.use_1200bps_touch=true
+arduino_zero_bamble.upload.wait_for_upload_port=true
+arduino_zero_bamble.upload.native_usb=true
+arduino_zero_bamble.build.mcu=cortex-m0plus
+arduino_zero_bamble.build.f_cpu=48000000L
+arduino_zero_bamble.build.usb_product="Bamblweeny 57"
+arduino_zero_bamble.build.usb_manufacturer="TyrellCorp"
+arduino_zero_bamble.build.board=SEEED_ZERO
+arduino_zero_bamble.build.core=arduino
+arduino_zero_bamble.build.extra_flags=-D__SAMD21G18A__ {build.usb_flags} -DARM_MATH_CM0PLUS -DSEEEDUINO_ZERO -D__SAMD21__
+arduino_zero_bamble.build.ldscript=linker_scripts/gcc/flash_with_bootloader.ld
+arduino_zero_bamble.build.openocdscript=openocd_scripts/arduino_arduino_zero_bamble.cfg
+arduino_zero_bamble.build.variant=arduino_zero
+arduino_zero_bamble.build.variant_system_lib=
+arduino_zero_bamble.build.vid=0x2886
+arduino_zero_bamble.build.pid=0x800B
+arduino_zero_bamble.bootloader.tool=openocd
+arduino_zero_bamble.bootloader.file=seeed_zero/samd21_sam_ba.bin
+arduino_zero_bamble.menu.usbstack.arduino=Arduino
+arduino_zero_bamble.menu.usbstack.tinyusb=TinyUSB
+arduino_zero_bamble.menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
+arduino_zero_bamble.menu.debug.off=Off
+arduino_zero_bamble.menu.debug.on=On
+arduino_zero_bamble.menu.debug.on.build.flags.debug=-g -DDEBUG=1
+

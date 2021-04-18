@@ -71,28 +71,28 @@ A diagram to help me understand how everything is routed:-
 
 | Type         	| MIDI channel | MIDI number   | Purpose |
 | ------------- | ------------ | ------------- | ------- |
-| Notes/CC/etc 	| 4 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
-| Notes/CC/etc  | 3     | any | Output bass notes 2 octaves higher, for playing melodies / pads | 
 | Notes/CC/etc  | 1     | any | Output to Muso Pitch 1 |
 | Notes/CC/etc  | 2     | any | Output to Muso Pitch 2 |
+| Notes/CC/etc  | 3     | any | Output to bitbox keys |
+| Notes/CC/etc 	| 4 	| any | Output to bass synth | TODO: forward modulation as aftertouch/velocity/modwheel etc |
 | Notes   	| 11    | 36-51 (C2-D#3) | 'shadow' copy of notes sent to midimuso, starting at C2 so they work with default bitbox pads |
-| Notes 	| 16 	| 60-70 (C4-?) | outputs to MIDI Muso CV-12, gates |
-| CV + pitch 	| 1 	| 1,7,11,71,74+pitch | outputs to MIDI Muso, CV/pitch outputs |
+| Notes 	| 16 	| 60-70 (C4-?) | outputs to MIDI Muso CV-12, gates for drum triggers |
+| CV + pitch 	| 1 	| 1,7,11,71,74+pitch | outputs to MIDI Muso, CV/pitch outputs for envelopes |
 
-* *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken - configure with MUSO_USE_PITCH_FOR in Drums.h 
+* *actually this currently outputs on the Pitch Bend output, as my Muso output seems to be broken - configure this by changing `MUSO_USE_PITCH_FOR` in Drums.h 
 
 # Requirements
 
- - Use the Seeeduino Zero board profile so that Serial has printf() - install boards from URL https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json and add boards.txt to eg C:\Users\<YOUR_USERNAME>\AppData\Local\Arduino15\packages\Seeeduino\hardware\samd\1.8.1\boards.txt - can edit the USB device name from here
- - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.
- - Uses the FortySevenEffects MIDI library https://github.com/FortySevenEffects/arduino_midi_library (with alternative experimental support for the Adafruit NeoPixel library).
- - DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
+ - Use the Seeeduino Zero board profile so that Serial has printf() - install boards from URL https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json and add contains of boards.txt to the end of eg `C:\Users\\<YOUR_USERNAME>\AppData\Local\Arduino15\packages\Seeeduino\hardware\sam\1.8.1\boards.txt` - can edit the USB device name from here
+ - Can be used in conjunction with USBMidiKlik (https://github.com/TheKikGen/USBMidiKliK) to provide USB MIDI, or can use native USB on boards that support it.  (hasn't been tested on board without native USB for a while so this is likely cbroken currently)
+ - Uses the FortySevenEffects MIDI library and FastLED library (with alternative experimental support for the Adafruit NeoPixel library).
+ - Stock DebounceEvent uses delay(), so need to apply patch from https://github.com/arjanmels/debounceevent/commit/c26419a5a2eb83c07bcb69e8073cecd7453c53bf.patch to fix stutter when buttons are pressed
 
 
 # FL Studio DAW Control Surface preset
 
  - *Euclidian settings.fst* is an FL Studio Patcher preset for controlling the Euclidian settings (screenshot below).
- - *Drum2MusoCV - Bamblweeny.fst* is an FL Studio MIDI Out preset for controlling the drum triggers and envelope settings. 
+ - [deprecated] *Drum2MusoCV - Bamblweeny.fst* is an FL Studio MIDI Out preset for controlling the drum triggers and envelope settings. 
 
 ![Euclidian settings FL preset screenshot](DAW%20templates/Euclidian%20settings.png)
 
@@ -104,17 +104,33 @@ A diagram to help me understand how everything is routed:-
 
 ![Photo of my unit with dodgy extra clock outputs](Hardware/my%20unit.jpg)
 
+ - **TODO:** document the hardware used
+  - buttons on which pins / how wired?
+  - MIDI DIN on TX, how wired?
+  - header output for pixels, how wired?
+    - data on pin 9
+  - clock outputs, how wired?
+
+----
 
 # Issues
 
  - Problems with midimuso pitch gates missing note-off messages when stopping everything, when a lot of notes need to be told to go off.  workaround by defining WORKAROUND_MISSED_NOTEOFFS in MidiOutput.hpp to insert short delay()s sometimes when sending a lot of messages during douse_all_trigger() calls.  Tried increasing TX buffer size but makes no difference, this seems to fix things in 99% of cases altho still sometimes misses the messages..
 
+----
 
 # TODO / future plans + ideas
 
+ - Song section mode for song structures, eg build up, break, intense, chilled, ..
+   - 'intensity' / 'sparesness' controls over mutation?
+
+ - Different banks of starting rhythms so we don't get bored to tears of 4/4 kick...
+   - preprogramme some and have them selectable?
+   - or cleverly randomise them somehow like mutations?
+
  - Replace DebounceEvent library with one that doesn't need patching
 
- - Make CC config options to able to enable/disable so the CV outputs can be used as CCs, envelopes or LFOs per-project
+ - Make CC config options to able to enable/disable so the CV outputs can be used as CCs, envelopes (done!) or LFOs per-project
 
  - LFOs
 
@@ -130,13 +146,6 @@ A diagram to help me understand how everything is routed:-
  
  - Replace DebounceEvent library with one that doesn't need patching
 
- - Latency/flam/swing on euclidian tracks.  Adjust the euclidian loop to check a copy of received_ticks that is adjusted by the appropriate latency
-	- ie if latency is set to -6, then remove 6 from received_ticks before tests is on bar etc
-		- gonna need to restructure slightly for this, or maybe just make some defines for testing like IS_ON_BAR(ticks), IS_ON_STEP(ticks)?
-		- will need to turn the loops inside out and iterate over tracks before checking if theyre on beat
-
- - Tied notes, per-track or just for bass.  to do this do we just avoid sending note off for last note until new note has been sent..? off/always/random/pattern?
-
  - Cut bass by kick option
 
  - Completely edit euclidian track parameters over MIDI... with feedback to control surface in daw for saving?  Trigger all outputs simultaneously/groups if have two recording groups
@@ -147,9 +156,6 @@ A diagram to help me understand how everything is routed:-
 		- configuration of octave shift
 		- option to arpeggiate on None / Channel 2 / Channel 3 / Both
 		- option to play full-chord / arp / root-only on Channel 3
-
- - Set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits or notes.
-	- turn one into a bar-synced LFO
 
  - Bitbox recording mode? ie send all triggers necessary to record a sample.  buttons to trigger recording?
 
@@ -194,6 +200,8 @@ A diagram to help me understand how everything is routed:-
         - ie if latency is set to -6, then remove 6 from received_ticks before tests is on bar etc
                 - gonna need to restructure slightly for this, or maybe just make some defines for testing like IS_ON_BAR(ticks), IS_ON_STEP(ticks)?
                 - will need to turn the loops inside out and iterate over tracks before checking if theyre on beat
+ - Set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits or notes.
+ - Tied notes, per-track or just for bass.  to do this do we just avoid sending note off for last note until new note has been sent..? off/always/random/pattern?
  
 ----
  
