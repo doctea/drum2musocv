@@ -96,6 +96,8 @@ A diagram to help me understand how everything is routed:-
 
 ![Euclidian settings FL preset screenshot](DAW%20templates/Euclidian%20settings.png)
 
+![Euclidian settings FL preset screenshot - Envelope settings](DAW%20templates/Euclidian%20settings%20-%20Envelopes%20tab.png)
+
 # Hardware/demos
 
 [Testing modular + mutating Euclidian sequencer #2 video](https://www.youtube.com/watch?v=taRN2wLEkPA)
