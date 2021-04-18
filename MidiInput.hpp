@@ -187,11 +187,6 @@ void process_midi() {
       // tell the harmony/autobass what notes we wanna play
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
-        //Serial.println(autobass_input.get_debug_notes_held());
-        /*Serial.printf("\r\n>>>>> in process_midi, channel_state number is #%i, address is %i", autobass_input.chanindex, &autobass_input);
-        Serial.printf(", notes: %s\r\n", autobass_input.get_debug_notes_held());
-        if (autobass_input.is_note_held())
-          Serial.printf(">>> in process_midi, a note is held !\r\n");*/
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         autobass_input.handle_note_off(MIDIIN.getData1());
         if (!autobass_input.is_note_held()) { // if this has meant all nodes have turned off, kill the existing note
@@ -201,32 +196,60 @@ void process_midi() {
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_IN) {            // forward bass input unchanged
       // relay all incoming messages for the Neutron/bass
       //Serial.println("Received a message targeted at the neutron directly: %0x, %0x, %0x\n", MIDIIN.getType(), MIDIIN.getData1(), MIDIIN.getData2());
-      MIDIOUT.send(MIDIIN.getType(),
-                   MIDIIN.getData1(),
-                   MIDIIN.getData2(),
-                   MIDI_CHANNEL_BASS_OUT
-      );
+      if (MIDIIN.getType()==midi::MidiType::NoteOn) {
+        //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        harmony.send_note_on_for_channel(MIDI_CHANNEL_BASS_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
+        harmony.send_note_off_for_channel(MIDI_CHANNEL_BASS_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else {
+        MIDIOUT.send(MIDIIN.getType(),
+                    MIDIIN.getData1(),
+                    MIDIIN.getData2(),
+                    MIDI_CHANNEL_BASS_OUT
+        );
+      }
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_MELODY_IN) {       // forward channel 3 unchanged
       // direct melody playing - echo all messages straight through to eg bitbox
-      MIDIOUT.send(MIDIIN.getType(),
+      if (MIDIIN.getType()==midi::MidiType::NoteOn) {
+        //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        harmony.send_note_on_for_channel(MIDI_CHANNEL_BITBOX_KEYS, MIDIIN.getData1(), MIDIIN.getData2());
+      } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
+        harmony.send_note_off_for_channel(MIDI_CHANNEL_BITBOX_KEYS, MIDIIN.getData1(), MIDIIN.getData2());
+      } else {
+        MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
                    MIDIIN.getData2(),
                    MIDI_CHANNEL_BITBOX_KEYS
-      );
+        );
+      }
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_ROOT_IN) {     // forward channel 1 unchanged
       // for ensemble - send notes to muso on channel 1
-      MIDIOUT.send(MIDIIN.getType(),
-                   MIDIIN.getData1(),
-                   MIDIIN.getData2(),
-                   MIDI_CHANNEL_PAD_ROOT_OUT
-      );
+      if (MIDIIN.getType()==midi::MidiType::NoteOn) {
+        //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        harmony.send_note_on_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
+        harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else {
+        MIDIOUT.send(MIDIIN.getType(),
+                    MIDIIN.getData1(),
+                    MIDIIN.getData2(),
+                    MIDI_CHANNEL_PAD_ROOT_OUT
+        );
+      }
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_PAD_PITCH_IN) {    // forward channel 2 unchanged
       // for ensemble - send notes to muso on channel 1
-      MIDIOUT.send(MIDIIN.getType(),
-                   MIDIIN.getData1(),
-                   MIDIIN.getData2(),
-                   MIDI_CHANNEL_PAD_PITCH_OUT
-      );      
+      if (MIDIIN.getType()==midi::MidiType::NoteOn) {
+        //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        harmony.send_note_on_for_channel(MIDI_CHANNEL_PAD_PITCH_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
+        harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_PITCH_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+      } else {
+        MIDIOUT.send(MIDIIN.getType(),
+                    MIDIIN.getData1(),
+                    MIDIIN.getData2(),
+                    MIDI_CHANNEL_PAD_PITCH_OUT
+        );      
+      }
     } else {
       // catch all other channels
       //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );

@@ -72,8 +72,6 @@ class MidiKeysOutput : public ChannelState {
         }
       }
 
-      fire_envelope_for_channel(channel, velocity);
-
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing
       } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
@@ -210,6 +208,9 @@ class MidiKeysOutput : public ChannelState {
       handle_note_on((byte)pitch);
       
       // todo - possibly put the fire_envelope_for_channel here instead?
+      // but how do we tell when its a chord we're playing rather than just a single note so we dont just retrigger? :/
+      //      do we even need to care about that actually?
+      fire_envelope_for_channel(channel, velocity);
 
       pitch += (12*octave_offset);
 
@@ -235,8 +236,6 @@ class MidiKeysOutput : public ChannelState {
 
       //Serial.printf("actual send_note_off, pitch %i is indeed held\r\n", pitch);
       handle_note_off((byte)pitch);
-
-      // todo - possibly put the douse_envelope_for_channel here instead?
 
       pitch += (12*octave_offset);
 

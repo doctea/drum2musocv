@@ -89,7 +89,10 @@ bool handle_envelope_ccs(byte channel, byte number, byte value);
 void kill_envelopes();
 void initialise_envelopes();
 void process_envelopes(unsigned long now);
+void randomise_envelopes();
+
 void fire_envelope_for_channel(int channel, int velocity = 127);
 void douse_envelope_for_channel(int channel, int velocity = 0);
+
   
 #endif

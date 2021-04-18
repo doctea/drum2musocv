@@ -269,6 +269,34 @@ class Harmony {
      return channel_state.get_root_note() + get_scale_note(0, get_chord_number());
     }
 
+    // to be used when relaying played notes from midi in..
+    // this way envelopes will trigger too
+    void send_note_on_for_channel(int channel, int pitch, int velocity) {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        if (mko[i].channel==channel) {
+          mko[i].send_note_on(pitch, velocity);
+        }
+      }      
+    }
+    // to be used when relaying played notes from midi in..
+    // this way envelopes will trigger too
+    void send_note_off_for_channel(int channel, int pitch, int velocity = 0) {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        if (mko[i].channel==channel) {
+          mko[i].send_note_off(pitch, velocity);
+        }
+      }      
+    }
+
+    /*// kill only envelope output, to be used when an envelope changes its assigned trigger
+    HarmonyOutput douse_envelopes_for_channel(int channel) {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        if (mko[i].channel==channel) {
+          mko[i].;
+        }
+      }
+    }*/
+
     // trigger current pitch/chord on the specified harmony output
     void fire_for(int output_number) {
       //Serial.printf("fire_for output number %i\r\n", output_number);

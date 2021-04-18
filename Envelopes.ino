@@ -14,6 +14,19 @@ void initialise_envelopes() {
   envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
   envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
   envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
+
+}
+
+void randomise_envelopes() {
+  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+    envelopes[i].trigger_on_channel = random(0,4);
+    envelopes[i].lfo_sync_ratio_hold_and_decay = random(0,127);
+    envelopes[i].lfo_sync_ratio_sustain_and_release = random(0,127);
+    envelopes[i].attack_length = random(0,127);
+    envelopes[i].hold_length = random(0,127);
+    envelopes[i].decay_length = random(0,127);
+    envelopes[i].sustain_ratio = 1.0/(float)random(0,127);
+  }
 }
 
 void kill_envelopes() {
@@ -51,6 +64,8 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
     } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
+      if (envelopes[env_num].trigger_on_channel>0)
+        update_envelope(env_num, 0, false);
       envelopes[env_num].trigger_on_channel = value % 16;
     }
     return true;
@@ -303,9 +318,11 @@ void process_envelope(byte i, unsigned long now) {
 // trigger any envelopes that have been told to respond to given channel
 void fire_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
+  Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
 
   for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
     if (envelopes[i].trigger_on_channel==channel) {
+      Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, true);
     }
   }

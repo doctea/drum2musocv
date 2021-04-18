@@ -76,18 +76,13 @@ void setup() {
   bpm_reset_clock();
 
   //initialise_harmony();
-
   initialise_euclidian();
-
-  //initialise_bass();
-
   initialise_envelopes();
 
   //NOISY_DEBUG(1000, 1);
 
   kill_notes();
   kill_envelopes();
-
 
   debug_pitch_for_trigger();
 

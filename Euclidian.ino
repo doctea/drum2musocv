@@ -120,6 +120,8 @@ void mutate_euclidian(int pattern) {
   } else {
     EUC_printf("[EUC] Mutated pattern %i\r\n", pattern);
   }
+
+  //randomise_envelopes();  // todo: enable this
 }
 
 void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
