@@ -56,7 +56,7 @@
 | `Envelopes.h` | `68` | `Envelope 0 RELEASE` | `` |
 | `Envelopes.h` | `69` | `Envelope 0 HD_VIB` | `` |
 | `Envelopes.h` | `70` | `Envelope 0 SR_VIB` | `` |
-| `Envelopes.h` | `71` | `Envelope 0 RESERVED` | `` |
+| `Envelopes.h` | `71` | `Envelope 0 TRIGGER_ON_MIDI_CHANNEL` | `` |
 | `Envelopes.h` | `72` | `Envelope 1 ATTACK` | `` |
 | `Envelopes.h` | `73` | `Envelope 1 HOLD` | `` |
 | `Envelopes.h` | `74` | `Envelope 1 DECAY` | `` |
@@ -64,7 +64,7 @@
 | `Envelopes.h` | `76` | `Envelope 1 RELEASE` | `` |
 | `Envelopes.h` | `77` | `Envelope 1 HD_VIB` | `` |
 | `Envelopes.h` | `78` | `Envelope 1 SR_VIB` | `` |
-| `Envelopes.h` | `79` | `Envelope 1 RESERVED` | `` |
+| `Envelopes.h` | `79` | `Envelope 1 TRIGGER_ON_MIDI_CHANNEL` | `` |
 | `Envelopes.h` | `80` | `Envelope 2 ATTACK` | `` |
 | `Envelopes.h` | `81` | `Envelope 2 HOLD` | `` |
 | `Envelopes.h` | `82` | `Envelope 2 DECAY` | `` |
@@ -72,7 +72,7 @@
 | `Envelopes.h` | `84` | `Envelope 2 RELEASE` | `` |
 | `Envelopes.h` | `85` | `Envelope 2 HD_VIB` | `` |
 | `Envelopes.h` | `86` | `Envelope 2 SR_VIB` | `` |
-| `Envelopes.h` | `87` | `Envelope 2 RESERVED` | `` |
+| `Envelopes.h` | `87` | `Envelope 2 TRIGGER_ON_MIDI_CHANNEL` | `` |
 | `Envelopes.h` | `88` | `Envelope 3 ATTACK` | `` |
 | `Envelopes.h` | `89` | `Envelope 3 HOLD` | `` |
 | `Envelopes.h` | `90` | `Envelope 3 DECAY` | `` |
@@ -80,7 +80,7 @@
 | `Envelopes.h` | `92` | `Envelope 3 RELEASE` | `` |
 | `Envelopes.h` | `93` | `Envelope 3 HD_VIB` | `` |
 | `Envelopes.h` | `94` | `Envelope 3 SR_VIB` | `` |
-| `Envelopes.h` | `95` | `Envelope 3 RESERVED` | `` |
+| `Envelopes.h` | `95` | `Envelope 3 TRIGGER_ON_MIDI_CHANNEL` | `` |
 | `Envelopes.h` | `96` | `Envelope 4 ATTACK` | `` |
 | `Envelopes.h` | `97` | `Envelope 4 HOLD` | `` |
 | `Envelopes.h` | `98` | `Envelope 4 DECAY` | `` |
@@ -88,7 +88,7 @@
 | `Envelopes.h` | `100` | `Envelope 4 RELEASE` | `` |
 | `Envelopes.h` | `101` | `Envelope 4 HD_VIB` | `` |
 | `Envelopes.h` | `102` | `Envelope 4 SR_VIB` | `` |
-| `Envelopes.h` | `103` | `Envelope 4 RESERVED` | `` |
+| `Envelopes.h` | `103` | `Envelope 4 TRIGGER_ON_MIDI_CHANNEL` | `` |
 | `Harmony.hpp` | `105` | `CC_AUTO_CHORD_TYPE` | ` enable/disable playing automatic chord types (ie stacking triads)` |
 | `Harmony.hpp` | `106` | `CC_AUTO_CHORD_INVERSION` | ` enable/disable playing automatic chord inversions` |
 | `Harmony.hpp` | `107` | `CC_MELODY_OCTAVE_OFFSET` | ` output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3` |
@@ -96,4 +96,6 @@
 | `Harmony.hpp` | `109` | `CC_MELODY_AUTO_SCALE` | ` enable/disable automatic changing of scale every phrase` |
 | `MidiInput.hpp` | `110` | `CC_SYNC_RATIO` | ` sync ratio of the envelope modulation in ticks, default 24` |
 | `MidiInput.hpp` | `111` | `CC_CLOCK_TICK_RATIO` | ` send a clock tick for every X clock ticks, default 1` |
+| `Harmony.hpp` | `112` | `CC_PAD_ROOT_MELODY_MODE` | ` output 2: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord` |
+| `Harmony.hpp` | `113` | `CC_PAD_ROOT_OCTAVE_OFFSET` | ` output 2: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3` |
 | `Drums.h` | `123` | `MIDI_CC_ALL_NOTES_OFF` | `` |

@@ -115,6 +115,8 @@ ChannelState autobass_input = ChannelState();   // global tracking notes that ar
 
 //// output 2 (muso/ensemble root)
 #define CC_CHANNEL_PAD_ROOT         10    // output 2: set the MIDI channel to output the pad root on (default 1)
+#define CC_PAD_ROOT_MELODY_MODE     112   // output 2: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_PAD_ROOT_OCTAVE_OFFSET        113   // output 2: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
 // not implemented: output 2 melody mode
 // not implemented: output 2 octave offset
 // not implemented: output 2 tie-on 
@@ -774,6 +776,10 @@ class Harmony {
         mko_pads_pitch.douse_notes();
         mko_pads_pitch.set_melody_mode(value);
         return true;
+      } else if (number==CC_PAD_ROOT_MELODY_MODE) {
+        mko_pads_root.douse_notes();
+        mko_pads_root.set_melody_mode(value);
+        return true;
       /*} else if (number==CC_BASS_SET_ARP_MODE) {
         set_arp_mode(value);
         return true;*/
@@ -796,6 +802,10 @@ class Harmony {
       } else if (number==CC_PAD_PITCH_OCTAVE_OFFSET) {
         mko_pads_pitch.douse_notes();
         mko_pads_pitch.set_octave_offset(constrain(value-2, -2, 3));
+        return true;
+      } else if (number==CC_PAD_ROOT_OCTAVE_OFFSET) {
+        mko_pads_root.douse_notes();
+        mko_pads_root.set_octave_offset(constrain(value-2, -2, 3));
         return true;
       } else if (number==CC_MELODY_SCALE) {
         //mko_keys.set_octave_offset(constrain(value-3, -3, 3));

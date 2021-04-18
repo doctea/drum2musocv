@@ -8,7 +8,7 @@ NUM_PATTERNS = 20
 
 table = {}
 
-env_controls = [ 'ATTACK', 'HOLD', 'DECAY', 'SUSTAIN', 'RELEASE', 'HD_VIB', 'SR_VIB', 'RESERVED' ]
+env_controls = [ 'ATTACK', 'HOLD', 'DECAY', 'SUSTAIN', 'RELEASE', 'HD_VIB', 'SR_VIB', 'TRIGGER_ON_MIDI_CHANNEL' ]
 
 for line in fileinput.input():
     #print ("got line %s" % line)

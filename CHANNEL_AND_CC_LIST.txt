@@ -37,6 +37,8 @@ Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: set the MIDI 
 Harmony.hpp:#define CC_HARMONY_MELODY_MODE      29    // output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 Harmony.hpp:#define CC_MELODY_OCTAVE_OFFSET     107   // output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
 Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // output 2: set the MIDI channel to output the pad root on (default 1)
+Harmony.hpp:#define CC_PAD_ROOT_MELODY_MODE     112   // output 2: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+Harmony.hpp:#define CC_PAD_ROOT_OCTAVE_OFFSET        113   // output 2: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
 Harmony.hpp:#define CC_CHANNEL_PAD_PITCH        5     // output 3: set the MIDI channel to output the pads pitch on (default 2)
 Harmony.hpp:#define CC_PAD_PITCH_MELODY_MODE    3     // output 3: set mode to use for the pitch output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 Harmony.hpp:#define CC_PAD_PITCH_OCTAVE_OFFSET  4     // output 3: set octave offset (-2 to +3)
