@@ -119,6 +119,17 @@ A diagram to help me understand how everything is routed:-
 
 # TODO / future plans + ideas
 
+ - 'Acid' harmony output mode, with note ties and automation acid line generation (maybe take some inspiration from [Aciduino](https://github.com/midilab/aciduino))
+
+ - Separate the harmony inputs, so you can specify different lines to play for each harmony output, including 'only when note held' stuff
+
+ - Check that chord/scale generation is actually working to produce valid output - wondering if i'm accidentally basing the entire scale off the chord root?
+
+ - Rename the project to something catchier and more reflective of its abilities
+
+ - Refactor to make it easier to add new drum and harmony outputs
+   - and modes to re-output drum triggers on appropriate GM Drum notes, for controlling MIDI drum machines
+
  - Song section mode for song structures, eg build up, break, intense, chilled, ..
    - 'intensity' / 'sparesness' controls over mutation?
 
@@ -204,5 +215,7 @@ A diagram to help me understand how everything is routed:-
  - Tied notes, per-track or just for bass.  to do this do we just avoid sending note off for last note until new note has been sent..? off/always/random/pattern?
  
 ----
+
+# Feedback / Contributions
  
-Would love if people found a use for this, so if you are interested at all in this project then it would be great to hear from you!
+Would love if people found a use for this, so if you are interested at all in this project then it would be great to hear from you!  [Let me know](mailto:doctea@gmail.com) what you're interested in using the project for, what doesn't work, or any other questions or feedback you may have...
