@@ -2,7 +2,7 @@
 
 * A USB MIDI interface, originally for adapting the [MidiMuso CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes), but now with many added features.
 
-* Currently targerts [Arduino Zero clones](https://www.banggood.com/Geekcreit-SAMD21-M0-Module-32-bit-ARM-Cortex-M0-Core-Development-Board-p-1176168.html)/[Seeeduino Cortex M0+ boards](https://www.seeedstudio.com/Seeeduino-Cortex-M0-p-4070.html), originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
+* Currently targets [Arduino Zero clones](https://www.banggood.com/Geekcreit-SAMD21-M0-Module-32-bit-ARM-Cortex-M0-Core-Development-Board-p-1176168.html)/[Seeeduino Cortex M0+ boards](https://www.seeedstudio.com/Seeeduino-Cortex-M0-p-4070.html), originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
 
 * **Drum pitch mapping** allows you to play the CV-12 using external drum pads, or eg take advantage of FL Studio's note-naming in the piano roll.
 
@@ -137,6 +137,8 @@ A diagram to help me understand how everything is routed:-
  - Add more physical buttons to provide greater control over modes  
 
  - Make a KiCad circuit / PCB / panel to integrate LEDs and outputs behind a panel
+   - tiny OLED and rotary encoder would be interesting, to tweak settings from panel without faffing with DAW
+   - as would accepting parameter changes via i2c connection from controllers like the [F8R](https://michigansynthworks.com/products/8m-fader-bank-with-cv-i2c-and-midi), like I've just become aware some Eurorack modules do (eg Disting)
  
  - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
    - features to do this.  currently arps over held chord
