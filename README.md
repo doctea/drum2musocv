@@ -119,7 +119,7 @@ A diagram to help me understand how everything is routed:-
 
 # TODO / future plans + ideas
 
- - 'Acid' harmony output mode, with note ties and automation acid line generation (maybe take some inspiration from [Aciduino](https://github.com/midilab/aciduino))
+ - 'Acid' harmony output mode, with note ties and automation acid line generation (maybe take some inspiration from [Aciduino](https://github.com/midilab/aciduino) and [endless acid banger](https://github.com/vitling/acid-banger))
 
  - Separate the harmony inputs, so you can specify different lines to play for each harmony output, including 'only when note held' stuff
 
