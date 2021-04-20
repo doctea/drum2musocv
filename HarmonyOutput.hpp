@@ -243,7 +243,8 @@ class MidiKeysOutput : public ChannelState {
       if (DEBUG_HARMONY) Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);
       MIDIOUT.sendNoteOff(pitch, velocity, channel);
 
-      douse_envelope_for_channel(channel);
+      if (!is_note_held())
+        douse_envelope_for_channel(channel);
 
       if (midiecho_enabled)
         MIDIIN.sendNoteOff(pitch, velocity, channel);  // echo back to host 

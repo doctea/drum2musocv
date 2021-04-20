@@ -226,6 +226,7 @@ void process_midi() {
       // for ensemble - send notes to muso on channel 1
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
+        //Serial.println("MIDI_CHANNEL_PAD_ROOT_IN note ON");
         harmony.send_note_on_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());

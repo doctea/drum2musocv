@@ -291,10 +291,17 @@ class Harmony {
     }
 
     /*// kill only envelope output, to be used when an envelope changes its assigned trigger
-    HarmonyOutput douse_envelopes_for_channel(int channel) {
+    void fire_envelope_for_channel(int channel, int velocity = 127) {
       for (int i = 0 ; i < NUM_MKO ; i++) {
         if (mko[i].channel==channel) {
-          mko[i].;
+          mko[i].fire_envelope(velocity);
+        }
+      }
+    }
+    void douse_envelope_for_channel(int channel) {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        if (mko[i].channel==channel) {
+          mko[i].douse_envelope();
         }
       }
     }*/

@@ -128,7 +128,7 @@ A diagram to help me understand how everything is routed:-
  - Rename the project to something catchier and more reflective of its abilities
 
  - Refactor to make it easier to add new drum and harmony outputs
-   - and modes to re-output drum triggers on appropriate GM Drum notes, for controlling MIDI drum machines
+   - and modes to re-output drum triggers on appropriate GM Drum notes, for controlling MIDI drum machines (would start at MidiOutput.hpp:fire_trigger and get_muso_pitch_for_trigger for this)
 
  - Song section mode for song structures, eg build up, break, intense, chilled, ..
    - 'intensity' / 'sparesness' controls over mutation?
