@@ -84,6 +84,30 @@ void set_pattern_active_status(int pattern, bool active) {
   }
 }
 
+double randomDouble(double minf, double maxf)
+{
+  return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
+}
+
+void mutate_euclidian_acidbanger(int pattern) {
+  // based on code from https://github.com/vitling/acid-banger/blob/main/src/pattern.ts
+  float density = 1.0;
+  if (pattern>=NUM_TRIGGERS+NUM_ENVELOPES) {
+    // melodic track so use melodic generator                                     
+    for (int i = 0 ; i < patterns[pattern].steps ; i++) {
+      int chance = 100.0 * (density * (i % 4 == 0 ? 0.6 : (i % 3 == 0 ? 0.5 : (i % 2 == 0 ? 0.3 : 0.1))));
+      if (random(0,100) < chance) {
+        patterns[pattern].stored[i] = true;
+      } else {
+        patterns[pattern].stored[i] = false;
+      }
+    }
+  } else {
+    // rhythm track so use rhythmic generator
+    mutate_euclidian_total(pattern);
+  }
+}
+
 void mutate_euclidian_total(int pattern) {
   int steps = random(2, SEQUENCE_LENGTH_STEPS);   // limit the other random results to max steps so that we don't frequently saturate
   int pulses = random(1, steps);
@@ -170,6 +194,8 @@ void process_euclidian(int ticks) {
           mutate_euclidian_total(ran);
         else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
           mutate_euclidian(ran);
+        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_ACIDBANGER)
+          mutate_euclidian_acidbanger(ran);
         else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
           // do nothing
         } // else and there's room for another mode too...
