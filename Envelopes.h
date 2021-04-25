@@ -18,7 +18,7 @@ enum envelope_types : byte {
 #define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 #define ENV_CC_START  64  // what number CC the envelope controls begin at
 
-#define SUSTAIN_MINIMUM   32            // minimum sustain volume to use (below this becomes inaudible, so cut it off)
+#define SUSTAIN_MINIMUM   1   // was 32         // minimum sustain volume to use (below this becomes inaudible, so cut it off)
 #define ENV_MAX_ATTACK    (PPQN*2) //48 // maximum attack stage length in ticks
 #define ENV_MAX_HOLD      (PPQN*2) //48 // maximum hold stage length
 #define ENV_MAX_DECAY     (PPQN*2) //48 // maximum decay stage length
