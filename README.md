@@ -215,6 +215,7 @@ A diagram to help me understand how everything is routed:-
                 - will need to turn the loops inside out and iterate over tracks before checking if theyre on beat
  - Set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits or notes.
  - Tied notes, per-track or just for bass.  to do this do we just avoid sending note off for last note until new note has been sent..? off/always/random/pattern?
+ - Rough implementation of the melody rhythm randomness from the [endless acid banger](https://github.com/vitling/acid-banger))
  
 ----
 
