@@ -153,10 +153,6 @@ A diagram to help me understand how everything is routed:-
    - tiny OLED and rotary encoder would be interesting, to tweak settings from panel without faffing with DAW
    - as would accepting parameter changes via i2c connection from controllers like the [F8R](https://michigansynthworks.com/products/8m-fader-bank-with-cv-i2c-and-midi), like I've just become aware some Eurorack modules do (eg Disting)
  
- - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
-   - features to do this.  currently arps over held chord
-   - make this so can switch between modes...
- 
  - Replace DebounceEvent library with one that doesn't need patching
 
  - Cut bass by kick option
@@ -216,6 +212,9 @@ A diagram to help me understand how everything is routed:-
  - Set some of the envelopes to act as envelopes synchronous with some of the triggers, for applying modulation to hits or notes.
  - Tied notes, per-track or just for bass.  to do this do we just avoid sending note off for last note until new note has been sent..? off/always/random/pattern?
  - Rough implementation of the melody rhythm randomness from the [endless acid banger](https://github.com/vitling/acid-banger))
+ - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
+   - features to do this.  currently arps over held chord
+   - make this so can switch between modes...
  
 ----
 
