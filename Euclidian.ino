@@ -89,6 +89,20 @@ double randomDouble(double minf, double maxf)
   return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
 }
 
+void mutate(int pattern){
+  if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
+    mutate_euclidian_total(pattern);
+  else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
+    mutate_euclidian(pattern);
+  else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_ACIDBANGER)
+    mutate_euclidian_acidbanger(pattern);
+  else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
+    // do nothing
+  } else { //and there's room for more modes too...
+
+  }
+}
+
 void mutate_euclidian_acidbanger(int pattern) {
   // based on code from https://github.com/vitling/acid-banger/blob/main/src/pattern.ts
   float density = 1.0;
@@ -190,15 +204,7 @@ void process_euclidian(int ticks) {
         int ran = random(euclidian_mutate_minimum_pattern % NUM_PATTERNS, constrain(1 + euclidian_mutate_maximum_pattern,0,NUM_PATTERNS));
         EUC_printf("chose pattern %i\r\n", ran);
         randomSeed(seed + ran);
-        if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
-          mutate_euclidian_total(ran);
-        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
-          mutate_euclidian(ran);
-        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_ACIDBANGER)
-          mutate_euclidian_acidbanger(ran);
-        else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_NONE) {
-          // do nothing
-        } // else and there's room for another mode too...
+        mutate(ran);
 
         //debug_patterns();
       }

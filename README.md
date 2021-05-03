@@ -92,7 +92,7 @@ A diagram to help me understand how everything is routed:-
 # FL Studio DAW Control Surface preset
 
  - *Euclidian settings.fst* is an FL Studio Patcher preset for controlling the Euclidian settings (screenshot below).
- - [deprecated] *Drum2MusoCV - Bamblweeny.fst* is an FL Studio MIDI Out preset for controlling the drum triggers and envelope settings. 
+ - [deprecated] *Drum2MusoCV - Bamblweeny.fst* is an FL Studio MIDI Out preset for controlling the drum triggers and envelope settings - now included in separate tab
 
 ![Euclidian settings FL preset screenshot](DAW%20templates/Euclidian%20settings.png)
 
