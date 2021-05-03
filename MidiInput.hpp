@@ -183,6 +183,11 @@ void process_midi() {
   if (MIDIIN.read()) {
     //Serial.printf("received message from MIDIIN, channel is %i: type is %i, ", MIDIIN.getChannel(), MIDIIN.getType()  );
     //Serial.printf("data1 is %i, data2 is %i\r\n", MIDIIN.getData1(), MIDIIN.getData2() );
+    if (/*!MIDIIN.isChannelMessage() ||*/ 
+      MIDIIN.getType()!=midi::MidiType::NoteOn && 
+      MIDIIN.getType()!=midi::MidiType::NoteOff && 
+      MIDIIN.getType()!=midi::MidiType::ControlChange)
+        return; // && !MIDIIN.getType()!=midi::MidiType::PitchBend
     if (MIDIIN.getChannel()==GM_CHANNEL_DRUMS) {
       // ignore so that the handle* functions will deal with this instead
     } else if (MIDIIN.getChannel()==MIDI_CHANNEL_BASS_AUTO_IN) {
