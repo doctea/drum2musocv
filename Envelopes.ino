@@ -14,11 +14,21 @@ void initialise_envelopes() {
   envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
   envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
   envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
+#if MUSO_MODE==MUSO_MODE_0B_AND_2A
+  envelopes[ENV_PITCH_1].midi_cc    = MUSO_CC_CV_6;
+  envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
+  envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
+  envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
+  envelopes[ENV_PITCH_1].trigger_on_channel = 1;
+  envelopes[ENV_PITCH_2].trigger_on_channel = 1;
+  envelopes[ENV_PITCH_3].trigger_on_channel = 2;
+  envelopes[ENV_PITCH_4].trigger_on_channel = 2;
+#endif
 
 }
 
 void randomise_envelopes() {
-  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+  for (int i = 0 ; i < NUM_ENVELOPES ; i++) { // _EXTENDED if we want to randomise the extended envelopes too?
     envelopes[i].trigger_on_channel = random(0,4);
     envelopes[i].lfo_sync_ratio_hold_and_decay = random(0,127);
     envelopes[i].lfo_sync_ratio_sustain_and_release = random(0,127);
@@ -30,7 +40,7 @@ void randomise_envelopes() {
 }
 
 void kill_envelopes() {
-  for (byte i = 0 ; i < NUM_ENVELOPES; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED; i++) {
     envelopes[i].stage = OFF;
     envelopes[i].stage_start_level = (byte)0;
     //MIDIOUT.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
@@ -41,8 +51,11 @@ void kill_envelopes() {
 // change to an envelope setting
 bool handle_envelope_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
+  int num_envelopes = (channel==MIDI_CHANNEL_EXTENDED_ENVELOPES && MUSO_MODE==MUSO_MODE_0B_AND_2A) ? NUM_ENVELOPES_EXTENDED
+                      :
+                      NUM_ENVELOPES;
 
-  if (number>=ENV_CC_START && number <= ENV_CC_START + (ENV_CC_SPAN*NUM_ENVELOPES)) {
+  if (number>=ENV_CC_START && number <= ENV_CC_START + (ENV_CC_SPAN*num_envelopes)) {
     number -= ENV_CC_START;
     int env_num = number / ENV_CC_SPAN; // which envelope are we dealing with?
     number = number % ENV_CC_SPAN;      // which control are we dealing with?
@@ -128,7 +141,7 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 void process_envelopes(unsigned long now) {
   static unsigned long last_processed = 0;
   if (now==last_processed) return;
-  for (byte i = 0 ; i < NUM_ENVELOPES ; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     process_envelope(i, now);
   }
   last_processed = now;
@@ -320,7 +333,7 @@ void fire_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
   Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
 
-  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on_channel==channel) {
       Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, true);
@@ -331,7 +344,7 @@ void fire_envelope_for_channel(int channel, int velocity) {
 void douse_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
 
-  for (int i = 0 ; i < NUM_ENVELOPES ; i++) {
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on_channel==channel) {
       update_envelope(i, velocity, false);
     }

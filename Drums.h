@@ -78,8 +78,10 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_MODE_0B  1
 #define MUSO_MODE_1B  2
 #define MUSO_MODE_2B  3
+#define MUSO_MODE_0B_AND_2A	4
 //#define MUSO_MODE     MUSO_MODE_0B    // for all-gates mode
-#define MUSO_MODE     MUSO_MODE_2B      // for two-pitch-outputs mode
+//#define MUSO_MODE     MUSO_MODE_0B      // for two-pitch-outputs mode
+#define MUSO_MODE	MUSO_MODE_0B_AND_2A
 
 //#if MUSO_MODE==MUSO_MODE_0B
 #define NUM_TRIGGERS        (MUSO_NOTE_GATE_11 - MUSO_NOTE_MINIMUM + 1)
@@ -95,6 +97,10 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_CC_CV_3  11
 #define MUSO_CC_CV_4  71
 #define MUSO_CC_CV_5  74
+#define MUSO_CC_CV_6  93
+#define MUSO_CC_CV_7  94
+#define MUSO_CC_CV_8  73
+#define MUSO_CC_CV_9  72
 #define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 
 #define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)

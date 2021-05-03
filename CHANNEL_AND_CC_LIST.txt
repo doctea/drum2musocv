@@ -3,6 +3,10 @@ Drums.h:#define MUSO_CC_CV_2  7
 Drums.h:#define MUSO_CC_CV_3  11
 Drums.h:#define MUSO_CC_CV_4  71
 Drums.h:#define MUSO_CC_CV_5  74
+Drums.h:#define MUSO_CC_CV_6  93
+Drums.h:#define MUSO_CC_CV_7  94
+Drums.h:#define MUSO_CC_CV_8  73
+Drums.h:#define MUSO_CC_CV_9  72
 Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
@@ -49,6 +53,7 @@ UI.h:#define CC_DEMO_MODE  19        // choose playback mode - 0=None, 1=Euclidi
 UI.ino:#define CC_CHANNEL_BITBOX_DRUMS_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
 UI.ino:#define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
+Envelopes.h:#define MIDI_CHANNEL_EXTENDED_ENVELOPES   11  // channel to receive extended envelope info on 
 Harmony.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Harmony.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Harmony.hpp:#define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords

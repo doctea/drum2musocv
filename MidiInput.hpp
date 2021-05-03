@@ -1,7 +1,7 @@
 #ifndef MIDIINPUT_INCLUDED
 #define MIDIINPUT_INCLUDED
 
-#define RELAY_PROGRAM_CHANGE false
+#define RELAY_PROGRAM_CHANGE false   // only enable passing through program changes when we know its safe ie when only one midimuso is connected
 
 #include "MidiSetup.hpp"
 #include "Drums.h"
@@ -66,7 +66,9 @@ void handleNoteOn(byte channel, byte pitch, byte velocity) {
 
 
 void handleControlChange(byte channel, byte number, byte value) {
-  if (channel==GM_CHANNEL_DRUMS) {
+  if (channel==MIDI_CHANNEL_EXTENDED_ENVELOPES) {
+    handle_envelope_ccs(channel, number, value);
+  } else if (channel==GM_CHANNEL_DRUMS) {
     // pass thru control changes, shifted to channel 1
     // TODO: intercept our own control messages to do things like set envelope settings, LFO settings, trigger targets/choke linking..
     if (number==CC_SYNC_RATIO) {

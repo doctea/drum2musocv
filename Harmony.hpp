@@ -188,7 +188,7 @@ class Harmony {
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
+	MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT),
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 

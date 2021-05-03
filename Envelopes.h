@@ -3,6 +3,8 @@
 
 #include "MidiSetup.hpp"
 
+#define MIDI_CHANNEL_EXTENDED_ENVELOPES   11  // channel to receive extended envelope info on 
+
 // STRUCTS
 
 enum envelope_types : byte {
@@ -10,10 +12,20 @@ enum envelope_types : byte {
   ENV_SPLASH = 1,
   ENV_WOBBLY = 2,
   ENV_RIDE_BELL = 3,
-  ENV_RIDE_CYMBAL = 4
+  ENV_RIDE_CYMBAL = 4,
+  ENV_PITCH_1 = 5,	// TODO: enable these...
+  ENV_PITCH_2 = 6,	// TODO: enable these...and add 2 more
+  ENV_PITCH_3 = 7,
+  ENV_PITCH_4 = 8
   // TODO: more envelope types...
 };
+#if MUSO_MODE==MUSO_MODE_0B_AND_2A
 #define NUM_ENVELOPES 5
+#define NUM_ENVELOPES_EXTENDED 9  // extended for envelopes that aren't included in the triggerable envelopes, ie to be used for the harmony outputs
+#else
+#define NUM_ENVELOPES 5 
+#define NUM_ENVELOPES_EXTENDED 5
+#endif
 
 #define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 #define ENV_CC_START  64  // what number CC the envelope controls begin at
