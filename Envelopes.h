@@ -92,7 +92,7 @@ typedef struct envelope_state {
 
 byte cc_value_sync_modifier = 24;  // initial global clock sync modifier -- number of real ticks per 24 pseudoticks ?
 
-envelope_state envelopes[NUM_ENVELOPES];
+envelope_state envelopes[NUM_ENVELOPES_EXTENDED];
 
 
 // prototype stubs

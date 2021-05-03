@@ -45,6 +45,15 @@ A diagram to help me understand how everything is routed:-
 
 ![Routing diagram](drum2musocv_routing_diagram.svg)
 
+# Using multiple midimuso-cv boards
+
+  - Now supports running two midimuso-cv boards:
+    - Board 1 in mode 0B (11 triggers + 5 envelopes)
+    - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
+  - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
+    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch)
+  - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes
+  - TODO: add control panel for the extra 4 envelopes
 
 # MIDI parameters
 
