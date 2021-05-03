@@ -36,9 +36,11 @@ for line in fileinput.input():
         continue
     if defname=="ENV_CC_START":
         c = int(x[2])
-        for e in range(NUM_ENVS_EXTENDED):
+        for e in range(NUM_ENVS):
             for s in range(ENV_SPAN):
-                table[CHANNEL if e<NUM_ENVS else CHANNEL_EXTENDED][c] = { 'defname': 'Envelope %s %s' % (e, env_controls[s]), 'file': file, 'comment': 'Chan %s'%CHANNEL if e<NUM_ENVS else 'Extended pitch envelopes on Chan %s'%CHANNEL_EXTENDED }
+                table[CHANNEL][c] = { 'defname': 'Envelope %s %s' % (e, env_controls[s]), 'file': file, 'comment': 'Chan %s'%CHANNEL }
+                if e < NUM_ENVS_EXTENDED - NUM_ENVS: # do double-duty of completing channel 11 table too
+                    table[CHANNEL_EXTENDED][c] = { 'defname': 'Envelope %s %s' % (e+NUM_ENVS, env_controls[s]), 'file': file, 'comment': 'Extended pitch envelopes on Chan %s'%CHANNEL_EXTENDED }
                 c += 1
         continue
     #print ("got temp defname %s" % defname)

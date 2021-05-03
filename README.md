@@ -45,15 +45,21 @@ A diagram to help me understand how everything is routed:-
 
 ![Routing diagram](drum2musocv_routing_diagram.svg)
 
+# Using single midimuso-cv board
+
+  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B` (11xGate, 5xCV Envelope) or `MUSO_MODE_2B` (7xGate, 5xCV Envelope, 2xPitch, 2xPitch Gate)
+
 # Using multiple midimuso-cv boards
 
+  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B_AND_2A` (11xGate, 5xCV Envelope, 2xPitch, 4xPitch Envelope)
   - Now supports running two midimuso-cv boards:
     - Board 1 in mode 0B (11 triggers + 5 envelopes)
     - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
   - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
-    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch)
+    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch) (no UI to adjust this)
   - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes
-  - TODO: add control panel for the extra 4 envelopes
+  - TODO: finish adding control panel for the extra 4 envelopes
+    - DONE: added controls for 2 extra envelopes
 
 # MIDI parameters
 
@@ -224,6 +230,7 @@ A diagram to help me understand how everything is routed:-
  - Make Euclidian bass capable of changing root note / arpeggiate / chord sequences
    - features to do this.  currently arps over held chord
    - make this so can switch between modes...
+ - Support multiple MidiMuso-CVs - one for max pitch/cv, one for pitch outputs+envelopes
  
 ----
 

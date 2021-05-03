@@ -51,14 +51,22 @@ void kill_envelopes() {
 // change to an envelope setting
 bool handle_envelope_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
-  int num_envelopes = (channel==MIDI_CHANNEL_EXTENDED_ENVELOPES && MUSO_MODE==MUSO_MODE_0B_AND_2A) ? NUM_ENVELOPES_EXTENDED
-                      :
-                      NUM_ENVELOPES;
+  int num_envelopes = 0;
+  int env_offset = 0;
+  
+  if (channel==MIDI_CHANNEL_EXTENDED_ENVELOPES && MUSO_MODE==MUSO_MODE_0B_AND_2A) {
+    num_envelopes = NUM_ENVELOPES_EXTENDED - NUM_ENVELOPES; //4;
+    env_offset = NUM_ENVELOPES; //5;
+  } else {
+    num_envelopes = NUM_ENVELOPES;
+    env_offset = 0;
+  }
 
   if (number>=ENV_CC_START && number <= ENV_CC_START + (ENV_CC_SPAN*num_envelopes)) {
     number -= ENV_CC_START;
     int env_num = number / ENV_CC_SPAN; // which envelope are we dealing with?
     number = number % ENV_CC_SPAN;      // which control are we dealing with?
+    env_num += env_offset;
     //NOISY_DEBUG(env_num*100 , number);
     //NUMBER_DEBUG(6, env_num, number);
     // TODO: switch() would be better, but wasted too much time with weird problem doing it that way so this'll do for now

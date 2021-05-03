@@ -100,38 +100,38 @@
 `10` | `Harmony.hpp` | `113` | `CC_PAD_ROOT_OCTAVE_OFFSET` | ` output 2: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3` |
 `10` | `Drums.h` | `123` | `MIDI_CC_ALL_NOTES_OFF` | `` |
 | ---- | ---- | -- | ---- | ------- |
-`11` | `Envelopes.h` | `104` | `Envelope 5 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `105` | `Envelope 5 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `106` | `Envelope 5 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `107` | `Envelope 5 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `108` | `Envelope 5 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `109` | `Envelope 5 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `110` | `Envelope 5 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `111` | `Envelope 5 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `112` | `Envelope 6 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `113` | `Envelope 6 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `114` | `Envelope 6 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `115` | `Envelope 6 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `116` | `Envelope 6 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `117` | `Envelope 6 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `118` | `Envelope 6 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `119` | `Envelope 6 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `120` | `Envelope 7 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `121` | `Envelope 7 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `122` | `Envelope 7 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `123` | `Envelope 7 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `124` | `Envelope 7 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `125` | `Envelope 7 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `126` | `Envelope 7 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `127` | `Envelope 7 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `128` | `Envelope 8 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `129` | `Envelope 8 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `130` | `Envelope 8 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `131` | `Envelope 8 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `132` | `Envelope 8 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `133` | `Envelope 8 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `134` | `Envelope 8 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `135` | `Envelope 8 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `64` | `Envelope 5 ATTACK` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `65` | `Envelope 5 HOLD` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `66` | `Envelope 5 DECAY` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `67` | `Envelope 5 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `68` | `Envelope 5 RELEASE` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `69` | `Envelope 5 HD_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `70` | `Envelope 5 SR_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `71` | `Envelope 5 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `72` | `Envelope 6 ATTACK` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `73` | `Envelope 6 HOLD` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `74` | `Envelope 6 DECAY` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `75` | `Envelope 6 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `76` | `Envelope 6 RELEASE` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `77` | `Envelope 6 HD_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `78` | `Envelope 6 SR_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `79` | `Envelope 6 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `80` | `Envelope 7 ATTACK` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `81` | `Envelope 7 HOLD` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `82` | `Envelope 7 DECAY` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `83` | `Envelope 7 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `84` | `Envelope 7 RELEASE` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `85` | `Envelope 7 HD_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `86` | `Envelope 7 SR_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `87` | `Envelope 7 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `88` | `Envelope 8 ATTACK` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `89` | `Envelope 8 HOLD` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `90` | `Envelope 8 DECAY` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `91` | `Envelope 8 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `92` | `Envelope 8 RELEASE` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `93` | `Envelope 8 HD_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `94` | `Envelope 8 SR_VIB` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `95` | `Envelope 8 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
 | ---- | ---- | -- | ---- | ------- |
 
 ----
