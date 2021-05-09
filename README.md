@@ -1,6 +1,6 @@
 # drum2musocv
 
-* A USB MIDI interface, originally for adapting the [MidiMuso CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes), but now with many added features.
+* A USB MIDI interface, originally for adapting the [MidiMuso Orac CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes and providing triggerable ADSR envelopes), but now with many added features.
 
 * In active development... very likely to be bugs or things that can be very much improved.  Check back for updates or contact me if you're trying to use this!
 
@@ -30,6 +30,8 @@
 
 * Outputs **4xClock triggers** using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
+* Can use a single midimuso in mode 0B or 2B, or two midimusos via a midi splitter on in mode 0B and one in 2A
+
 # Controls
 
  - Two buttons, button 1 on pin A0 and button 2 on pin 8
@@ -47,19 +49,20 @@ A diagram to help me understand how everything is routed:-
 
 # Using single midimuso-cv board
 
-  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B` (11xGate, 5xCV Envelope) or `MUSO_MODE_2B` (7xGate, 5xCV Envelope, 2xPitch, 2xPitch Gate)
+  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B` (10xGate, 5xCV Envelope) or `MUSO_MODE_2B` (7xGate, 5xCV Envelope, 2xPitch, 2xPitch Gate)
 
 # Using multiple midimuso-cv boards
 
-  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B_AND_2A` (11xGate, 5xCV Envelope, 2xPitch, 4xPitch Envelope)
+  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B_AND_2A` (10xGate, 5xCV Envelope, 2xPitch, 4xPitch Envelope)
   - Now supports running two midimuso-cv boards:
-    - Board 1 in mode 0B (11 triggers + 5 envelopes)
+    - Board 1 in mode 0B (10 triggers* + 5 envelopes)
     - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
   - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
     - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch) (no UI to adjust this)
-  - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes
+  - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes when you want to update its mode
   - TODO: finish adding control panel for the extra 4 envelopes
     - DONE: added controls for 2 extra envelopes
+  - *: Because of a problem with the MidiMuso-CV12 in mode 0B (A Gate 1 is also triggered on Channel 1 Pitch input), Kick moves to Stick and Stick is disabled, reducing us to 10 triggers instead of 11.
 
 # MIDI parameters
 

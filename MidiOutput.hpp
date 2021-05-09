@@ -50,7 +50,14 @@ int get_muso_pitch_for_trigger(int trigger) {
   if (gate!=-1)
     return MUSO_NOTE_MINIMUM + gate;
   return -1;
+#elif MUSO_MODE==MUSO_MODE_0B_AND_2A  // multi-board mode -- put kick onto stick to avoid problem with muso board in 0B unexpectedly reacting on channel 1 note on/offs
+  int gate = trigger;
+  if (trigger==0) gate = 1;   // kick -> stick
+  else if (trigger==1) gate = -1; // disable stick
 
+  if (gate!=-1)
+    return MUSO_NOTE_MINIMUM + gate;
+  return -1;
 #else
   return MUSO_NOTE_MINIMUM+trigger;
 #endif
