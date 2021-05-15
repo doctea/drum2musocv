@@ -1,5 +1,14 @@
+#include "Config.h"
+
 #ifdef ENABLE_PIXELS
 #ifdef ENABLE_PIXELS_FASTLED
+
+#include "Drums.h"
+#include "Envelopes.h"
+#include "UI.h"
+#include "BPM.hpp"
+#include "Euclidian.h"
+#include "MidiInput.hpp"
 
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused
@@ -18,6 +27,8 @@
 // ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
 #define DATA_PIN 9
 //#define CLOCK_PIN 13
+
+long last_updated_pixels_at = 0;
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -71,8 +82,11 @@ void setup_pixels() {
 }*/
 
 
-void update_pixels() {
-  update_pixels_triggers();
+void update_pixels(unsigned long now_ms) {
+  if (now_ms - last_updated_pixels_at >= PIXEL_REFRESH) {
+    last_updated_pixels_at = now_ms;
+    update_pixels_triggers();
+  }
 } 
 
 #define STRIP_LENGTH  (NUM_LEDS/2)
@@ -84,8 +98,13 @@ void update_pixels() {
 // 0-4 inclusive: first 5 triggers, kick -> crash
 // 10-16 inclusive: second 6 triggers, tamb -> ch
 // leaving 5, 6, 7, 8, 9 for envelopes
+//#if MUSO_MODE==MUSO_MODE_0B
 #define TRIGGER_BANK_1_SIZE   5
 #define TRIGGER_BANK_2_SIZE   6
+/*#elif MUSO_MODE==MUSO_MODE_2B
+#define TRIGGER_BANK_1_SIZE   3
+#define TRIGGER_BANK_2_SIZE   4
+#endif*/
 
 // determine which trigger this pixel address is for
 int get_trigger_for_pixel(int p) {

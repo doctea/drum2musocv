@@ -1,39 +1,21 @@
-#define SEEEDUINO // enable seeduino cortex m0+ compatibility for FastLED (see Pixels.ino)
+#include "Config.h"
 
-#ifdef SEEEDUINO
-#define ARDUINO_SAMD_ZERO
-#endif
+#include "MidiSetup.hpp"
 
-// config settings
-//#define TEST_TRIGGERS
-#define ENABLE_PIXELS
-//#define ENABLE_PIXELS_ADA // choose this or ENABLE_PIXELS_FASTLED
-#define ENABLE_PIXELS_FASTLED
+#include "BPM.hpp"
 
-//#define ENABLE_SCREEN
-//#define ENABLE_SCREEN_ADA
-//#define ENABLE_SCREEN_LCDGFX
-
-#define ENABLE_BUTTONS
-
-#define PIXEL_REFRESH   50  // number of milliseconds to wait between updating pixels (if enabled ofc)
-
-//#define ENABLE_EEPROM     // untested, not available on SAMD platforms
-#define ENABLE_MIDI_ECHO
-
-#define IDLE_TIMEOUT 5000 // five second timeout before going into 'idle mode' ie running own clock and displaying 'screensaver'
-
-#define USB_NATIVE  // enable native usb support
-
-
+#include "MidiEcho.h"
 #include "MidiInput.hpp"
+#include "MidiOutput.hpp"
 #include "UI.h"
 
 #include "Drums.h"
 #include "Envelopes.h"
 
 #include "Euclidian.h"
+#include "Pixels.h"
 
+#include "Harmony.hpp"
 
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
@@ -42,7 +24,6 @@
 // GLOBALS
 
 // for demo mode
-short demo_mode = 0;
 int last_played_trigger = -1;
 
 // for handling clock ---------------------------------------------------------
@@ -69,18 +50,7 @@ long last_updated_screen_at = 0;
 
 #endif
 
-// override default midi library settings, so that notes with velocity 0 aren't treated as note-offs
-// however this doesn't work like i need it to
-/*struct MySettings : public midi::DefaultSettings {
-    static const long BaudRate = 31250;
-    const bool HandleNullVelocityNoteOnAsNoteOff = false;
-};
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);*/
-
-
-
 #ifdef ENABLE_PIXELS
-long last_updated_pixels_at = 0;
 #endif
 
 
@@ -91,6 +61,10 @@ void setup() {
 
   delay(500); // give half a second grace to allow for programming
 
+  Serial.begin(115200);   // usb serial debug port
+  unsigned long started_millis = millis();
+  while (!Serial && millis() < started_millis+500 ) {};  // wait for serial to become available or timeout after half a second
+
   Serial.println("---> Bambleweeny57 starting up! <c> doctea/The Tyrell Corporation 2020+ <---");
 
 #ifdef ENABLE_SCREEN
@@ -98,6 +72,10 @@ void setup() {
 #endif
 
   initialise_pitch_for_triggers();
+
+#ifdef ENABLE_CLOCK_TRIGGER
+  initialise_clock_outputs();
+#endif
 
 #ifdef ENABLE_EEPROM
   initialise_eeprom();
@@ -115,10 +93,8 @@ void setup() {
 
   bpm_reset_clock();
 
+  //initialise_harmony();
   initialise_euclidian();
-
-  initialise_bass();
-
   initialise_envelopes();
 
   //NOISY_DEBUG(1000, 1);
@@ -126,7 +102,12 @@ void setup() {
   kill_notes();
   kill_envelopes();
 
+  debug_pitch_for_trigger();
+
   Serial.println("---> Bambleweeny57 setup done! <---");
+
+  harmony.debug_inversions();
+  
 }
 
 void loop() {
@@ -156,7 +137,7 @@ void loop() {
         douse_trigger(last_played_trigger, 0, true);
         last_played_trigger = -1;
       } else {
-        last_played_trigger = random(0,NUM_TRIGGERS+NUM_ENVELOPES);
+        last_played_trigger = random(0,NUM_TRIGGERS+NUM_ENVELOPES+NUM_MIDI_OUTS);
         //Serial.printf("noteon = %i\r\n", last_played_pitch);
         fire_trigger(last_played_trigger,random(1,127), true);
       }
@@ -167,10 +148,7 @@ void loop() {
   process_envelopes(now);
 
 #ifdef ENABLE_PIXELS
-  if (now_ms - last_updated_pixels_at >= PIXEL_REFRESH) {
-    last_updated_pixels_at = now_ms;
-    update_pixels();
-  } 
+  update_pixels(now_ms);
 #endif
 
 #ifdef ENABLE_SCREEN

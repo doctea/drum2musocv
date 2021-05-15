@@ -1,5 +1,7 @@
 #include "SinTables.h"
 
+#include "MidiOutput.hpp"
+
 void initialise_envelopes() {
   // set up the default envelope states
   /*envelopes[ENV_SPLASH].attack_length = PPQN / 2;
@@ -12,10 +14,33 @@ void initialise_envelopes() {
   envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
   envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
   envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
+#if MUSO_MODE==MUSO_MODE_0B_AND_2A
+  envelopes[ENV_PITCH_1].midi_cc    = MUSO_CC_CV_6;
+  envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
+  envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
+  envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
+  envelopes[ENV_PITCH_1].trigger_on_channel = 1;
+  envelopes[ENV_PITCH_2].trigger_on_channel = 1;
+  envelopes[ENV_PITCH_3].trigger_on_channel = 2;
+  envelopes[ENV_PITCH_4].trigger_on_channel = 2;
+#endif
+
+}
+
+void randomise_envelopes() {
+  for (int i = 0 ; i < NUM_ENVELOPES ; i++) { // _EXTENDED if we want to randomise the extended envelopes too?
+    envelopes[i].trigger_on_channel = random(0,4);
+    envelopes[i].lfo_sync_ratio_hold_and_decay = random(0,127);
+    envelopes[i].lfo_sync_ratio_sustain_and_release = random(0,127);
+    envelopes[i].attack_length = random(0,127);
+    envelopes[i].hold_length = random(0,127);
+    envelopes[i].decay_length = random(0,127);
+    envelopes[i].sustain_ratio = 1.0/(float)random(0,127);
+  }
 }
 
 void kill_envelopes() {
-  for (byte i = 0 ; i < NUM_ENVELOPES; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED; i++) {
     envelopes[i].stage = OFF;
     envelopes[i].stage_start_level = (byte)0;
     //MIDIOUT.sendControlChange(envelopes[i].midi_cc, (byte)0, (byte)1);
@@ -26,11 +51,22 @@ void kill_envelopes() {
 // change to an envelope setting
 bool handle_envelope_ccs(byte channel, byte number, byte value) {
   //NOISY_DEBUG(1000, number);
+  int num_envelopes = 0;
+  int env_offset = 0;
+  
+  if (channel==MIDI_CHANNEL_EXTENDED_ENVELOPES && MUSO_MODE==MUSO_MODE_0B_AND_2A) {
+    num_envelopes = NUM_ENVELOPES_EXTENDED - NUM_ENVELOPES; //4;
+    env_offset = NUM_ENVELOPES; //5;
+  } else {
+    num_envelopes = NUM_ENVELOPES;
+    env_offset = 0;
+  }
 
-  if (number>=ENV_CC_START && number <= ENV_CC_START + (ENV_CC_SPAN*NUM_ENVELOPES)) {
+  if (number>=ENV_CC_START && number <= ENV_CC_START + (ENV_CC_SPAN*num_envelopes)) {
     number -= ENV_CC_START;
     int env_num = number / ENV_CC_SPAN; // which envelope are we dealing with?
     number = number % ENV_CC_SPAN;      // which control are we dealing with?
+    env_num += env_offset;
     //NOISY_DEBUG(env_num*100 , number);
     //NUMBER_DEBUG(6, env_num, number);
     // TODO: switch() would be better, but wasted too much time with weird problem doing it that way so this'll do for now
@@ -48,20 +84,14 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
       envelopes[env_num].lfo_sync_ratio_hold_and_decay = constrain(1+value,1,128);
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
+    } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
+      if (envelopes[env_num].trigger_on_channel>0)
+        update_envelope(env_num, 0, false);
+      envelopes[env_num].trigger_on_channel = value % 16;
     }
     return true;
   }
-  if (number==0x7B) {// || // intercept 'all notes off', 
-        // TODO: have i commented out the wrong lines here? ^^^
-        kill_envelopes();
-        return true;
-  } else if (number==0x07) {
-      //number==0x65 || // RPN MSB
-      //number==0x07*/) { // intercept 'volume' messages ..  this is the fucker interfering -- used for overall volume control, so DAW sends this, interferring with our control of the CC!
-      //TODO: do i need to also ignore the others (1,7,11,71,74)?
-      //TODO: or... use them as offsets so can modulate...?
-      return true;
-  }  
+
   return false;
 }
 
@@ -119,7 +149,7 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 void process_envelopes(unsigned long now) {
   static unsigned long last_processed = 0;
   if (now==last_processed) return;
-  for (byte i = 0 ; i < NUM_ENVELOPES ; i++) {
+  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     process_envelope(i, now);
   }
   last_processed = now;
@@ -305,3 +335,27 @@ void process_envelope(byte i, unsigned long now) {
     }
 
 }
+
+// trigger any envelopes that have been told to respond to given channel
+void fire_envelope_for_channel(int channel, int velocity) {
+  if (channel==0) return;
+  Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
+
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
+    if (envelopes[i].trigger_on_channel==channel) {
+      Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
+      update_envelope(i, velocity, true);
+    }
+  }
+}
+
+void douse_envelope_for_channel(int channel, int velocity) {
+  if (channel==0) return;
+
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
+    if (envelopes[i].trigger_on_channel==channel) {
+      update_envelope(i, velocity, false);
+    }
+  }
+}
+
