@@ -878,13 +878,13 @@ class Harmony {
       return output;
     }
 
-    /*char *get_bass_info_2() {
+    char *get_bass_info_2() {
       static char output[32];
     
       // auto scale, auto arp, auto progression, bass counter
-      sprintf(output, "as aa ap bc\n%c  %c  %c  %2i\n", bass_auto_scale ? 'Y' : 'N', bass_auto_arp ? 'Y' : 'N', bass_auto_progression ? 'Y' : 'N', bass_counter);
+      sprintf(output, "as ai ap bc\n%c  %c  %c  %2i\n", auto_scale ? 'Y' : 'N', auto_chord_inversion ? 'Y' : 'N', auto_progression ? 'Y' : 'N', sequence_counter);
       return output;
-    }*/
+    }
     
 };
 

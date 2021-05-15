@@ -22,3 +22,6 @@
 //#define ENABLE_MIDI_ECHO  // now replaced with midiecho_enabled runtime-settable option
 
 #define IDLE_TIMEOUT 5000 // five second timeout after receiving midi before going into 'idle mode' ie running own clock and displaying 'screensaver'
+
+#define ENABLE_SCREEN
+#define ENABLE_SCREEN_ADA

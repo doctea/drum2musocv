@@ -3,5 +3,5 @@
     "configuration": "usbstack=arduino,debug=off",
     "board": "Seeeduino:samd:arduino_zero_bamble",
     "output": "../ArduinoOutput",
-    "port": "COM25"
+    "port": "COM3"
 }

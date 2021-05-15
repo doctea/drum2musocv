@@ -1,8 +1,13 @@
 #ifndef SCREEN_INCLUDED
 #define SCREEN_INCLUDED
 
-#include <SPI.h>
-#include <Wire.h>
+#define USE_SPI_DMA
+#define ARDUINO_SAMD_ZERO
+
+#include <Adafruit_ZeroDMA.h>
+//#include <Adafruit_SPITFT.h>
+//#include <SPI.h>
+//#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -17,6 +22,7 @@
 #define OLED_RESET     -1 //4 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+//Adafruit_ZeroDMA display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define NUMFLAKES     10 // Number of snowflakes in the animation example
 
@@ -105,10 +111,10 @@ void screen_update() {
 
   //display.setTextSize(1);
 
-  display.write(get_bass_info());
+  display.write(harmony.get_bass_info());
   display.write("\n");
   display.setTextSize(1);
-  display.write(get_bass_info_2());
+  display.write(harmony.get_bass_info_2());
   display.write("\n");
 
   static uint8_t last[128];

@@ -41,18 +41,14 @@ unsigned long time_last; // last time main loop was run, for calculating elapsed
 #include "Screen_ada.hpp"
 #endif
 
-#ifdef ENABLE_SCREEN_LCDGFX
+/*#ifdef ENABLE_SCREEN_LCDGFX
 #include "Screen_lcdgfx.hpp"
 #else
 #include "Screen_snowflakes.hpp"
-#endif
+#endif*/
 long last_updated_screen_at = 0;
 
 #endif
-
-#ifdef ENABLE_PIXELS
-#endif
-
 
 // -----------------------------------------------------------------------------
 
