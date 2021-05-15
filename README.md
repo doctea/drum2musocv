@@ -30,7 +30,7 @@
 
 * Outputs **4xClock triggers** using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
-* Can use a single midimuso in mode 0B or 2B, or two midimusos via a midi splitter on in mode 0B and one in 2A
+* Can use a single midimuso in mode 0B or 2B, or two midimusos via a midi splitter, one in mode 0B and one in 2A
 
 # Controls
 
