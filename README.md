@@ -58,10 +58,8 @@ A diagram to help me understand how everything is routed:-
     - Board 1 in mode 0B (10 triggers* + 5 envelopes)
     - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
   - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
-    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch) (no UI to adjust this)
+    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch)
   - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes when you want to update its mode
-  - TODO: finish adding control panel for the extra 4 envelopes
-    - DONE: added controls for 2 extra envelopes
   - *: Because of a problem with the MidiMuso-CV12 in mode 0B (A Gate 1 is also triggered on Channel 1 Pitch input), Kick moves to Stick and Stick is disabled, reducing us to 10 triggers instead of 11.
 
 # MIDI parameters
@@ -234,6 +232,8 @@ A diagram to help me understand how everything is routed:-
    - features to do this.  currently arps over held chord
    - make this so can switch between modes...
  - Support multiple MidiMuso-CVs - one for max pitch/cv, one for pitch outputs+envelopes
+   - DONE: finish adding control panel for the extra 4 envelopes
+     - DONE: added controls for 2 extra envelopes
  
 ----
 
