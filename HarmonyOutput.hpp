@@ -41,7 +41,7 @@ class MidiKeysOutput : public ChannelState {
     void process_tick_ties() {
       //if (tied_status) Serial.printf("process_tick_ties on a tied note for channel %i, ttl is %i\r\n", channel, tied_ttl);
       if (tied_status && tied_started && --tied_ttl<=0) {
-        Serial.printf("<<<<TIES: Processing a finished tie, latched note to kill==%i!\r\n", stored_tied_notes[0]);
+        //Serial.printf("<<<<TIES: Processing a finished tie, latched note to kill==%i!\r\n", stored_tied_notes[0]);
         send_note_off(stored_tied_notes);
         tied_status = false;
         tied_started = false;
@@ -53,16 +53,16 @@ class MidiKeysOutput : public ChannelState {
     }
 
     void fire_notes(int pitch, int *pitches, int velocity = 127) {
-      Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
+      //Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
 
       if (is_note_held() && !tied_status) {
         douse_notes();
       }
       if (tied_status) {
-        Serial.printf("TIES: fire_notes with tied_status - latched note is %i - STARTING countdown\r\n", stored_tied_notes[0]);
+        //Serial.printf("TIES: fire_notes with tied_status - latched note is %i - STARTING countdown\r\n", stored_tied_notes[0]);
         // there is a tye pending, so set ttl
         if (stored_tied_notes[0]==pitch) { // same note, so kill old one first
-          Serial.printf("TIES: fire_notes told to tie same note as already tied, so sending note off for %i first\r\n", stored_tied_notes[0]);
+          //Serial.printf("TIES: fire_notes told to tie same note as already tied, so sending note off for %i first\r\n", stored_tied_notes[0]);
           send_note_off(stored_tied_notes);
           tied_started = tied_status = false;
           tied_ttl = 0;

@@ -339,11 +339,11 @@ void process_envelope(byte i, unsigned long now) {
 // trigger any envelopes that have been told to respond to given channel
 void fire_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
-  Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
+  //Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
 
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on_channel==channel) {
-      Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
+      //Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, true);
     }
   }
