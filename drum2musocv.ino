@@ -29,7 +29,6 @@ int last_played_trigger = -1;
 // for handling clock ---------------------------------------------------------
 // At 120 BPM, 24 clock ticks will last 0.02083 seconds. = 200ms
 float estimated_ticks_per_ms = 0.1f;  // initial estimated speed
-float estimated_ms_per_tick = 0.0f;
 unsigned long time_last; // last time main loop was run, for calculating elapsed time
 
 //float ticks = 0;  // store ticks as float, so can update by fractional ticks
