@@ -30,10 +30,14 @@ int midi_channel_bitbox_drums_out = DEFAULT_MIDI_CHANNEL_BITBOX_OUT;
 #include "Euclidian.h"    // cos we need to know the the number of patterns (actually we dont but..)
 #include "ClockTriggerOutput.hpp"
 
+int pitch_for_trigger_table[NUM_TRIGGERS];
+int get_muso_pitch_for_trigger(int trigger) {
+  return pitch_for_trigger_table[trigger];
+}
 
 // get the output pitch to use for this trigger
 // take into account that some outputs may be missing or moved when in different muso modes and swap them appropriately
-int get_muso_pitch_for_trigger(int trigger) {
+int get_muso_pitch_for_trigger_actual(int trigger) {
 #if MUSO_MODE==MUSO_MODE_2B // pitches mode
   int gate;
   if (trigger==0) gate = 3;
@@ -61,6 +65,12 @@ int get_muso_pitch_for_trigger(int trigger) {
 #else
   return MUSO_NOTE_MINIMUM+trigger;
 #endif
+}
+
+void initialise_pitch_for_trigger_table () {
+  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
+    pitch_for_trigger_table[i] = get_muso_pitch_for_trigger_actual(i);
+  }
 }
 
 // functions for sending MIDI out
