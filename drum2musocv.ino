@@ -74,6 +74,7 @@ void setup() {
   initialise_euclidian();
   initialise_envelopes();
 
+  initialise_pitch_for_trigger_table();
   //NOISY_DEBUG(1000, 1);
 
   kill_notes();
