@@ -162,7 +162,7 @@ void douse_all_triggers(bool internal = false) {
   for (int i = 0 ; i < NUM_TRIGGERS + NUM_ENVELOPES + NUM_MIDI_OUTS ; i++) {
 #ifdef WORKAROUND_MISSED_NOTEOFFS
     if (i > NUM_TRIGGERS+NUM_ENVELOPES) {
-      Serial.printf("WORKAROUND_MISSED_NOTEOFFS_DELAY: douse_all_triggers delaying trigger %i for %i ms", i, WORKAROUND_MISSED_NOTEOFFS_DELAY);
+      OUT_printf("WORKAROUND_MISSED_NOTEOFFS_DELAY: douse_all_triggers delaying trigger %i for %i ms", i, WORKAROUND_MISSED_NOTEOFFS_DELAY);
       delay(WORKAROUND_MISSED_NOTEOFFS_DELAY);
     }
 #endif

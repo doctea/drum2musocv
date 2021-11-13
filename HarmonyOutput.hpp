@@ -259,7 +259,7 @@ class MidiKeysOutput : public ChannelState {
         debug_notes_held();
         send_note_off(get_held_notes());
       } else {
-        Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
+        OUT_printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
       }
       
       //MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes
