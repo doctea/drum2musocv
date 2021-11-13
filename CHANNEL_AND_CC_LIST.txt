@@ -69,3 +69,8 @@ Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_r
 Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
 MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)
+Envelopes.h:#define TRIGGER_CHANNEL_OFF 0
+Envelopes.h:#define TRIGGER_CHANNEL_LFO 17
+Envelopes.h:#define TRIGGER_CHANNEL_LFO_MODULATED 18
+Envelopes.h:#define TRIGGER_CHANNEL_LFO_INVERTED 19
+Envelopes.h:#define TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED 20

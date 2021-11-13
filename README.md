@@ -10,7 +10,9 @@
 
 * When it isn't receiving an **external clock input**, runs off its own **internal clock** at the last detected BPM.
 
-* Implements **5 triggerable envelopes** with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+* Implements **5 triggerable envelopes** (or 9 with two Oracs) with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+
+* Envelopes can now be set to loop ie become freerunning LFOs with envelope control.  New & experimental, also allows modulation of one envelope by the one to the left, and inversions
 
 * **Visual feedback**: Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
@@ -204,6 +206,7 @@ A diagram to help me understand how everything is routed:-
 
 ### Done list
 
+ - Can put envelopes into LFO modes: freerunning, modulated by left-hand envelope, inverted freerunning, inverted + modulated by left-hand envelope
  - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
  - Make euclidian sequences work off midi clock, fix any bpm issues.
  - Make BPM guesser only work off the last 4 steps, to handle live changes of tempo better (done, but still needs 3 beats before it becomes accurate...?)

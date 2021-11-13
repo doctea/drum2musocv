@@ -251,7 +251,7 @@ void process_envelope(byte i, unsigned long now) {
         lvl = (byte)(sustain_level);
         
         // go straight to RELEASE if sustain is zero or we're in lfo mode
-        if (envelopes[i].sustain_ratio==0.0f || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO) {
+        if (envelopes[i].sustain_ratio==0.0f || envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage_start_level = lvl;
           OUT_printf("Leaving SUSTAIN stage with lvl at %i\r\n", lvl);
@@ -326,11 +326,20 @@ void process_envelope(byte i, unsigned long now) {
       } 
     } else {
         // envelope is stopped - restart it if in lfo mode!
-        if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO) {
+        if (envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
           OUT_printf("envelope %i is stopped, restarting\n", i);
           update_envelope(i, 127, true);
         }
     }
+
+    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED ) {
+      int modulating_envelope = (i-1==-1) ? NUM_ENVELOPES_EXTENDED-1 : i-1;
+      lvl = ((float)lvl) * ((float)envelopes[modulating_envelope].last_sent_lvl/127);
+    }
+    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_INVERTED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED) {
+      lvl = 127-lvl;
+    }
+
 
     envelopes[i].actual_level = lvl;
     

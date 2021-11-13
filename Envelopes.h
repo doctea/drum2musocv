@@ -38,7 +38,9 @@ enum envelope_types : byte {
 
 #define TRIGGER_CHANNEL_OFF 0
 #define TRIGGER_CHANNEL_LFO 17
-
+#define TRIGGER_CHANNEL_LFO_MODULATED 18
+#define TRIGGER_CHANNEL_LFO_INVERTED 19
+#define TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED 20
 //#define TEST_LFOS
 
 enum stage : byte {
