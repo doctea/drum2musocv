@@ -5,6 +5,10 @@
 
 #define TIE_PORTA_TICK_LENGTH   TICKS_PER_STEP
 
+// the range of the midimuso pitch, apparently
+#define MINIMUM_PITCH 21    
+#define MAXIMUM_PITCH 101   
+
 #include <USB-MIDI.h> 
 #include "Harmony.hpp"
 #include "ChannelState.hpp"
@@ -205,18 +209,24 @@ class MidiKeysOutput : public ChannelState {
       if (pitch==-1) return;
       if (channel==0) return;
 
+      int offset = 12*octave_offset;
+
+      if (offset + pitch < MINIMUM_PITCH || offset + pitch > MAXIMUM_PITCH)
+        return;
+        
       handle_note_on((byte)pitch);
       
+      pitch += offset; //(12*octave_offset);
+
+      // Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
+      HARM_printf("\t\tactual send_note_on  on channel %i for pitch %i [%s] at velocity %i\r\n", (byte)channel, pitch, get_note_name(pitch).c_str(), velocity);
+      MIDIOUT.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);
+
       // todo - possibly put the fire_envelope_for_channel here instead?
       // but how do we tell when its a chord we're playing rather than just a single note so we dont just retrigger? :/
       //      do we even need to care about that actually?
       fire_envelope_for_channel(channel, velocity);
 
-      pitch += (12*octave_offset);
-
-      //Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
-      HARM_printf("\t\tactual send_note_on  on channel %i for pitch %i [%s] at velocity %i\r\n", (byte)channel, pitch, get_note_name(pitch).c_str(), velocity);
-      MIDIOUT.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);
       if (midiecho_enabled)
         MIDIIN.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);  // echo back to host
     }
@@ -234,10 +244,15 @@ class MidiKeysOutput : public ChannelState {
         return;
       }
 
+      int offset = (12*octave_offset);
+
+      if (offset + pitch < MINIMUM_PITCH || offset + pitch > MAXIMUM_PITCH)
+        return;
+
       //Serial.printf("actual send_note_off, pitch %i is indeed held\r\n", pitch);
       handle_note_off((byte)pitch);
 
-      pitch += (12*octave_offset);
+      pitch += offset;
 
       //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
       if (DEBUG_HARMONY) Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);

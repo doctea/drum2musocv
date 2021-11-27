@@ -274,6 +274,7 @@ class Harmony {
     // to be used when relaying played notes from midi in..
     // this way envelopes will trigger too
     void send_note_on_for_channel(int channel, int pitch, int velocity) {
+      Serial.printf("send_note_on_for_channel(chan%i, pitc%i, velo%i)\n", channel, pitch, velocity);
       for (int i = 0 ; i < NUM_MKO ; i++) {
         if (mko[i].channel==channel) {
           mko[i].send_note_on(pitch, velocity);
