@@ -76,25 +76,25 @@ void initialise_pitch_for_trigger_table () {
 // functions for sending MIDI out
 
 //static int i = 0;
-void fire_trigger(byte t, byte v, bool internal = false) {
+void fire_trigger(byte trigger, byte velocity, bool internal = false) {
   //OUT_printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
-  byte p = MUSO_NOTE_MINIMUM + t;
-  byte b = BITBOX_NOTE_MINIMUM + t;
+  byte p = MUSO_NOTE_MINIMUM + trigger;
+  byte b = BITBOX_NOTE_MINIMUM + trigger;
   if (
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM
   ) {
     //OUT_printf("   for trigger %i sending muso gate note on pitch %i\r\n", t, p);
-    trigger_status[t] = v > 0; // TRIGGER_IS_ON;
+    trigger_status[trigger] = velocity > 0; // TRIGGER_IS_ON;
     //OUT_println("set trigger_status to ON");
-    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(t)>=0)        {
+    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(trigger)>=0)        {
       //OUT_printf("fire_trigger(%i) sending muso pitch %i\r\n", t, get_muso_pitch_for_trigger(t));
-      MIDIOUT.sendNoteOn(get_muso_pitch_for_trigger(t)/*p*/, v, MUSO_GATE_CHANNEL);
+      MIDIOUT.sendNoteOn(get_muso_pitch_for_trigger(trigger)/*p*/, velocity, MUSO_GATE_CHANNEL);
     }
     if (MIDI_CHANNEL_BITBOX_DRUMS_OUT>0)  {
       OUT_printf("fire_trigger(%i) sending bitbox drum pitch %i on channel %i\r\n", b, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
-      MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
+      MIDIOUT.sendNoteOn(b, velocity, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
     }
     //OUT_println("sent both midi notes");
   } else if (
@@ -102,60 +102,68 @@ void fire_trigger(byte t, byte v, bool internal = false) {
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES
   ) {
     //OUT_printf("   for trigger %i, is an envelope trigger - muso_gate_channel is %i!\r\n", t, MUSO_GATE_CHANNEL);
-    if (MUSO_GATE_CHANNEL==DEFAULT_MUSO_GATE_CHANNEL)        update_envelope (p - (MUSO_NOTE_MAXIMUM), v, true);
-    if (MIDI_CHANNEL_BITBOX_DRUMS_OUT>0) MIDIOUT.sendNoteOn(b, v, MIDI_CHANNEL_BITBOX_DRUMS_OUT);  // also send trigger for the envelopes
-  } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+    if (MUSO_GATE_CHANNEL==DEFAULT_MUSO_GATE_CHANNEL)        update_envelope (p - (MUSO_NOTE_MAXIMUM), velocity, true);
+    if (MIDI_CHANNEL_BITBOX_DRUMS_OUT>0) MIDIOUT.sendNoteOn(b, velocity, MIDI_CHANNEL_BITBOX_DRUMS_OUT);  // also send trigger for the envelopes
+  } else if (trigger>=NUM_TRIGGERS + NUM_ENVELOPES && trigger<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
     //OUT_printf("   for trigger %i got HARMONY instrument %i!\r\n", t, t - (NUM_TRIGGERS + NUM_ENVELOPES));
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     //harmony.fire_both(); //bass_note_on_and_next();
-    harmony.fire_for(t - (NUM_TRIGGERS + NUM_ENVELOPES));
+    harmony.fire_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
     //else
     //  OUT_println("No note held? is_note_held is false");
   } else {
-    OUT_printf("WARNING: fire_trigger not doing anything with trigger %i (pitch %i)\r\n", t, p);
+    OUT_printf("WARNING: fire_trigger not doing anything with trigger %i (pitch %i)\r\n", trigger, p);
   }
   if (midiecho_enabled)
-    if (internal) echo_fire_trigger(p - MUSO_NOTE_MINIMUM, v);
+    if (internal) echo_fire_trigger(p - MUSO_NOTE_MINIMUM, velocity);
   //OUT_println("finishing fire_trigger");
 }
 
-void douse_trigger(byte t, byte v = 0, bool internal = false, bool tied = false) {
+void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool tied = false) {
   //OUT_printf("dousing trigger=%i\r\n", t);
-  byte p = MUSO_NOTE_MINIMUM + t;
-  byte b = BITBOX_NOTE_MINIMUM + t;
+  byte p = MUSO_NOTE_MINIMUM + trigger;
+  byte b = BITBOX_NOTE_MINIMUM + trigger;
   if (                                                  // a gate trigger
     p >= MUSO_NOTE_MINIMUM &&
     p < MUSO_NOTE_MAXIMUM
   ) {
+    // a drum trigger
     //OUT_printf("   for trigger %i sending muso gate note OFF pitch %i\r\n", t, p);
-    trigger_status[t] = TRIGGER_IS_OFF;
+    trigger_status[trigger] = TRIGGER_IS_OFF;
     //OUT_println("set trigger_status to OFF");
-    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(t)>=0)        MIDIOUT.sendNoteOff(get_muso_pitch_for_trigger(t)/*p*/, v, MUSO_GATE_CHANNEL);   // hardcoded channel 16 for midimuso
+    if (MUSO_GATE_CHANNEL>0 && get_muso_pitch_for_trigger(trigger)>=0)        
+      MIDIOUT.sendNoteOff(
+        get_muso_pitch_for_trigger(trigger)/*p*/, 
+        velocity, MUSO_GATE_CHANNEL
+      );   // hardcoded channel 16 for midimuso
+
     if (midi_channel_bitbox_drums_out>0) {
-      OUT_printf("!!!! douse_trigger(%i) sending velocity %i on pitch %i to channel %i\r\n", t, v, b, midi_channel_bitbox_drums_out);
+      OUT_printf("!!!! douse_trigger(%i) sending velocity %i on pitch %i to channel %i\r\n", trigger, velocity, b, midi_channel_bitbox_drums_out);
       //delay(10);
       //MIDIOUT.sendNoteOff(b, v, 0);
-      MIDIOUT.sendNoteOff(b, v, midi_channel_bitbox_drums_out);
+      MIDIOUT.sendNoteOff(b, velocity, midi_channel_bitbox_drums_out);
     }
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //OUT_printf("fired a note OFF to bit box: %i\r\n", i);
-  } else if (                                           // an envelope trigger
+  } else if (
+    // an envelope trigger
     p >= MUSO_NOTE_MAXIMUM &&
     p < MUSO_NOTE_MAXIMUM + NUM_ENVELOPES
   ) {
     //OUT_printf("   for trigger %i, dousing an envelope trigger!\r\n", p);
     if (MUSO_GATE_CHANNEL==DEFAULT_MUSO_GATE_CHANNEL)        update_envelope (p - (MUSO_NOTE_MAXIMUM), 0, false);
-    if (MIDI_CHANNEL_BITBOX_DRUMS_OUT>0) MIDIOUT.sendNoteOff(b, v, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
-  } else if (t>=NUM_TRIGGERS + NUM_ENVELOPES && t<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
-    OUT_printf("   for trigger %i dousing instrument trigger %i!\r\n", t, t - (NUM_TRIGGERS + NUM_ENVELOPES));
+    if (MIDI_CHANNEL_BITBOX_DRUMS_OUT>0) MIDIOUT.sendNoteOff(b, velocity, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
+  } else if (trigger>=NUM_TRIGGERS + NUM_ENVELOPES && trigger<NUM_PATTERNS) { //p == MUSO_NOTE_MAXIMUM + NUM_ENVELOPES) {
+    // a harmony trigger
+    OUT_printf("   for trigger %i dousing instrument trigger %i!\r\n", trigger, trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
     //harmony.douse_both();
-    if (tied) OUT_printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", t - (NUM_TRIGGERS + NUM_ENVELOPES));
-    harmony.douse_for(t - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
+    if (tied) OUT_printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
+    harmony.douse_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
   } else {
     //OUT_printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
   if (midiecho_enabled)
-    if (internal) echo_douse_trigger(p - MUSO_NOTE_MINIMUM, v);
+    if (internal) echo_douse_trigger(p - MUSO_NOTE_MINIMUM, velocity);
 }
 
 void douse_all_triggers(bool internal = false) {

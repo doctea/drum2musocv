@@ -3,10 +3,10 @@ Drums.h:#define MUSO_CC_CV_2  7
 Drums.h:#define MUSO_CC_CV_3  11
 Drums.h:#define MUSO_CC_CV_4  71
 Drums.h:#define MUSO_CC_CV_5  74
-Drums.h:#define MUSO_CC_CV_6  93
-Drums.h:#define MUSO_CC_CV_7  94
-Drums.h:#define MUSO_CC_CV_8  73
-Drums.h:#define MUSO_CC_CV_9  72
+Drums.h:#define MUSO_CC_CV_6  93    // extended envelope, used for the midi note-triggered envelopes
+Drums.h:#define MUSO_CC_CV_7  94    // extended envelope, used for the midi note-triggered envelopes
+Drums.h:#define MUSO_CC_CV_8  73    // extended envelope, used for the midi note-triggered envelopes
+Drums.h:#define MUSO_CC_CV_9  72    // extended envelope, used for the midi note-triggered envelopes
 Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
@@ -69,6 +69,7 @@ Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_r
 Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
 MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)
+
 Envelopes.h:#define TRIGGER_CHANNEL_OFF 0
 Envelopes.h:#define TRIGGER_CHANNEL_LFO 17
 Envelopes.h:#define TRIGGER_CHANNEL_LFO_MODULATED 18
