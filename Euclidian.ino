@@ -19,6 +19,8 @@
 
 bpm_status bpm_statuses[NUM_PATTERNS];
 
+float euclidian_density = 1.0;
+
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
 
@@ -29,6 +31,10 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (pulses > 0)   p->pulses = pulses;
   if (rotation >= 0) p->rotation = rotation;
   if (duration >= 0) p->duration = duration;
+
+  int original_pulses = p->pulses;
+  p->pulses = ((float)p->pulses) * (1.5*euclidian_density);
+  EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+euclidian_density));
 
   EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
 
@@ -343,6 +349,7 @@ void initialise_euclidian() {
 
   // definition: make_euclid( pattern_t *p,  int steps = 0,  int pulses = 0,   int rotation = 0,   int duration = STEPS_PER_BEAT/4   ) {
 
+  unsigned long euclidian_time = millis();
   EUC_println("initialising:-");
   //     length, pulses, rotation, duration
   int i = 0;
@@ -364,9 +371,9 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
   make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
   make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
-  make_euclid(&patterns[i++],  LEN,    1, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
-  make_euclid(&patterns[i++],  LEN,    1, 5,   STEPS_PER_BEAT,   PATTERN_PAD_PITCH); // root pad
-  Serial.printf(" initialised %i Euclidian patterns\r\n", i-1);
+  make_euclid(&patterns[i++],  LEN,    4, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
+  make_euclid(&patterns[i++],  LEN,    4, 5,   STEPS_PER_BEAT,   PATTERN_PAD_PITCH); // root pad
+  EUC_printf(" initialised %i Euclidian patterns in %ims\r\n", i-1, millis()-euclidian_time);
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
@@ -456,6 +463,10 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     return true;
   } else if (number == CC_EUCLIDIAN_CLAP_FLAM) {
     euclidian_flam_clap = value >0;
+    return true;
+  } else if (number == CC_EUCLIDIAN_DENSITY) {
+    euclidian_density = ((float)value)/127.0f;
+    EUC_printf("euclidan_density set to %2.2f\n", euclidian_density);
     return true;
   }
   return false;

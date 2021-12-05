@@ -159,6 +159,7 @@ void process_envelopes(unsigned long now) {
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
 void process_envelope(byte i, unsigned long now) {
+  //unsigned long envelope_time = millis();
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -351,6 +352,8 @@ void process_envelope(byte i, unsigned long now) {
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
     }
+
+  //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);
 
 }
 
