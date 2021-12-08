@@ -19,7 +19,7 @@
 
 bpm_status bpm_statuses[NUM_PATTERNS];
 
-float euclidian_density = 1.0;
+float euclidian_density = 0.566666666666f;
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
@@ -33,7 +33,7 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (duration >= 0) p->duration = duration;
 
   int original_pulses = p->pulses;
-  p->pulses = ((float)p->pulses) * (1.5*euclidian_density);
+  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+euclidian_density));
   EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+euclidian_density));
 
   EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
