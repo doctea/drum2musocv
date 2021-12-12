@@ -12,7 +12,7 @@
 
 * Implements **5 triggerable envelopes** (or 9 with two Oracs) with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
 
-* Envelopes can now be set to loop ie become freerunning LFOs with envelope control.  New & experimental, also allows modulation of one envelope by the one to the left, and inversions
+* Envelopes can now be set to loop per-envelope ie become freerunning LFOs with envelope-like control.  retriggerable + inverted mode for each.
 
 * **Visual feedback**: Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
