@@ -3,7 +3,7 @@
 
 # drum2musocv
 
-* A USB MIDI interface, originally for adapting the [MidiMuso Orac CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum notes and providing triggerable ADSR envelopes), but now with many added features.
+* A USB MIDI interface, originally for adapting the [MidiMuso Orac CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum channel/notes and providing triggerable ADSR envelopes), but now with many added features.
 
 * In active development... very likely to be bugs or things that can be very much improved.  Check back for updates or contact me if you're trying to use this!
 
@@ -13,7 +13,9 @@
 
 * When it isn't receiving an **external clock input**, runs off its own **internal clock** at the last detected BPM.
 
-* Implements **5 triggerable envelopes** with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+* Implements **5 triggerable envelopes** (or 9 with two Oracs) with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+
+* Envelopes can now be set to loop ie become freerunning LFOs with envelope control.  New & experimental, also allows modulation of one envelope by the one to the left, and inversions
 
 * **Visual feedback**: Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
@@ -61,10 +63,8 @@ A diagram to help me understand how everything is routed:-
     - Board 1 in mode 0B (10 triggers* + 5 envelopes)
     - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
   - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
-    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch) (no UI to adjust this)
+    - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch)
   - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes when you want to update its mode
-  - TODO: finish adding control panel for the extra 4 envelopes
-    - DONE: added controls for 2 extra envelopes
   - *: Because of a problem with the MidiMuso-CV12 in mode 0B (A Gate 1 is also triggered on Channel 1 Pitch input), Kick moves to Stick and Stick is disabled, reducing us to 10 triggers instead of 11.
 
 # MIDI parameters
@@ -142,6 +142,8 @@ A diagram to help me understand how everything is routed:-
 
 # TODO / future plans + ideas
 
+ - Make the envelopes triggerable by any trigger, not just MIDI
+
  - 'Acid' harmony output mode, with note ties and automation acid line generation (maybe take some inspiration from [Aciduino](https://github.com/midilab/aciduino) and [endless acid banger](https://github.com/vitling/acid-banger))
 
  - Separate the harmony inputs, so you can specify different lines to play for each harmony output, including 'only when note held' stuff
@@ -209,6 +211,7 @@ A diagram to help me understand how everything is routed:-
 
 ### Done list
 
+ - Can put envelopes into LFO modes: freerunning, modulated by left-hand envelope, inverted freerunning, inverted + modulated by left-hand envelope
  - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
  - Make euclidian sequences work off midi clock, fix any bpm issues.
  - Make BPM guesser only work off the last 4 steps, to handle live changes of tempo better (done, but still needs 3 beats before it becomes accurate...?)
@@ -237,6 +240,8 @@ A diagram to help me understand how everything is routed:-
    - features to do this.  currently arps over held chord
    - make this so can switch between modes...
  - Support multiple MidiMuso-CVs - one for max pitch/cv, one for pitch outputs+envelopes
+   - DONE: finish adding control panel for the extra 4 envelopes
+     - DONE: added controls for 2 extra envelopes
  
 ----
 

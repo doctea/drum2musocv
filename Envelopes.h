@@ -36,6 +36,11 @@ enum envelope_types : byte {
 #define ENV_MAX_DECAY     (PPQN*2) //48 // maximum decay stage length
 #define ENV_MAX_RELEASE   (PPQN*4) //96 // maximum release stage length
 
+#define TRIGGER_CHANNEL_OFF 0
+#define TRIGGER_CHANNEL_LFO 17
+#define TRIGGER_CHANNEL_LFO_MODULATED 18
+#define TRIGGER_CHANNEL_LFO_INVERTED 19
+#define TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED 20
 //#define TEST_LFOS
 
 enum stage : byte {
@@ -80,7 +85,7 @@ typedef struct envelope_state {
   unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
 
-  int trigger_on_channel = 0;
+  int trigger_on_channel = 0; // 0 = disabled, 1-16 = midi channel, 17+ = lfo
 
   byte midi_cc;
 

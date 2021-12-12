@@ -5,6 +5,10 @@
 
 #define TIE_PORTA_TICK_LENGTH   TICKS_PER_STEP
 
+// the range of the midimuso pitch, apparently
+#define MINIMUM_PITCH 21    
+#define MAXIMUM_PITCH 101   
+
 #include <USB-MIDI.h> 
 #include "Harmony.hpp"
 #include "ChannelState.hpp"
@@ -41,7 +45,7 @@ class MidiKeysOutput : public ChannelState {
     void process_tick_ties() {
       //if (tied_status) Serial.printf("process_tick_ties on a tied note for channel %i, ttl is %i\r\n", channel, tied_ttl);
       if (tied_status && tied_started && --tied_ttl<=0) {
-        Serial.printf("<<<<TIES: Processing a finished tie, latched note to kill==%i!\r\n", stored_tied_notes[0]);
+        //Serial.printf("<<<<TIES: Processing a finished tie, latched note to kill==%i!\r\n", stored_tied_notes[0]);
         send_note_off(stored_tied_notes);
         tied_status = false;
         tied_started = false;
@@ -53,16 +57,16 @@ class MidiKeysOutput : public ChannelState {
     }
 
     void fire_notes(int pitch, int *pitches, int velocity = 127) {
-      Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
+      //Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
 
       if (is_note_held() && !tied_status) {
         douse_notes();
       }
       if (tied_status) {
-        Serial.printf("TIES: fire_notes with tied_status - latched note is %i - STARTING countdown\r\n", stored_tied_notes[0]);
+        //Serial.printf("TIES: fire_notes with tied_status - latched note is %i - STARTING countdown\r\n", stored_tied_notes[0]);
         // there is a tye pending, so set ttl
         if (stored_tied_notes[0]==pitch) { // same note, so kill old one first
-          Serial.printf("TIES: fire_notes told to tie same note as already tied, so sending note off for %i first\r\n", stored_tied_notes[0]);
+          //Serial.printf("TIES: fire_notes told to tie same note as already tied, so sending note off for %i first\r\n", stored_tied_notes[0]);
           send_note_off(stored_tied_notes);
           tied_started = tied_status = false;
           tied_ttl = 0;
@@ -205,18 +209,24 @@ class MidiKeysOutput : public ChannelState {
       if (pitch==-1) return;
       if (channel==0) return;
 
+      int offset = 12*octave_offset;
+
+      if (offset + pitch < MINIMUM_PITCH || offset + pitch > MAXIMUM_PITCH)
+        return;
+        
       handle_note_on((byte)pitch);
       
+      pitch += offset; //(12*octave_offset);
+
+      // Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
+      HARM_printf("\t\tactual send_note_on  on channel %i for pitch %i [%s] at velocity %i\r\n", (byte)channel, pitch, get_note_name(pitch).c_str(), velocity);
+      MIDIOUT.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);
+
       // todo - possibly put the fire_envelope_for_channel here instead?
       // but how do we tell when its a chord we're playing rather than just a single note so we dont just retrigger? :/
       //      do we even need to care about that actually?
       fire_envelope_for_channel(channel, velocity);
 
-      pitch += (12*octave_offset);
-
-      //Serial.printf("actual send_note_ON for pitch %i on channel %i\r\n", pitch, channel); 
-      HARM_printf("\t\tactual send_note_on  on channel %i for pitch %i [%s] at velocity %i\r\n", (byte)channel, pitch, get_note_name(pitch).c_str(), velocity);
-      MIDIOUT.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);
       if (midiecho_enabled)
         MIDIIN.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);  // echo back to host
     }
@@ -234,10 +244,15 @@ class MidiKeysOutput : public ChannelState {
         return;
       }
 
+      int offset = (12*octave_offset);
+
+      if (offset + pitch < MINIMUM_PITCH || offset + pitch > MAXIMUM_PITCH)
+        return;
+
       //Serial.printf("actual send_note_off, pitch %i is indeed held\r\n", pitch);
       handle_note_off((byte)pitch);
 
-      pitch += (12*octave_offset);
+      pitch += offset;
 
       //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
       if (DEBUG_HARMONY) Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);
@@ -259,7 +274,7 @@ class MidiKeysOutput : public ChannelState {
         debug_notes_held();
         send_note_off(get_held_notes());
       } else {
-        Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
+        OUT_printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
       }
       
       //MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes

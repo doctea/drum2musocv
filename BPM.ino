@@ -154,6 +154,8 @@ double bpm_calculate_current () {
   // speed = distance/time
   // bpm = beats/time
 
+  estimated_ms_per_tick = 60000.0d/(bpm*PPQN);
+
   //Serial.printf("bpm calculated as %3.3f (from elapsed_ms %3.3f and beats %3.3f)\r\n", bpm, elapsed_ms,  beats);
 
   return bpm;

@@ -4,6 +4,8 @@
 
 #include "MidiSetup.hpp"
 
+float estimated_ms_per_tick = 0.0f;
+
 // utility functions for calculating BPM etc
 
 // defines for clock type and time signature etc
@@ -76,7 +78,7 @@ unsigned int get_euclidian_seed() {
   return seed;
 }
 
-
+double bpm_calculate_current ();
 
 class bpm_status {
 public:

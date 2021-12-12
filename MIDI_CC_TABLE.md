@@ -98,6 +98,7 @@
 `10` | `MidiInput.hpp` | `111` | `CC_CLOCK_TICK_RATIO` | ` send a clock tick for every X clock ticks, default 1` |
 `10` | `Harmony.hpp` | `112` | `CC_PAD_ROOT_MELODY_MODE` | ` output 2: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord` |
 `10` | `Harmony.hpp` | `113` | `CC_PAD_ROOT_OCTAVE_OFFSET` | ` output 2: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3` |
+`10` | `Euclidian.h` | `114` | `CC_EUCLIDIAN_DENSITY` | ` experimental: global density of euclidian patterns` |
 `10` | `Drums.h` | `123` | `MIDI_CC_ALL_NOTES_OFF` | `` |
 | ---- | ---- | -- | ---- | ------- |
 `11` | `Envelopes.h` | `64` | `Envelope 5 ATTACK` | `Extended pitch envelopes on Chan 11` |

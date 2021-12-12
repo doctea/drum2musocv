@@ -39,6 +39,7 @@ COMPILE FAIL -- NUM_PATTERNS doesnt match PATTERN_PAD_PITCH !
 #define CC_EUCLIDIAN_SET_MAXIMUM_PATTERN  26    // highest number pattern to automutate
 #define CC_EUCLIDIAN_SEED_USE_PHRASE      27    // increment seed according to BPM phrase (ie automutate)
 #define CC_EUCLIDIAN_FILLS                28    // enable/disable fills on last bar of phrase, 0=off
+#define CC_EUCLIDIAN_DENSITY              114   // experimental: global density of euclidian patterns
 
 #define CC_EUCLIDIAN_HIHAT_SHUFF          9     // enable/disable hihat shuffle, 0=off
 #define CC_EUCLIDIAN_CLAP_FLAM            8     // enable/disable clap flam, 0=off
@@ -54,7 +55,8 @@ enum mutate_modes : int {
   EUCLIDIAN_MUTATE_MODE_SUBTLE = 1,
   EUCLIDIAN_MUTATE_MODE_TOTAL = 2,
   EUCLIDIAN_MUTATE_MODE_ACIDBANGER = 3,
-  EUCLIDIAN_MUTATE_MODE_MAX = 4
+  EUCLIDIAN_MUTATE_MODE_MASKED = 4,
+  EUCLIDIAN_MUTATE_MODE_MAX = 5
 };
 int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 

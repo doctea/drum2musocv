@@ -85,9 +85,9 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
     } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
-      if (envelopes[env_num].trigger_on_channel>0)
+      if (envelopes[env_num].trigger_on_channel!=TRIGGER_CHANNEL_OFF)
         update_envelope(env_num, 0, false);
-      envelopes[env_num].trigger_on_channel = value % 16;
+      envelopes[env_num].trigger_on_channel = value;  // 0 = off, 1-16 = channel, 17 = lfo // % 16;
     }
     return true;
   }
@@ -159,6 +159,7 @@ void process_envelopes(unsigned long now) {
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
 void process_envelope(byte i, unsigned long now) {
+  //unsigned long envelope_time = millis();
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -171,15 +172,18 @@ void process_envelope(byte i, unsigned long now) {
     elapsed = (float)elapsed * ratio;   // convert real elapsed to pseudoelapsed
     
 #ifdef DEBUG_ENVELOPES
-    if (s>0) {
-      Serial.printf("process_envelope(%i, %u) in stage %i: sync'd elapsed is %u, ", i, now, s, elapsed);
-      Serial.printf("real elapsed is %u, ", real_elapsed);
+    static byte last_stage;
+    if (s>0 && last_stage!=s && envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO) {
+      Serial.printf("process_envelope(%i, %u, trig %i) in stage %i: sync'd elapsed is %u, ", i, now, envelopes[i].trigger_on_channel, elapsed);
+      Serial.printf("real elapsed is %u, lvl is %i, ", real_elapsed, envelopes[i].last_sent_lvl);
       Serial.printf("cc_value_sync_modifier is %u\r\n", cc_value_sync_modifier);
 
-      Serial.printf("Ratio is PPQN %u / %u = %3.3f, so therefore", PPQN, cc_value_sync_modifier, ratio);
+      /*Serial.printf("Ratio is PPQN %u / %u = %3.3f, so therefore", PPQN, cc_value_sync_modifier, ratio);
       Serial.printf("converting real elapsed %u to ", real_elapsed);
-      Serial.printf("%u\r\n", elapsed);
+      Serial.printf("%u\r\n", elapsed);*/
     } 
+    last_stage = s;
+    
 #endif
     
     // TODO: switch() would be nicer than if-else blocks, but ran into weird problems (like breakpoints never being hit) when approached it that way?!
@@ -247,11 +251,11 @@ void process_envelope(byte i, unsigned long now) {
 
         lvl = (byte)(sustain_level);
         
-        // go straight to RELEASE if sustain is zero
-        if (envelopes[i].sustain_ratio==0.0f) {
+        // go straight to RELEASE if sustain is zero or we're in lfo mode
+        if (envelopes[i].sustain_ratio==0.0f || envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage_start_level = lvl;
-          Serial.printf("Leaving SUSTAIN stage with lvl at %i\r\n", lvl);
+          OUT_printf("Leaving SUSTAIN stage with lvl at %i\r\n", lvl);
           envelopes[i].stage++; // = RELEASE;
         }
     } else if (s==RELEASE) {
@@ -320,8 +324,23 @@ void process_envelope(byte i, unsigned long now) {
           127
         );
         //Serial.printf("sync of %i resulted in lvl %i\r\n", sync, lvl);
-      }
+      } 
+    } else {
+        // envelope is stopped - restart it if in lfo mode!
+        if (envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
+          OUT_printf("envelope %i is stopped, restarting\n", i);
+          update_envelope(i, 127, true);
+        }
     }
+
+    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED ) {
+      int modulating_envelope = (i-1==-1) ? NUM_ENVELOPES_EXTENDED-1 : i-1;
+      lvl = ((float)lvl) * ((float)envelopes[modulating_envelope].last_sent_lvl/127);
+    }
+    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_INVERTED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED) {
+      lvl = 127-lvl;
+    }
+
 
     envelopes[i].actual_level = lvl;
     
@@ -334,16 +353,18 @@ void process_envelope(byte i, unsigned long now) {
       envelopes[i].last_sent_lvl = lvl;
     }
 
+  //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);
+
 }
 
 // trigger any envelopes that have been told to respond to given channel
 void fire_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
-  Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
+  //Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
 
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on_channel==channel) {
-      Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
+      //Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, true);
     }
   }

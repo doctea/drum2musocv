@@ -128,6 +128,20 @@ int get_envelope_for_pixel(int i) {
   }
 }
 
+static CRGB trigger_colours[NUM_TRIGGERS] = {
+  CRGB::Red,
+  CRGB::OrangeRed,
+  CRGB::Orange,
+  CRGB::Yellow,
+  CRGB::YellowGreen,
+  CRGB::Green,
+  CRGB::Aqua,
+  CRGB::Blue,
+  CRGB::BlueViolet,
+  CRGB::Violet,
+  CRGB::DarkViolet
+};
+
 void update_pixels_triggers() {
     bool changed = false;
     for (int i = 0 ; i < NUM_LEDS ; i++) {
@@ -168,7 +182,8 @@ void update_pixels_triggers() {
       if (active) {
         if (pixel_type==PIX_TRIGGER) {
           // handling a trigger pixel that is on
-          colour = CRGB::Red;
+          //colour = CRGB::Red;
+          colour = trigger_colours[t];
         } else if (pixel_type==PIX_ENVELOPE) {
           // handling an envelope pixel that is active
           if (envelopes[t].stage==ATTACK) {

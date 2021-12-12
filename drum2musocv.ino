@@ -89,10 +89,13 @@ void setup() {
 
   bpm_reset_clock();
 
+  bpm_calculate_current();
+
   //initialise_harmony();
   initialise_euclidian();
   initialise_envelopes();
 
+  initialise_pitch_for_trigger_table();
   //NOISY_DEBUG(1000, 1);
 
   kill_notes();
@@ -106,6 +109,7 @@ void setup() {
   
 }
 
+
 void loop() {
   process_midi();
 
@@ -113,11 +117,14 @@ void loop() {
   update_buttons();
 #endif
 
-  //unsigned long now = clock_millis();
   unsigned long now = bpm_clock();
   unsigned long now_ms = millis();
   unsigned long delta_ms = now_ms - time_last;
   //Serial.print("now is "); Serial.println(now);
+  if (delta_ms >= (int)estimated_ms_per_tick) {
+    //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
+    Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
+  }
   
   if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION) {
     //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
