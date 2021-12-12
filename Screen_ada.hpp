@@ -1,6 +1,9 @@
 #ifndef SCREEN_INCLUDED
 #define SCREEN_INCLUDED
 
+#include "BPM.hpp"
+#include "UI.h"
+
 #define USE_SPI_DMA
 #define ARDUINO_SAMD_ZERO
 
