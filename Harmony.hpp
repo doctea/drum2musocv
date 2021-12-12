@@ -193,7 +193,7 @@ class Harmony {
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
-	MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
+	      MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT),
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 
@@ -344,14 +344,19 @@ class Harmony {
             chord_type,
             inversion
           );
-      }
+      } 
 
-      mko[output_number].fire_notes(pitch, notes);
+      if (mko[output_number].fire_notes(pitch, notes)) {
+        update_envelopes_for_trigger(output_number + NUM_TRIGGERS + NUM_ENVELOPES, 127, true);
+      }
     }
 
     void douse_for(int output_number, bool tied = false) {
       HARM_printf("douse_for output number %i - channel %i\r\n", output_number, mko[output_number].channel);
       mko[output_number].douse_notes(tied);   // erm this doesnt seem to affect anything?!
+      if (!mko[output_number].is_note_held()) {
+        update_envelopes_for_trigger(output_number + NUM_TRIGGERS + NUM_ENVELOPES, 0, false);
+      }
     }
 
     // douse all harmony output notes by calling douse_for
@@ -407,6 +412,16 @@ class Harmony {
       return get_scale_note(
         sequence [sequence_number] [position % HARM_SEQUENCE_LENGTH]
       );
+    }
+
+    bool is_note_held(int channel) {
+      for (int i = 0 ; i < NUM_MKO ; i++) {
+        if (mko[i].channel==channel) {
+          if (mko[i].is_note_held()) return true;
+          //mko[i].send_note_off(pitch, velocity);
+        }
+      } 
+      return false;     
     }
 
     // might be deprecated now?

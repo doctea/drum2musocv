@@ -110,7 +110,7 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     //harmony.fire_both(); //bass_note_on_and_next();
     harmony.fire_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
-    update_envelopes_for_trigger(trigger, velocity, true);
+    //update_envelopes_for_trigger(trigger, velocity, true);
     //else
     //  OUT_println("No note held? is_note_held is false");
   } else {
@@ -162,7 +162,7 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
     //harmony.douse_both();
     if (tied) OUT_printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
     harmony.douse_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
-    update_envelopes_for_trigger(trigger, velocity, false);
+    //update_envelopes_for_trigger(trigger, velocity, false);
   } else {
     //OUT_printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }

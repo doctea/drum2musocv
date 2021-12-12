@@ -209,7 +209,8 @@ void process_midi() {
         update_envelopes_for_trigger(TRIGGER_HARMONY_BASS, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_BASS_OUT, MIDIIN.getData1(), MIDIIN.getData2());
-        update_envelopes_for_trigger(TRIGGER_HARMONY_BASS, MIDIIN.getData2(), false);
+        if(!harmony.is_note_held(MIDI_CHANNEL_BASS_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_BASS, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),
@@ -225,7 +226,8 @@ void process_midi() {
         update_envelopes_for_trigger(TRIGGER_HARMONY_MELODY, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_BITBOX_KEYS, MIDIIN.getData1(), MIDIIN.getData2());
-        update_envelopes_for_trigger(TRIGGER_HARMONY_MELODY, MIDIIN.getData2(), false);
+        if(!harmony.is_note_held(MIDI_CHANNEL_BITBOX_KEYS))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_MELODY, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
@@ -242,7 +244,8 @@ void process_midi() {
         update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_ROOT, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
-        update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_ROOT, MIDIIN.getData2(), false);
+        if(!harmony.is_note_held(MIDI_CHANNEL_PAD_ROOT_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_ROOT, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),
@@ -258,7 +261,8 @@ void process_midi() {
         update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_PITCH, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_PITCH_OUT, MIDIIN.getData1(), MIDIIN.getData2());
-        update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_PITCH, MIDIIN.getData2(), false);
+        if(!harmony.is_note_held(MIDI_CHANNEL_PAD_PITCH_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_PITCH, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),

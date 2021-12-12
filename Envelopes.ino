@@ -92,7 +92,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
       envelopes[env_num].loop = bitRead(value,5);          // +32 = loop on/off
       envelopes[env_num].invert = bitRead(value,6);        // +64 = invert on/off
       envelopes[env_num].trigger_on = value & 0b00011111;  // mask off the high bits to get the trigger number
-      Serial.printf("setting envelope %i to trigger on %i, loop %i invert %i\n", env_num, envelopes[env_num].trigger_on, envelopes[env_num].loop, envelopes[env_num].invert );
+      //Serial.printf("setting envelope %i to trigger on %i, loop %i invert %i\n", env_num, envelopes[env_num].trigger_on, envelopes[env_num].loop, envelopes[env_num].invert );
     }
     return true;
   }
@@ -103,7 +103,7 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
 void update_envelopes_for_trigger(int trigger, int velocity, bool state) {
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on==trigger) {
-      Serial.printf("update_envelopes_for_trigger(trigger %i, env %i, state %i)\n", trigger, i, state);
+      //Serial.printf("update_envelopes_for_trigger(trigger %i, env %i, state %i)\n", trigger, i, state);
       update_envelope(i, (byte)velocity, state);
     }
   }
@@ -361,7 +361,7 @@ void process_envelope(byte i, unsigned long now) {
     if (envelopes[i].last_sent_lvl != lvl) {  // only send a new value if its different to the last value sent for this envelope
       //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
 
-      Serial.printf("sending value %i for envelope %i\n", lvl, i);
+      //Serial.printf("sending value %i for envelope %i\n", lvl, i);
       midi_send_envelope_level(i, lvl); // send message to midimuso
       
       envelopes[i].last_sent_at = now;
@@ -390,6 +390,7 @@ void douse_envelope_for_channel(int channel, int velocity) {
 
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     if (envelopes[i].trigger_on==channel) {
+      //Serial.printf("got douse_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, false);
     }
   }

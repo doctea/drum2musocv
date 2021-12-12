@@ -56,7 +56,7 @@ class MidiKeysOutput : public ChannelState {
       }
     }
 
-    void fire_notes(int pitch, int *pitches, int velocity = 127) {
+    bool fire_notes(int pitch, int *pitches, int velocity = 127) {
       //Serial.printf("fire_notes for channel %i with melody_mode %i: pitch %i\r\n", channel, melody_mode, pitch);
 
       if (is_note_held() && !tied_status) {
@@ -78,11 +78,13 @@ class MidiKeysOutput : public ChannelState {
 
       if (melody_mode==HARMONY::MELODY_MODE::MELODY_MODE_NONE) {
         // do nothing
+        return false;
       } else if (melody_mode==HARMONY::MELODY_MODE::SINGLE) {
         arp_counter = 0;
         send_note_on(pitch, velocity);
         //if (DEBUG_HARMONY) 
         if (DEBUG_HARMONY) Serial.printf("    using single mode - sending pitch %s [%i]\r\n", get_note_name(pitch).c_str(), pitch);
+        return true;
       } else if (melody_mode==HARMONY::MELODY_MODE::CHORD || HARMONY::MELODY_MODE::ARPEGGIATE) {
         //if (DEBUG_HARMONY) 
         
@@ -107,6 +109,7 @@ class MidiKeysOutput : public ChannelState {
 
           send_note_on(pitches, velocity);  // send all notes of generated chord_type
         }
+        return true;
       }
     }
 
