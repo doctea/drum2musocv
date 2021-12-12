@@ -225,7 +225,7 @@ class MidiKeysOutput : public ChannelState {
       // todo - possibly put the fire_envelope_for_channel here instead?
       // but how do we tell when its a chord we're playing rather than just a single note so we dont just retrigger? :/
       //      do we even need to care about that actually?
-      fire_envelope_for_channel(channel, velocity);
+      //fire_envelope_for_channel(channel, velocity);
 
       if (midiecho_enabled)
         MIDIIN.sendNoteOn((byte)pitch, (byte)velocity, (byte)channel);  // echo back to host

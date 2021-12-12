@@ -38,6 +38,11 @@
 #define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())      // output 2
 #define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
 
+#define TRIGGER_HARMONY_BASS      16
+#define TRIGGER_HARMONY_MELODY    17
+#define TRIGGER_HARMONY_PAD_ROOT  18
+#define TRIGGER_HARMONY_PAD_PITCH 19
+
 //BITBOX/melody settings
 #define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 #define BITBOX_KEYS_OCTAVE_OFFSET   2
@@ -276,6 +281,7 @@ class Harmony {
     void send_note_on_for_channel(int channel, int pitch, int velocity) {
       HARM_printf("send_note_on_for_channel(chan%i, pitc%i, velo%i)\n", channel, pitch, velocity);
       for (int i = 0 ; i < NUM_MKO ; i++) {
+        // translate i to trigger number ?
         if (mko[i].channel==channel) {
           mko[i].send_note_on(pitch, velocity);
         }

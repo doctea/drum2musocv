@@ -96,6 +96,7 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
       OUT_printf("fire_trigger(%i) sending bitbox drum pitch %i on channel %i\r\n", b, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
       MIDIOUT.sendNoteOn(b, velocity, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
     }
+    update_envelopes_for_trigger(trigger, velocity, true);
     //OUT_println("sent both midi notes");
   } else if (
     p >= MUSO_NOTE_MAXIMUM &&
@@ -109,6 +110,7 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     //harmony.fire_both(); //bass_note_on_and_next();
     harmony.fire_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
+    update_envelopes_for_trigger(trigger, velocity, true);
     //else
     //  OUT_println("No note held? is_note_held is false");
   } else {
@@ -143,6 +145,7 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
       //MIDIOUT.sendNoteOff(b, v, 0);
       MIDIOUT.sendNoteOff(b, velocity, midi_channel_bitbox_drums_out);
     }
+    update_envelopes_for_trigger(trigger, velocity, false);
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //OUT_printf("fired a note OFF to bit box: %i\r\n", i);
   } else if (
@@ -159,6 +162,7 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
     //harmony.douse_both();
     if (tied) OUT_printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
     harmony.douse_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
+    update_envelopes_for_trigger(trigger, velocity, false);
   } else {
     //OUT_printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
