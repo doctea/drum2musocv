@@ -139,8 +139,6 @@ A diagram to help me understand how everything is routed:-
 
 # TODO / future plans + ideas
 
- - Make the envelopes triggerable by any trigger, not just MIDI
-
  - 'Acid' harmony output mode, with note ties and automation acid line generation (maybe take some inspiration from [Aciduino](https://github.com/midilab/aciduino) and [endless acid banger](https://github.com/vitling/acid-banger))
 
  - Separate the harmony inputs, so you can specify different lines to play for each harmony output, including 'only when note held' stuff
@@ -208,7 +206,10 @@ A diagram to help me understand how everything is routed:-
 
 ### Done list
 
- - Can put envelopes into LFO modes: freerunning, modulated by left-hand envelope, inverted freerunning, inverted + modulated by left-hand envelope
+ - Make the envelopes triggerable by any trigger, not just MIDI
+	- with toggleables in the control surface using formula conrtoller to combine checkboxes with knob values
+ - Can put envelopes into LFO modes: looping and inverted
+	- lost ability to modulate from previous version, but looping and inverted is still decent right?  and have run out of ccs to control the envelopes for the envelopes
  - Euclidian fills on last bar of phrase.  Multiply the track parameters to increase/decrease density?
  - Make euclidian sequences work off midi clock, fix any bpm issues.
  - Make BPM guesser only work off the last 4 steps, to handle live changes of tempo better (done, but still needs 3 beats before it becomes accurate...?)
