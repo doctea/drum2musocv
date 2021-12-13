@@ -49,46 +49,46 @@
 `10` | `Euclidian.h` | `49` | `Euclidian on/off for pattern 17` | `` |
 `10` | `Euclidian.h` | `50` | `Euclidian on/off for pattern 18` | `` |
 `10` | `Euclidian.h` | `51` | `Euclidian on/off for pattern 19` | `` |
-`10` | `Envelopes.h` | `64` | `Envelope 0 ATTACK` | `Chan 10` |
-`10` | `Envelopes.h` | `65` | `Envelope 0 HOLD` | `Chan 10` |
-`10` | `Envelopes.h` | `66` | `Envelope 0 DECAY` | `Chan 10` |
-`10` | `Envelopes.h` | `67` | `Envelope 0 SUSTAIN` | `Chan 10` |
-`10` | `Envelopes.h` | `68` | `Envelope 0 RELEASE` | `Chan 10` |
-`10` | `Envelopes.h` | `69` | `Envelope 0 HD_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `70` | `Envelope 0 SR_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `71` | `Envelope 0 TRIGGER_ON_MIDI_CHANNEL` | `Chan 10` |
-`10` | `Envelopes.h` | `72` | `Envelope 1 ATTACK` | `Chan 10` |
-`10` | `Envelopes.h` | `73` | `Envelope 1 HOLD` | `Chan 10` |
-`10` | `Envelopes.h` | `74` | `Envelope 1 DECAY` | `Chan 10` |
-`10` | `Envelopes.h` | `75` | `Envelope 1 SUSTAIN` | `Chan 10` |
-`10` | `Envelopes.h` | `76` | `Envelope 1 RELEASE` | `Chan 10` |
-`10` | `Envelopes.h` | `77` | `Envelope 1 HD_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `78` | `Envelope 1 SR_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `79` | `Envelope 1 TRIGGER_ON_MIDI_CHANNEL` | `Chan 10` |
-`10` | `Envelopes.h` | `80` | `Envelope 2 ATTACK` | `Chan 10` |
-`10` | `Envelopes.h` | `81` | `Envelope 2 HOLD` | `Chan 10` |
-`10` | `Envelopes.h` | `82` | `Envelope 2 DECAY` | `Chan 10` |
-`10` | `Envelopes.h` | `83` | `Envelope 2 SUSTAIN` | `Chan 10` |
-`10` | `Envelopes.h` | `84` | `Envelope 2 RELEASE` | `Chan 10` |
-`10` | `Envelopes.h` | `85` | `Envelope 2 HD_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `86` | `Envelope 2 SR_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `87` | `Envelope 2 TRIGGER_ON_MIDI_CHANNEL` | `Chan 10` |
-`10` | `Envelopes.h` | `88` | `Envelope 3 ATTACK` | `Chan 10` |
-`10` | `Envelopes.h` | `89` | `Envelope 3 HOLD` | `Chan 10` |
-`10` | `Envelopes.h` | `90` | `Envelope 3 DECAY` | `Chan 10` |
-`10` | `Envelopes.h` | `91` | `Envelope 3 SUSTAIN` | `Chan 10` |
-`10` | `Envelopes.h` | `92` | `Envelope 3 RELEASE` | `Chan 10` |
-`10` | `Envelopes.h` | `93` | `Envelope 3 HD_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `94` | `Envelope 3 SR_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `95` | `Envelope 3 TRIGGER_ON_MIDI_CHANNEL` | `Chan 10` |
-`10` | `Envelopes.h` | `96` | `Envelope 4 ATTACK` | `Chan 10` |
-`10` | `Envelopes.h` | `97` | `Envelope 4 HOLD` | `Chan 10` |
-`10` | `Envelopes.h` | `98` | `Envelope 4 DECAY` | `Chan 10` |
-`10` | `Envelopes.h` | `99` | `Envelope 4 SUSTAIN` | `Chan 10` |
-`10` | `Envelopes.h` | `100` | `Envelope 4 RELEASE` | `Chan 10` |
-`10` | `Envelopes.h` | `101` | `Envelope 4 HD_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `102` | `Envelope 4 SR_VIB` | `Chan 10` |
-`10` | `Envelopes.h` | `103` | `Envelope 4 TRIGGER_ON_MIDI_CHANNEL` | `Chan 10` |
+`10` | `Envelopes.h` | `64` | `Envelope 0 Attack` | `Attack time` |
+`10` | `Envelopes.h` | `65` | `Envelope 0 Hold` | `Hold after attack time` |
+`10` | `Envelopes.h` | `66` | `Envelope 0 Decay` | `Decay time` |
+`10` | `Envelopes.h` | `67` | `Envelope 0 Sustain` | `Sustain volume` |
+`10` | `Envelopes.h` | `68` | `Envelope 0 Release` | `Release time` |
+`10` | `Envelopes.h` | `69` | `Envelope 0 HD Vibrato` | `Hold-Decay phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `70` | `Envelope 0 SR Vibrato` | `Sustain-Release phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `71` | `Envelope 0 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert` |
+`10` | `Envelopes.h` | `72` | `Envelope 1 Attack` | `Attack time` |
+`10` | `Envelopes.h` | `73` | `Envelope 1 Hold` | `Hold after attack time` |
+`10` | `Envelopes.h` | `74` | `Envelope 1 Decay` | `Decay time` |
+`10` | `Envelopes.h` | `75` | `Envelope 1 Sustain` | `Sustain volume` |
+`10` | `Envelopes.h` | `76` | `Envelope 1 Release` | `Release time` |
+`10` | `Envelopes.h` | `77` | `Envelope 1 HD Vibrato` | `Hold-Decay phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `78` | `Envelope 1 SR Vibrato` | `Sustain-Release phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `79` | `Envelope 1 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert` |
+`10` | `Envelopes.h` | `80` | `Envelope 2 Attack` | `Attack time` |
+`10` | `Envelopes.h` | `81` | `Envelope 2 Hold` | `Hold after attack time` |
+`10` | `Envelopes.h` | `82` | `Envelope 2 Decay` | `Decay time` |
+`10` | `Envelopes.h` | `83` | `Envelope 2 Sustain` | `Sustain volume` |
+`10` | `Envelopes.h` | `84` | `Envelope 2 Release` | `Release time` |
+`10` | `Envelopes.h` | `85` | `Envelope 2 HD Vibrato` | `Hold-Decay phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `86` | `Envelope 2 SR Vibrato` | `Sustain-Release phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `87` | `Envelope 2 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert` |
+`10` | `Envelopes.h` | `88` | `Envelope 3 Attack` | `Attack time` |
+`10` | `Envelopes.h` | `89` | `Envelope 3 Hold` | `Hold after attack time` |
+`10` | `Envelopes.h` | `90` | `Envelope 3 Decay` | `Decay time` |
+`10` | `Envelopes.h` | `91` | `Envelope 3 Sustain` | `Sustain volume` |
+`10` | `Envelopes.h` | `92` | `Envelope 3 Release` | `Release time` |
+`10` | `Envelopes.h` | `93` | `Envelope 3 HD Vibrato` | `Hold-Decay phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `94` | `Envelope 3 SR Vibrato` | `Sustain-Release phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `95` | `Envelope 3 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert` |
+`10` | `Envelopes.h` | `96` | `Envelope 4 Attack` | `Attack time` |
+`10` | `Envelopes.h` | `97` | `Envelope 4 Hold` | `Hold after attack time` |
+`10` | `Envelopes.h` | `98` | `Envelope 4 Decay` | `Decay time` |
+`10` | `Envelopes.h` | `99` | `Envelope 4 Sustain` | `Sustain volume` |
+`10` | `Envelopes.h` | `100` | `Envelope 4 Release` | `Release time` |
+`10` | `Envelopes.h` | `101` | `Envelope 4 HD Vibrato` | `Hold-Decay phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `102` | `Envelope 4 SR Vibrato` | `Sustain-Release phase Vibrato sync rate` |
+`10` | `Envelopes.h` | `103` | `Envelope 4 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert` |
 `10` | `Harmony.hpp` | `105` | `CC_AUTO_CHORD_TYPE` | ` enable/disable playing automatic chord types (ie stacking triads)` |
 `10` | `Harmony.hpp` | `106` | `CC_AUTO_CHORD_INVERSION` | ` enable/disable playing automatic chord inversions` |
 `10` | `Harmony.hpp` | `107` | `CC_MELODY_OCTAVE_OFFSET` | ` output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3` |
@@ -101,38 +101,38 @@
 `10` | `Euclidian.h` | `114` | `CC_EUCLIDIAN_DENSITY` | ` experimental: global density of euclidian patterns` |
 `10` | `Drums.h` | `123` | `MIDI_CC_ALL_NOTES_OFF` | `` |
 | ---- | ---- | -- | ---- | ------- |
-`11` | `Envelopes.h` | `64` | `Envelope 5 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `65` | `Envelope 5 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `66` | `Envelope 5 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `67` | `Envelope 5 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `68` | `Envelope 5 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `69` | `Envelope 5 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `70` | `Envelope 5 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `71` | `Envelope 5 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `72` | `Envelope 6 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `73` | `Envelope 6 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `74` | `Envelope 6 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `75` | `Envelope 6 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `76` | `Envelope 6 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `77` | `Envelope 6 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `78` | `Envelope 6 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `79` | `Envelope 6 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `80` | `Envelope 7 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `81` | `Envelope 7 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `82` | `Envelope 7 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `83` | `Envelope 7 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `84` | `Envelope 7 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `85` | `Envelope 7 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `86` | `Envelope 7 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `87` | `Envelope 7 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `88` | `Envelope 8 ATTACK` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `89` | `Envelope 8 HOLD` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `90` | `Envelope 8 DECAY` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `91` | `Envelope 8 SUSTAIN` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `92` | `Envelope 8 RELEASE` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `93` | `Envelope 8 HD_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `94` | `Envelope 8 SR_VIB` | `Extended pitch envelopes on Chan 11` |
-`11` | `Envelopes.h` | `95` | `Envelope 8 TRIGGER_ON_MIDI_CHANNEL` | `Extended pitch envelopes on Chan 11` |
+`11` | `Envelopes.h` | `64` | `Envelope 5 Attack` | `Attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `65` | `Envelope 5 Hold` | `Hold after attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `66` | `Envelope 5 Decay` | `Decay time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `67` | `Envelope 5 Sustain` | `Sustain volume (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `68` | `Envelope 5 Release` | `Release time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `69` | `Envelope 5 HD Vibrato` | `Hold-Decay phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `70` | `Envelope 5 SR Vibrato` | `Sustain-Release phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `71` | `Envelope 5 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `72` | `Envelope 6 Attack` | `Attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `73` | `Envelope 6 Hold` | `Hold after attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `74` | `Envelope 6 Decay` | `Decay time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `75` | `Envelope 6 Sustain` | `Sustain volume (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `76` | `Envelope 6 Release` | `Release time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `77` | `Envelope 6 HD Vibrato` | `Hold-Decay phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `78` | `Envelope 6 SR Vibrato` | `Sustain-Release phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `79` | `Envelope 6 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `80` | `Envelope 7 Attack` | `Attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `81` | `Envelope 7 Hold` | `Hold after attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `82` | `Envelope 7 Decay` | `Decay time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `83` | `Envelope 7 Sustain` | `Sustain volume (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `84` | `Envelope 7 Release` | `Release time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `85` | `Envelope 7 HD Vibrato` | `Hold-Decay phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `86` | `Envelope 7 SR Vibrato` | `Sustain-Release phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `87` | `Envelope 7 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `88` | `Envelope 8 Attack` | `Attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `89` | `Envelope 8 Hold` | `Hold after attack time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `90` | `Envelope 8 Decay` | `Decay time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `91` | `Envelope 8 Sustain` | `Sustain volume (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `92` | `Envelope 8 Release` | `Release time (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `93` | `Envelope 8 HD Vibrato` | `Hold-Decay phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `94` | `Envelope 8 SR Vibrato` | `Sustain-Release phase Vibrato sync rate (Extended pitch envelopes on Chan 11)` |
+`11` | `Envelopes.h` | `95` | `Envelope 8 Trigger on` | `Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert (Extended pitch envelopes on Chan 11)` |
 | ---- | ---- | -- | ---- | ------- |
 
 ----

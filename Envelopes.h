@@ -86,9 +86,9 @@ typedef struct envelope_state {
   unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
 
-  int trigger_on = 0; // 0-19 = trigger, 20 = off
-  bool loop;
-  bool invert;
+  int trigger_on = 0; // 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->84 = trigger #+invert, 96->116 = trigger #+loop+invert
+  bool loop = false;
+  bool invert = false;
 
   byte midi_cc;
 
