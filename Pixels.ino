@@ -173,7 +173,8 @@ void update_pixels_triggers() {
         t = get_envelope_for_pixel(i);
         if (t>=0) {
           pixel_type = PIX_ENVELOPE;
-          active = envelopes[t].stage != OFF;
+          //active = envelopes[t].stage != OFF;
+          active = envelopes[t].last_sent_actual_lvl>0; // != OFF;
         }
       }
 
@@ -188,19 +189,27 @@ void update_pixels_triggers() {
           // handling an envelope pixel that is active
           if (envelopes[t].stage==ATTACK) {
             colour = CRGB::Red;
+          } else if (envelopes[i].stage==HOLD) {
+            colour = CRGB::White;
           } else if (envelopes[t].stage==DECAY) {
             colour = CRGB::Yellow;
+          } else if (envelopes[t].stage==SUSTAIN) {
+            colour = CRGB::Orange;
           } else if (envelopes[t].stage==RELEASE) {
-            colour = CRGB::Aqua;
+            colour = CRGB::Crimson;
           } else {
             colour = CRGB::Green;
           }
-          // fade by envelope level relative to velocity
-          colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));
+          
+          //colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));// fade by envelope level relative to velocity
+          colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].last_sent_actual_lvl/127.0))); // by the actual level....
         }
       } else {
         //colour = CRGB::Black;
-        colour = leds[p]/4; //CRGB::Black;
+        if (pixel_type==PIX_TRIGGER)
+          colour = leds[p]/4; //CRGB::Black;
+        else 
+          colour = CRGB::Black;
       }
 
 #ifdef ENABLE_PIXEL_POSITION

@@ -87,11 +87,11 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
     } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
-      if (envelopes[env_num].trigger_on!=TRIGGER_CHANNEL_OFF)
-        update_envelope(env_num, 0, false);
+      //if (envelopes[env_num].trigger_on!=TRIGGER_CHANNEL_OFF) 
       envelopes[env_num].loop = bitRead(value,5);          // +32 = loop on/off
       envelopes[env_num].invert = bitRead(value,6);        // +64 = invert on/off
       envelopes[env_num].trigger_on = value & 0b00011111;  // mask off the high bits to get the trigger number
+      update_envelope(env_num, 127, false);      
       //Serial.printf("setting envelope %i to trigger on %i, loop %i invert %i\n", env_num, envelopes[env_num].trigger_on, envelopes[env_num].loop, envelopes[env_num].invert );
     }
     return true;
@@ -343,7 +343,7 @@ void process_envelope(byte i, unsigned long now) {
         // envelope is stopped - restart it if in lfo mode!
         if (envelopes[i].loop) { //trigger_on>=TRIGGER_CHANNEL_LFO) {
           OUT_printf("envelope %i is stopped, restarting\n", i);
-          update_envelope(i, 127, true);
+          update_envelope(i, envelopes[i].velocity, true);
         }
     }
 
@@ -351,21 +351,26 @@ void process_envelope(byte i, unsigned long now) {
       int modulating_envelope = (i-1==-1) ? NUM_ENVELOPES_EXTENDED-1 : i-1;
       lvl = ((float)lvl) * ((float)envelopes[modulating_envelope].last_sent_lvl/127);
     }*/
-    if (envelopes[i].invert) {
-      lvl = 127-lvl;
-    }
-
 
     envelopes[i].actual_level = lvl;
     
-    if (envelopes[i].last_sent_lvl != lvl) {  // only send a new value if its different to the last value sent for this envelope
+    if (envelopes[i].last_sent_actual_lvl != envelopes[i].invert ? 127-lvl : lvl) {  // only send a new value if its different to the last value sent for this envelope
       //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
 
-      //Serial.printf("sending value %i for envelope %i\n", lvl, i);
-      midi_send_envelope_level(i, lvl); // send message to midimuso
+      /*if (envelopes[i].invert) {
+        lvl = 127-lvl;
+      }*/
+      midi_send_envelope_level(i, envelopes[i].invert ? 127-lvl : lvl); // send message to midimuso
       
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
+      envelopes[i].last_sent_actual_lvl = envelopes[i].invert ? 127-lvl : lvl;
+      if (envelopes[i].invert)
+        Serial.printf("sending value %i for envelope %i\n", envelopes[i].last_sent_actual_lvl, i);
+
+    } else {
+      if (envelopes[i].invert)
+        Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);
     }
 
   //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);

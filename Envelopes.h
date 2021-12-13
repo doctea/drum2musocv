@@ -68,9 +68,9 @@ typedef struct envelope_state {
   byte stage = LFO_SYNC_RATIO;
 #endif*/
 
-  byte velocity;         // triggered velocity
-  byte actual_level;          // right now, the level
-  byte stage_start_level;     // level at start of current stage
+  byte velocity = 127;         // triggered velocity
+  byte actual_level = 0;          // right now, the level
+  byte stage_start_level = 0;     // level at start of current stage
 
   // TODO: int delay_length = 5;                    // D - delay before atack starts
   unsigned int  attack_length   = 0;                // A - attack  - length of stage
@@ -92,7 +92,8 @@ typedef struct envelope_state {
 
   byte midi_cc;
 
-  byte last_sent_lvl;
+  byte last_sent_lvl; // value but not inverted
+  byte last_sent_actual_lvl;  // actual midi value sent
 };
 
 
@@ -112,7 +113,7 @@ void process_envelopes(unsigned long now);
 void randomise_envelopes();
 
 void fire_envelope_for_channel(int channel, int velocity = 127);
-void douse_envelope_for_channel(int channel, int velocity = 0);
+void douse_envelope_for_channel(int channel, int velocity = 127);
 
 void update_envelopes_for_trigger(int trigger, int velocity = 127, bool state = true);
   
