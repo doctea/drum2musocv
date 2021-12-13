@@ -365,12 +365,12 @@ void process_envelope(byte i, unsigned long now) {
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
       envelopes[i].last_sent_actual_lvl = envelopes[i].invert ? 127-lvl : lvl;
-      if (envelopes[i].invert)
-        Serial.printf("sending value %i for envelope %i\n", envelopes[i].last_sent_actual_lvl, i);
+      /*if (envelopes[i].invert)
+        Serial.printf("sending value %i for envelope %i\n", envelopes[i].last_sent_actual_lvl, i);*/
 
     } else {
-      if (envelopes[i].invert)
-        Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);
+      /*if (envelopes[i].invert)
+        Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);*/
     }
 
   //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);
