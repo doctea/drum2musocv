@@ -75,14 +75,15 @@ A diagram to help me understand how everything is routed:-
 
 | MIDI type   | MIDI channel | MIDI number    | Purpose                    |
 | ----------  | ------------ | -------------- | -------------------------- | 
-| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1   |
-| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2   |
-| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3   |
-| Note        | 10           | Ride Bell      | Trigger envelope on CV 4   |
-| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5*  |
+| Note on/off | 1,2,3,4      | any            | Output notes to corresponding channel, trigger envelope if assigned |
+| Note on/off | 10           | Cymbal Crash 2 | Trigger envelope on CV 1 (default, change by assigning trigger)  |
+| Note        | 10           | Cymbal Splash  | Trigger envelope on CV 2 (default, change by assigning trigger)  |
+| Note        | 10           | Vibra Slap     | Trigger envelope on CV 3 (default, change by assigning trigger)  |
+| Note        | 10           | Ride Bell      | Trigger envelope on CV 4 (default, change by assigning trigger)  |
+| Note        | 10           | Ride Cymbal    | Trigger envelope on CV 5* (default, change by assigning trigger)  |
 | Note        | 10           | ..GM drums..   | Trigger Muso triggers      |
 | CC          | 10           | 32 to 48       | Enable/disable Euclidian track |
-| Note+CC etc | 8            | any            | Bass synth - Resend on channel 2 |
+| Note+CC etc | 8            | any            | Bass synth - Resend on channel 4 |
 | Note        | 9            | any            | Bass synth - Euclidian track arpeggiates held chord on chan 2+3 (see below) |
 
 ## MIDI Outputs
@@ -134,6 +135,7 @@ A diagram to help me understand how everything is routed:-
 # Issues
 
  - Problems with midimuso pitch gates missing note-off messages when stopping everything, when a lot of notes need to be told to go off.  workaround by defining WORKAROUND_MISSED_NOTEOFFS in MidiOutput.hpp to insert short delay()s sometimes when sending a lot of messages during douse_all_trigger() calls.  Tried increasing TX buffer size but makes no difference, this seems to fix things in 99% of cases altho still sometimes misses the messages..
+ - Rapidly pressing 'stop' in DAW retriggers notes -- think due to it causing a tick
 
 ----
 
