@@ -21,10 +21,17 @@ void initialise_envelopes() {
   envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
   envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
   envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
-  envelopes[ENV_PITCH_1].trigger_on = 18;
-  envelopes[ENV_PITCH_2].trigger_on = 18;
-  envelopes[ENV_PITCH_3].trigger_on = 19;
-  envelopes[ENV_PITCH_4].trigger_on = 19;
+
+  envelopes[ENV_CRASH].trigger_on       = TRIGGER_CRASH_2;
+  envelopes[ENV_SPLASH].trigger_on      = TRIGGER_SPLASH;
+  envelopes[ENV_WOBBLY].trigger_on      = TRIGGER_VIBRA;
+  envelopes[ENV_RIDE_BELL].trigger_on   = TRIGGER_RIDE_BELL;
+  envelopes[ENV_RIDE_CYMBAL].trigger_on = TRIGGER_RIDE_CYM;
+
+  envelopes[ENV_PITCH_1].trigger_on = TRIGGER_PITCH_1_CH1;
+  envelopes[ENV_PITCH_2].trigger_on = TRIGGER_PITCH_1_CH1;
+  envelopes[ENV_PITCH_3].trigger_on = TRIGGER_PITCH_2_CH2;
+  envelopes[ENV_PITCH_4].trigger_on = TRIGGER_PITCH_2_CH2;
 #endif
 
 }

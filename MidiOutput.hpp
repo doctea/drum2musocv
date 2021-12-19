@@ -35,18 +35,18 @@ int get_muso_pitch_for_trigger(int trigger) {
   return pitch_for_trigger_table[trigger];
 }
 
-// get the output pitch to use for this trigger
+// get the MIDIMUSO output pitch to use for this trigger
 // take into account that some outputs may be missing or moved when in different muso modes and swap them appropriately
 int get_muso_pitch_for_trigger_actual(int trigger) {
-#if MUSO_MODE==MUSO_MODE_2B // pitches mode
+#if MUSO_MODE==MUSO_MODE_2B // single board, in pitches mode
   int gate;
-  if (trigger==0) gate = 3;
-  else if (trigger==1) gate = -1;
-  else if (trigger==5 || trigger==6 || trigger==7) gate = -1;
+  if (trigger==TRIGGER_KICK) gate = 3;
+  else if (trigger==TRIGGER_SIDESTICK) gate = -1;
+  else if (trigger==TRIGGER_TAMB || trigger==TRIGGER_HITOM || trigger==TRIGGER_LOTOM) gate = -1;
   else if (trigger<=NUM_TRIGGERS) {
-    if (trigger>7) 
+    if (trigger>TRIGGER_LOTOM) 
       gate = trigger - 4; 
-    else if (trigger>=2)
+    else if (trigger>=TRIGGER_CLAP)
       gate = trigger - 2;
   }
 
@@ -56,13 +56,13 @@ int get_muso_pitch_for_trigger_actual(int trigger) {
   return -1;
 #elif MUSO_MODE==MUSO_MODE_0B_AND_2A  // multi-board mode -- put kick onto stick to avoid problem with muso board in 0B unexpectedly reacting on channel 1 note on/offs
   int gate = trigger;
-  if (trigger==0) gate = 1;   // kick -> stick
-  else if (trigger==1) gate = -1; // disable stick
+  if      (trigger==TRIGGER_KICK)       gate = 1;   // kick -> stick
+  else if (trigger==TRIGGER_SIDESTICK)  gate = -1; // disable stick
 
   if (gate!=-1)
     return MUSO_NOTE_MINIMUM + gate;
   return -1;
-#else
+#else // single board, in triggers mode 0B
   return MUSO_NOTE_MINIMUM+trigger;
 #endif
 }

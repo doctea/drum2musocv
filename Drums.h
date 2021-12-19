@@ -92,6 +92,29 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_NOTE_MAXIMUM   (MUSO_NOTE_MINIMUM + NUM_TRIGGERS)
 #endif*/
 
+// defines to help with which trigger number/euclidian track number maps to which
+#define TRIGGER_KICK        0
+#define TRIGGER_SIDESTICK   1
+#define TRIGGER_CLAP        2
+#define TRIGGER_SNARE       3
+#define TRIGGER_CRASH_1     4
+#define TRIGGER_TAMB        5
+#define TRIGGER_HITOM       6
+#define TRIGGER_LOTOM       7
+#define TRIGGER_PEDALHAT    8
+#define TRIGGER_OPENHAT     9
+#define TRIGGER_CLOSEDHAT   10
+#define TRIGGER_CRASH_2     11
+#define TRIGGER_SPLASH      12
+#define TRIGGER_VIBRA       13
+#define TRIGGER_RIDE_BELL   14
+#define TRIGGER_RIDE_CYM    15
+#define TRIGGER_BASS_CH4    16
+#define TRIGGER_BITSBOX_CH3 17
+#define TRIGGER_PITCH_1_CH1 18
+#define TRIGGER_PITCH_2_CH2 19
+
+
 // the CC values that the midimuso translates into the CV outputs
 #define MUSO_CC_CV_1  1
 #define MUSO_CC_CV_2  7
