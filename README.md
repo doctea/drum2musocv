@@ -10,9 +10,9 @@
 
 * When it isn't receiving an **external clock input**, runs off its own **internal clock** at the last detected BPM.
 
-* Implements **5 triggerable envelopes** (or 9 with two Oracs) with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input, outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with recongfiguring could be used as triggerable CC envelopes for any device).
+* Implements **5 triggerable envelopes** (or **9** with two Oracs) with AHDSR (attack, hold, decay, sustain, release) stages, output on the CCs that the midimuso uses for its CV outputs so they can be used as envelopes.  Default mapped to the 'Cymbal Crash 2', 'Cymbal Splash', 'Vibra-slap', 'Ride Bell' and 'Ride Cymbal 1' GM drum notes for input (with MIDI control to map to any of the drum triggers or note-ons on the Harmony/MIDI channels), outputting on the muso's CV outs #1, #2, #3, #4 and #5 respectively (via midimuso CC 1, 7, 11, 71 and 74 - with reconfiguring could be used as triggerable CC envelopes for any device).
 
-* Envelopes can now be set to loop per-envelope ie become freerunning LFOs with envelope-like control.  retriggerable + inverted mode for each.
+* Envelopes can now be set to loop per-envelope ie become freerunning LFOs with envelope-like control.  Retriggerable + inverted mode for each.
 
 * **Visual feedback**: Indicates triggers and envelope levels via a 16-LED RGB Neopixel strip using the FastLED library on pin 9.
 
@@ -28,7 +28,7 @@
 
 * Temporary hack: uses the pitch bend output instead of the CV output that corresponds to CC 74, because mine seems to be broken.  (could use this in future to add an extra envelope/CV out or LFO output..)
 
-* **Echoes the MIDI output back to the host**, so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
+* **Optionally echoes the MIDI output back to the host**, so that you can record the rhythms for re-use or to route to softsynths or other MIDI devices.
 
 * Outputs **4xClock triggers** using a CD74HC4067 multiplexor (5ms latency between outputs if multiple triggered simultaneously) - every beat, every upbeat, every bar, every phrase.  Uses Arduino data pins 2,3,4,5 to set the multiplexor output.
 
@@ -51,18 +51,18 @@ A diagram to help me understand how everything is routed:-
 
 # Using single midimuso-cv board
 
-  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B` (10xGate, 5xCV Envelope) or `MUSO_MODE_2B` (7xGate, 5xCV Envelope, 2xPitch, 2xPitch Gate)
+  - Configure mode by setting `MUSO_MODE` define in Drums.h to `MUSO_MODE_0B` (10xGate, 5xCV Envelope) or `MUSO_MODE_2B` (7xGate, 5xCV Envelope, 2xPitch, 2xPitch Gate)
 
 # Using multiple midimuso-cv boards
 
-  - Configure mode by setting `MUSO_MODE` define to `MUSO_MODE_0B_AND_2A` (10xGate, 5xCV Envelope, 2xPitch, 4xPitch Envelope)
-  - Now supports running two midimuso-cv boards:
+  - Configure mode by setting `MUSO_MODE` define in Drums.h to `MUSO_MODE_0B_AND_2A` (10xGate, 5xCV Envelope, 2xPitch, 4xPitch Envelope)
+  - Now supports running two midimuso-cv boards via MIDI splitter (NOT chained):
     - Board 1 in mode 0B (10 triggers* + 5 envelopes)
     - Board 2 in mode 2A (2 pitch outputs + 4 extended envelopes)
   - Extended envelopes can have parameters set using appropriate CC's on **Channel 11**
     - by default they trigger on notes on MIDI channels 1 + 2 (root pitch / pad pitch)
-  - Check `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes when you want to update its mode
-  - *: Because of a problem with the MidiMuso-CV12 in mode 0B (A Gate 1 is also triggered on Channel 1 Pitch input), Kick moves to Stick and Stick is disabled, reducing us to 10 triggers instead of 11.
+  - Check the `RELAY_PROGRAM_CHANGE` define in order to enable/protect setting of muso modes when you want to update its mode (allows/prevents program change messages being passed on)
+  - *: Because of a problem with the MidiMuso-CV12 in mode 0B (A Gate 1 is also triggered on Channel 1 Pitch input), Kick moves to Stick and Stick is disabled, reducing us to 10 triggers instead of 11.  But does mean the old 'Kick' output can be used as gate for MIDI channel 1.
 
 # MIDI parameters
 
