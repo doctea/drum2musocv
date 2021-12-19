@@ -16,17 +16,18 @@ void initialise_envelopes() {
   envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
   envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
   envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
-#if MUSO_MODE==MUSO_MODE_0B_AND_2A
-  envelopes[ENV_PITCH_1].midi_cc    = MUSO_CC_CV_6;
-  envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
-  envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
-  envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
 
   envelopes[ENV_CRASH].trigger_on       = TRIGGER_CRASH_2;
   envelopes[ENV_SPLASH].trigger_on      = TRIGGER_SPLASH;
   envelopes[ENV_WOBBLY].trigger_on      = TRIGGER_VIBRA;
   envelopes[ENV_RIDE_BELL].trigger_on   = TRIGGER_RIDE_BELL;
   envelopes[ENV_RIDE_CYMBAL].trigger_on = TRIGGER_RIDE_CYM;
+
+#if MUSO_MODE==MUSO_MODE_0B_AND_2A
+  envelopes[ENV_PITCH_1].midi_cc    = MUSO_CC_CV_6;
+  envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
+  envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
+  envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
 
   envelopes[ENV_PITCH_1].trigger_on = TRIGGER_PITCH_1_CH1;
   envelopes[ENV_PITCH_2].trigger_on = TRIGGER_PITCH_1_CH1;
