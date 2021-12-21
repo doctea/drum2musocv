@@ -28,6 +28,7 @@
 COMPILE FAIL -- NUM_PATTERNS doesnt match PATTERN_PAD_PITCH !
 #endif
 
+#define CC_EUCLIDIAN_MUTATE_DENSITY       7     // automatically mutate density on/off
 #define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 #define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) // (50 when num_patterns = 2)
 #define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM

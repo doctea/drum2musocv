@@ -12,6 +12,7 @@ Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelop
 Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
 Envelopes.h:#define ENV_CC_START  64  // what number CC the envelope controls begin at
+Euclidian.h:#define CC_EUCLIDIAN_MUTATE_DENSITY       7     // automatically mutate density on/off
 Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_START  32    // active status of euclidian tracks starts at this CC and goes up to same+NUM_PATTERNS
 Euclidian.h:#define CC_EUCLIDIAN_ACTIVE_STATUS_END    (CC_EUCLIDIAN_ACTIVE_STATUS_START + NUM_PATTERNS) // (50 when num_patterns = 2)
 Euclidian.h:#define CC_EUCLIDIAN_SET_AUTO_PLAY        16    // enable/disable autoplaying on internal BPM
@@ -72,6 +73,3 @@ MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring 
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)
 
 Envelopes.h:#define TRIGGER_CHANNEL_OFF 20
-Envelopes.h:#define TRIGGER_CHANNEL_LFO_MODULATED 18
-Envelopes.h:#define TRIGGER_CHANNEL_LFO_INVERTED 19
-Envelopes.h:#define TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED 20*/

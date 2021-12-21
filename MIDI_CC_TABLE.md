@@ -5,6 +5,7 @@
 `10` | `Harmony.hpp` | `4` | `CC_PAD_PITCH_OCTAVE_OFFSET` | ` output 3: set octave offset (-2 to +3)` |
 `10` | `Harmony.hpp` | `5` | `CC_CHANNEL_PAD_PITCH` | ` output 3: set the MIDI channel to output the pads pitch on (default 2)` |
 `10` | `Harmony.hpp` | `6` | `CC_BASS_SET_TIE_ON` | ` output 0: set which steps the Euclidian bass should tie on` |
+`10` | `Euclidian.h` | `7` | `CC_EUCLIDIAN_MUTATE_DENSITY` | ` automatically mutate density on/off` |
 `10` | `Euclidian.h` | `8` | `CC_EUCLIDIAN_CLAP_FLAM` | ` enable/disable clap flam, 0=off` |
 `10` | `Euclidian.h` | `9` | `CC_EUCLIDIAN_HIHAT_SHUFF` | ` enable/disable hihat shuffle, 0=off` |
 `10` | `Harmony.hpp` | `10` | `CC_CHANNEL_PAD_ROOT` | ` output 2: set the MIDI channel to output the pad root on (default 1)` |

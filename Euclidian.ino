@@ -21,6 +21,8 @@ bpm_status bpm_statuses[NUM_PATTERNS];
 
 float euclidian_density = 0.566666666666f;
 
+bool euclidian_mutate_density = true;
+
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
 
@@ -101,6 +103,9 @@ double randomDouble(double minf, double maxf)
 
 // mutate the pattern according to mode
 void mutate(int pattern){
+  if (euclidian_mutate_density) {
+    euclidian_density = (0.6f+(sin(current_phrase)/2.1f));
+  }
   if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
     mutate_euclidian_total(pattern);
   else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
@@ -467,6 +472,9 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
   } else if (number == CC_EUCLIDIAN_DENSITY) {
     euclidian_density = ((float)value)/127.0f;
     EUC_printf("euclidan_density set to %2.2f\n", euclidian_density);
+    return true;
+  } else if (number == CC_EUCLIDIAN_MUTATE_DENSITY) {
+    euclidian_mutate_density = value>0;
     return true;
   }
   return false;
