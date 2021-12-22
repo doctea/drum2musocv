@@ -169,19 +169,21 @@ void update_envelope (byte env_num, byte velocity, bool state) {
 
 // process all the envelopes
 void process_envelopes(unsigned long now) {
+  //unsigned long envelope_time = millis();
   static unsigned long last_processed = 0;
   if (now==last_processed) return;
   for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     process_envelope(i, now);
   }
   last_processed = now;
+  //Serial.printf("envelopes processed in %ims\n", millis()-envelope_time);
 }
 
 //#define DEBUG_ENVELOPES
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
 void process_envelope(byte i, unsigned long now) {
-  //unsigned long envelope_time = millis();
+  //
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -381,7 +383,6 @@ void process_envelope(byte i, unsigned long now) {
         Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);*/
     }
 
-  //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);
 
 }
 

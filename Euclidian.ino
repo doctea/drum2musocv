@@ -19,7 +19,8 @@
 
 bpm_status bpm_statuses[NUM_PATTERNS];
 
-float euclidian_density = 0.566666666666f;
+float effective_euclidian_density = 0.566666666666f;
+float max_euclidian_density = 1.2f;
 
 bool euclidian_mutate_density = true;
 
@@ -35,8 +36,8 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (duration >= 0) p->duration = duration;
 
   int original_pulses = p->pulses;
-  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+euclidian_density));
-  EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+euclidian_density));
+  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+effective_euclidian_density));
+  EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+effective_euclidian_density));
 
   EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
 
@@ -103,8 +104,10 @@ double randomDouble(double minf, double maxf)
 
 // mutate the pattern according to mode
 void mutate(int pattern){
+  unsigned long mutate_time = millis();
   if (euclidian_mutate_density) {
-    euclidian_density = (0.6f+(sin(current_phrase)/2.1f));
+    effective_euclidian_density = constrain((0.7f+(sin(current_phrase)/2.2f)), 0.2f, max_euclidian_density);
+    Serial.printf("mutate euclidian density set to %2.2f!\n", effective_euclidian_density);
   }
   if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
     mutate_euclidian_total(pattern);
@@ -119,6 +122,7 @@ void mutate(int pattern){
   } else { //and there's room for more modes too...
 
   }
+  Serial.printf("mutate took %ims\n", millis()-mutate_time);
 }
 
 void mutate_euclidian_masked(int pattern) {
@@ -470,11 +474,12 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     euclidian_flam_clap = value >0;
     return true;
   } else if (number == CC_EUCLIDIAN_DENSITY) {
-    euclidian_density = ((float)value)/127.0f;
-    EUC_printf("euclidan_density set to %2.2f\n", euclidian_density);
+    max_euclidian_density = effective_euclidian_density = ((float)value)/127.0f;
+    EUC_printf("euclidian_density set to %2.2f\n", effective_euclidian_density);
     return true;
   } else if (number == CC_EUCLIDIAN_MUTATE_DENSITY) {
     euclidian_mutate_density = value>0;
+    Serial.printf("mutate euclidian density set from %i\n", value);
     return true;
   }
   return false;

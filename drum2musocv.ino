@@ -102,7 +102,8 @@ void loop() {
   //Serial.print("now is "); Serial.println(now);
   if (delta_ms >= (int)estimated_ms_per_tick) {
     //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
-    Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
+    //Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
+    Serial.printf("[WARNPERF] !!%ims/%3.3f!\r\n", delta_ms, estimated_ms_per_tick);
   }
   
   if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION) {
