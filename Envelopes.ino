@@ -1,5 +1,7 @@
 #include "SinTables.h"
 
+#include "Profiler.hpp"
+
 #include "MidiOutput.hpp"
 
 
@@ -120,6 +122,7 @@ void update_envelopes_for_trigger(int trigger, int velocity, bool state) {
 // received a message that the state of the envelope should change (note on/note off etc)
 void update_envelope (byte env_num, byte velocity, bool state) {
   unsigned long now = bpm_clock(); //clock_millis(); 
+  unsigned long env_time = millis();
   if (state == true) { //&& envelopes[env_num].stage==OFF) {  // envelope told to be in 'on' state by note on
     envelopes[env_num].velocity = velocity;
     envelopes[env_num].actual_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
@@ -165,11 +168,12 @@ void update_envelope (byte env_num, byte velocity, bool state) {
         break;
     }
   }
+  pf.l(PF::PF_ENVELOPES, millis()-env_time);
 }
 
 // process all the envelopes
 void process_envelopes(unsigned long now) {
-  //unsigned long envelope_time = millis();
+  unsigned long envelope_time = millis();
   static unsigned long last_processed = 0;
   if (now==last_processed) return;
   for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
@@ -177,6 +181,7 @@ void process_envelopes(unsigned long now) {
   }
   last_processed = now;
   //Serial.printf("envelopes processed in %ims\n", millis()-envelope_time);
+  pf.l(PF::PF_ENVELOPES, millis()-envelope_time);
 }
 
 //#define DEBUG_ENVELOPES

@@ -20,6 +20,7 @@ private:
 
     // track pitches internally
     void push_note (byte pitch) {
+
       if (DEBUG_CHANNELSTATE) Serial.printf("channelstate push_note(%i)\r\n", pitch);
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==-1) { // free slot so add this new pitch
@@ -144,7 +145,6 @@ private:
   public:  
 
     int held_notes[10] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-
   
     int get_root_note() {
       //Serial.printf("in get_root_note in ChannelState number #%i got: %s\r\n", chanindex, debug_string);

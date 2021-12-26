@@ -66,6 +66,7 @@ int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
 bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
 
+bool mutate_harmony_root    = false;
 bool mutate_enabled         = false;
 bool mask_enabled           = false;
 bool euclidian_fills_enabled = true;

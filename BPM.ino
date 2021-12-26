@@ -1,6 +1,7 @@
 #include "BPM.hpp"
 
 #include "MidiInput.hpp"
+#include "Profiler.hpp"
 
 bpm_status bpm = bpm_status();
 
@@ -66,8 +67,8 @@ unsigned int bpm_clock() {
     bpm_internal_mode = true;
 
     int delta_ms = (now - last_ticked);
-    double ms_per_tick = (60.0d / (double)(bpm_current * (double)PPQN));
-    double delta_ticks = (double)delta_ms / (1000.0d*ms_per_tick);
+    double ms_per_tick = (60.0f / (double)(bpm_current * (double)PPQN));
+    double delta_ticks = (double)delta_ms / (1000.0f*ms_per_tick);
     if ((int)delta_ticks>0) {
       received_ticks += delta_ticks;
   
@@ -103,6 +104,7 @@ unsigned int bpm_clock() {
   if (received_ticks%cc_value_clock_tick_ratio==0) {
     midi_send_clock(received_ticks);
   }
+  pf.l(PF::PF_BPM, millis()-now);
   return received_ticks;
 }
 
@@ -145,16 +147,16 @@ double bpm_calculate_current () {
   //estimated_ticks_per_ms = received_ticks / elapsed_ms;
 
   /* this version uses average of the last 4 received beats (actually steps) to calculate BPM so it tracks to changes better */
-  double beats = 1.0d / (double)last_beat_sample_size; //0.25; //1;
+  double beats = 1.0f / (double)last_beat_sample_size; //0.25; //1;
   
   double elapsed_ms = average_step_length(4);
 
-  double elapsed_minutes = (elapsed_ms / 60000.0d);
+  double elapsed_minutes = (elapsed_ms / 60000.0f);
   double bpm = (beats / elapsed_minutes);
   // speed = distance/time
   // bpm = beats/time
 
-  estimated_ms_per_tick = 60000.0d/(bpm*PPQN);
+  estimated_ms_per_tick = 60000.0f/(bpm*PPQN);
 
   //Serial.printf("bpm calculated as %3.3f (from elapsed_ms %3.3f and beats %3.3f)\r\n", bpm, elapsed_ms,  beats);
 

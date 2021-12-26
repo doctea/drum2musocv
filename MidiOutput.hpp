@@ -77,6 +77,7 @@ void initialise_pitch_for_trigger_table () {
 
 //static int i = 0;
 void fire_trigger(byte trigger, byte velocity, bool internal = false) {
+  unsigned long trigger_time = millis();
   //OUT_printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
   byte p = MUSO_NOTE_MINIMUM + trigger;
@@ -119,9 +120,12 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
   if (midiecho_enabled)
     if (internal) echo_fire_trigger(p - MUSO_NOTE_MINIMUM, velocity);
   //OUT_println("finishing fire_trigger");
+  pf.l(PF::PF_MIDI_OUT, millis()-trigger_time);
 }
 
 void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool tied = false) {
+  unsigned long trigger_time = millis();
+
   //OUT_printf("dousing trigger=%i\r\n", t);
   byte p = MUSO_NOTE_MINIMUM + trigger;
   byte b = BITBOX_NOTE_MINIMUM + trigger;
@@ -168,6 +172,8 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
   }
   if (midiecho_enabled)
     if (internal) echo_douse_trigger(p - MUSO_NOTE_MINIMUM, velocity);
+
+  pf.l(PF::PF_MIDI_OUT, millis()-trigger_time);
 }
 
 void douse_all_triggers(bool internal = false) {
@@ -184,6 +190,7 @@ void douse_all_triggers(bool internal = false) {
 }
 
 void midi_send_envelope_level(byte envelope, byte level) {
+  unsigned long send_time = millis();
   //Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
   //if (envelope == ENV_RIDE_CYMBAL) { // hack to use the pitch bend output as an envelope, since my 'cc 74' output seems to have stopped working - could use this to add an extra envelope or LFO etc
 #ifdef MUSO_USE_PITCH_FOR
@@ -195,6 +202,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
 #endif
     MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
   }
+  pf.l(PF::PF_MIDI_OUT, millis()-send_time);
 }
 
 void midi_kill_notes_bitbox_drums() {

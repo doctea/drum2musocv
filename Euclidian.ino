@@ -4,6 +4,8 @@
 #include "MidiOutput.hpp" // because we need to send MIDI
 #include "BPM.hpp"  // cos we need to know lengths
 
+#include "Profiler.hpp"
+
 //#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
@@ -122,7 +124,8 @@ void mutate(int pattern){
   } else { //and there's room for more modes too...
 
   }
-  Serial.printf("mutate took %ims\n", millis()-mutate_time);
+  //Serial.printf("mutate took %ims\n", millis()-mutate_time);
+  pf.l(PF::PF_EUCLIDIAN, millis()-mutate_time);
 }
 
 void mutate_euclidian_masked(int pattern) {
@@ -203,7 +206,7 @@ void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
 }
 
 void process_euclidian(int ticks) {
-
+  unsigned long euclidian_time = millis();
   static int last_processed = 0;
   if (ticks == last_processed) return;
 
@@ -220,14 +223,17 @@ void process_euclidian(int ticks) {
     }
     
     if (euclidian_reset_before_mutate) {
+      unsigned long mutate_time = millis();
       harmony.reset_progression();
       harmony.reset_sequence();
+      pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
     }
 
     bool should_mutate = mutate_enabled;
 
     if (should_mutate) {
       harmony.mutate();
+      unsigned long mutate_time = millis();
 
       unsigned long seed = get_euclidian_seed();
       EUC_printf("Euclidian seed: %i\n", seed);
@@ -242,11 +248,18 @@ void process_euclidian(int ticks) {
 
         //debug_patterns();
       }
+
+      if (mutate_harmony_root) {// && current_phrase%4==0) {
+        Serial.printf("mutating harmony_root\n"); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
+        harmony.mutate_midi_root_pitch();
+      }
+      pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
     }
   }
 
   // fills on last bar of phrase if enabled
   if (euclidian_fills_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && ((is_bpm_on_bar && current_bar == (BARS_PER_PHRASE - 1)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+    unsigned long mutate_time = millis();
     EUC_printf("FILLING at bar %i!\r\n", current_bar);
     randomSeed(current_phrase);
     for (int i = 0 ; i < 3 ; i++) {
@@ -260,6 +273,7 @@ void process_euclidian(int ticks) {
       if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
       make_euclid(&patterns[ran]);
     }
+    pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
   }
 
   // old euclidian trigger loop went here
@@ -340,13 +354,14 @@ void process_euclidian(int ticks) {
     
     //Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
   }
+  pf.l(PF::PF_EUCLIDIAN, millis()-euclidian_time);
   
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
 
 void initialise_euclidian() {
-
+  unsigned long euc_time = millis();
   EUC_println("initialise_euclidian():");
 
   EUC_println("resetting all:-");
@@ -386,6 +401,7 @@ void initialise_euclidian() {
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
+  //pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-euc_time);
 }
 
 

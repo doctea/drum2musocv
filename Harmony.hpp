@@ -1,6 +1,8 @@
 #ifndef HARMONY_INCLUDED
 #define HARMONY_INCLUDED
 
+#include "Profiler.hpp"
+
 #define DEBUG_HARMONY false
 //#define HARM_DEBUG
 // handling debugging output - pattern from https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
@@ -188,7 +190,6 @@ void sort_pitches(int pitches[], int len) {
 class Harmony {
 
   private:
-    ChannelState&   channel_state;
 
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
@@ -222,6 +223,7 @@ class Harmony {
 
     int default_chord_progression[4]    =   { 
       0, 5, 1, 4 
+      //0, 5, 1, 5
     };     // default chord progression
 
     int default_sequence[4][4]     =   { // degrees of scale to play per chord -- ie, arp patterns .. deprecated now?
@@ -238,6 +240,9 @@ class Harmony {
 
   public:  
  
+    int last_note_on;
+
+    ChannelState&   channel_state;
     Harmony(ChannelState& channel_state_): channel_state(channel_state_) {
       reset_progression();
       reset_sequence_pattern();
@@ -247,6 +252,19 @@ class Harmony {
       for (int i = 0 ; i < NUM_MKO ; i++) {
         mko[i].process_tick_ties();
       }
+    }
+
+    void mutate_midi_root_pitch() {
+      //Serial.printf("mutating root pitch from %i to %i\n", harmony.r, channel_state.last_note_on);
+      kill_notes();
+      set_midi_root_pitch(36 + scale_offset[scale_number][random(0,SCALE_SIZE)]);
+      Serial.printf("mutating root pitch -- setting to %i\n", 36 + scale_offset[scale_number][random(0,SCALE_SIZE)]);// from %i to %i\n", harmony.r, channel_state.last_note_on);
+      
+      //channel_state.set_midi_root_pitch(channel_state.last_note_on);
+    }
+
+    void set_midi_root_pitch(int pitch) {
+      channel_state.set_midi_root_pitch(pitch);
     }
 
     void set_progression(int source[4]) {
@@ -315,6 +333,7 @@ class Harmony {
 
     // trigger current pitch/chord on the specified harmony output
     void fire_for(int output_number) {
+      unsigned long time = millis();
       //Serial.printf("fire_for output number %i\r\n", output_number);
    
       if (only_note_held && !channel_state.is_note_held()) {
@@ -346,17 +365,23 @@ class Harmony {
           );
       } 
 
-      if (mko[output_number].fire_notes(pitch, notes)) {
+      last_note_on = pitch;
+
+      bool fired = mko[output_number].fire_notes(pitch, notes);
+      pf.l(PF::PF_INTEREST, millis()-time);
+      if (fired) {
         update_envelopes_for_trigger(output_number + NUM_TRIGGERS + NUM_ENVELOPES, 127, true);
-      }
+      }      
     }
 
     void douse_for(int output_number, bool tied = false) {
+      unsigned long time = millis();
       HARM_printf("douse_for output number %i - channel %i\r\n", output_number, mko[output_number].channel);
       mko[output_number].douse_notes(tied);   // erm this doesnt seem to affect anything?!
+      pf.l(PF::PF_HARMONY, millis()-time);
       if (!mko[output_number].is_note_held()) {
         update_envelopes_for_trigger(output_number + NUM_TRIGGERS + NUM_ENVELOPES, 0, false);
-      }
+      }      
     }
 
     // douse all harmony output notes by calling douse_for
@@ -376,6 +401,8 @@ class Harmony {
 
     // mutate harmony chord progression / sequence
     void mutate() {
+      unsigned long time = millis();
+
       if (mutation_mode==HARMONY::MUTATION_MODE::RANDOMISE) {
         HARM_println("## HARMONY MUTATE - randomise!");
         randomSeed(get_euclidian_seed());
@@ -400,6 +427,7 @@ class Harmony {
         }
         Serial.println("]");
       }
+      pf.l(PF::PF_HARMONY, millis()-time);
     }
 
     /////// chord choosing, note choosing, etc
@@ -839,7 +867,7 @@ class Harmony {
       } else if (number==CC_MELODY_SCALE) {
         //mko_keys.set_octave_offset(constrain(value-3, -3, 3));
         scale_number = value % NUM_SCALES;
-        Serial.printf("set scale to %i", scale_number);
+        Serial.printf("set scale to %i\n", scale_number);
         douse_all(); //douse_melody();
         return true;
       } else if (number==CC_MELODY_AUTO_SCALE) {
@@ -856,7 +884,7 @@ class Harmony {
         mko_pads_root.set_midi_channel(value);
         return true;
       } else if (number==CC_CHANNEL_PAD_PITCH) {
-        Serial.println(">>> received CC_CHANNEL_PAD_PITCH ");
+        //Serial.println(">>> received CC_CHANNEL_PAD_PITCH ");
         mko_pads_pitch.set_midi_channel(value);
         return true;
       } else if (number==CC_MELODY_ROOT) {
@@ -864,7 +892,7 @@ class Harmony {
           kill_notes();
         return true;
       } else if (number==CC_BASS_SET_TIE_ON) {
-        Serial.printf("### TIE: Setting tie_on for pattern %i to %i\r\n", PATTERN_BASS, value);
+        //Serial.printf("### TIE: Setting tie_on for pattern %i to %i\r\n", PATTERN_BASS, value);
         patterns[PATTERN_BASS].tie_on = value;
         return true;
       }

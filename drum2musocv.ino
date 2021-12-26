@@ -17,6 +17,8 @@
 
 #include "Harmony.hpp"
 
+#include "Profiler.hpp"
+
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
 #endif
@@ -100,15 +102,11 @@ void loop() {
   unsigned long now_ms = millis();
   unsigned long delta_ms = now_ms - time_last;
   //Serial.print("now is "); Serial.println(now);
-  if (delta_ms >= (int)estimated_ms_per_tick) {
-    //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
-    //Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
-    Serial.printf("[WARNPERF] !!%ims/%3.3f!\r\n", delta_ms, estimated_ms_per_tick);
-  }
-  
-  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION) {
+
+  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL) {
     //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
-    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION;
+    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL;
+    mutate_harmony_root = demo_mode==MODE_EXPERIMENTAL;
        
     process_euclidian(now);
   } else if (demo_mode==MODE_RANDOM) {
@@ -131,8 +129,20 @@ void loop() {
   process_envelopes(now);
 
 #ifdef ENABLE_PIXELS
+    unsigned int pixels_time = millis();
     update_pixels(now_ms);
+    //if (now_ms%1000==0) Serial.printf("Pixels took %ims\n", millis()-pixels_time);
+    pf.l(PF::PF_PIXELS, millis()-pixels_time);
 #endif
 
   time_last = now_ms;
+  
+  if (millis()-now_ms >= (int)estimated_ms_per_tick) {
+    //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
+    //Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
+    Serial.printf("[WARNPERF] !!%ims/%3.3f!\r\n", millis()-now_ms, estimated_ms_per_tick);
+    pf.output();
+  }
+  pf.reset();
+
 }
