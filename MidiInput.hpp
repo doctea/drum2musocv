@@ -137,13 +137,14 @@ void handleClock() {
 void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
-  
+  playing = true;
   bpm_reset_clock(-1);  // -1 so next tick will be start
 }
 void handleContinue() {
   // TODO: continue LFOs
   MIDIOUT.sendContinue();
   kill_envelopes();
+  playing = true;
 }
 void handleStop() {
   MIDIOUT.sendStop();
@@ -156,6 +157,7 @@ void handleStop() {
 
   bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   last_input_at = millis();
+  playing = false;
   
 //#ifdef ENABLE_PIXELS
 //  kill_notes();

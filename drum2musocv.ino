@@ -28,6 +28,7 @@
 // for demo mode
 int last_played_trigger = -1;
 
+
 // for handling clock ---------------------------------------------------------
 // At 120 BPM, 24 clock ticks will last 0.02083 seconds. = 200ms
 float estimated_ticks_per_ms = 0.1f;  // initial estimated speed

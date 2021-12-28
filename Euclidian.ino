@@ -28,7 +28,7 @@ bool euclidian_mutate_density = true;
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
-  unsigned long time = millis();
+  //unsigned long time = millis();
 
   if (trigger>=0)   p->trigger = trigger;
   if (tie_on>=0)    p->tie_on = tie_on;
@@ -59,13 +59,13 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (p->rotation > 0) {
     rotate_pattern(p, p->rotation);
   }
-  pf.l(PF::PF_INTEREST, millis()-time);
+  //pf.l(PF::PF_INTEREST, millis()-time);
 }
 
 // should note be played this step?
 bool query_pattern(pattern_t *p, int step, int offset = 0, int bar = 0) {
   step += bar * STEPS_PER_BAR;
-  int curStep = (p->rotation + step + offset) % p->steps; //wraps beat around if it is higher than the number of steps
+  int curStep = (step + offset - p->rotation) % p->steps; //wraps beat around if it is higher than the number of steps
   if (curStep < 0) curStep = (p->steps) + curStep; // wrap around if result passes sequence boundary
   //EUC_printf("\r\nquery_pattern querying step %i\r\n", curStep);
   return p->stored[curStep];
@@ -213,6 +213,8 @@ void process_euclidian(int ticks) {
   if (ticks == last_processed) return;
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
+
+  if (!playing) return;
 
   // TODO: configurable mutation frequency
   // start of phrase or middle of phrase
