@@ -28,9 +28,9 @@ class MidiKeysOutput : public ChannelState {
   public:
     byte channel = 0;
     
-    MidiKeysOutput(int chan, int octave_off = 0) {
+    MidiKeysOutput(int chan, int octave_offset = 0) {
       channel = chan;
-      octave_offset = octave_off;
+      octave_offset = octave_offset;
     }
 
     MidiKeysOutput set_melody_mode(int mm) {

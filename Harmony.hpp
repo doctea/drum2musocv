@@ -16,6 +16,7 @@
 //debug handling
 
 #define DEFAULT_MELODY_OFFSET   1
+#define DEFAULT_PAD_ROOT_OUT_OFFSET   0 //-2
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
@@ -195,7 +196,7 @@ class Harmony {
     MidiKeysOutput mko[NUM_MKO] = {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
 	      MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT),
+        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT,  DEFAULT_PAD_ROOT_OUT_OFFSET),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 
 #define mko_bass        mko[0]
@@ -368,7 +369,7 @@ class Harmony {
       last_note_on = pitch;
 
       bool fired = mko[output_number].fire_notes(pitch, notes);
-      pf.l(PF::PF_INTEREST, millis()-time);
+      pf.l(PF::PF_HARMONY, millis()-time);
       if (fired) {
         update_envelopes_for_trigger(output_number + NUM_TRIGGERS + NUM_ENVELOPES, 127, true);
       }      
