@@ -48,6 +48,7 @@ void randomise_envelopes() {
     envelopes[i].hold_length = random(0,127);
     envelopes[i].decay_length = random(0,127);
     envelopes[i].sustain_ratio = 1.0/(float)random(0,127);
+    envelopes[i].release_length = random(0,127);
   }
 }
 

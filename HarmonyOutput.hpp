@@ -239,16 +239,17 @@ class MidiKeysOutput : public ChannelState {
       // from bass_note_off()
       //if (!bass_currently_playing && (!bpm_internal_mode && bass_only_note_held && !autobass_input.is_note_held()))
       //  return;
+      int orig_pitch = pitch;
 
       if (channel==0) return;
       if (pitch==-1) return;
       if (!is_note_held((int)pitch)) {
-        Serial.printf("WARN: send_note_off told to OFF for pitch %i, but we think it isn't held\r\n", pitch);
+        Serial.printf("WARN: send_note_off w/ chan %i told to OFF for pitch %i [%s], ", channel, pitch, get_note_name(pitch).c_str());
+        Serial.printf("but we think it isn't held - actually held are "); Serial.println(get_debug_notes_held());// (altho %i is)\n", (get_held_notes())[0]);
         return;
       }
 
       int offset = (12*octave_offset);
-
       if (offset + pitch < MINIMUM_PITCH || offset + pitch > MAXIMUM_PITCH)
         return;
 
@@ -256,7 +257,7 @@ class MidiKeysOutput : public ChannelState {
       handle_note_off((byte)pitch);
 
       pitch += offset;
-      if (channel!=3) Serial.printf("Channel %i\tusing offset\t%i\tto reach pitch\t%i\t[ %s ]\n", channel, offset, pitch, get_note_name(pitch).c_str());
+      if (channel!=3) if (offset!=0) Serial.printf("Channel %i\tusing offset\t%i\tto reach pitch from %i\t%i\t[ %s ]\n", channel, offset, pitch, orig_pitch, get_note_name(pitch).c_str());
 
       //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
       if (DEBUG_HARMONY) Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);
@@ -275,7 +276,7 @@ class MidiKeysOutput : public ChannelState {
       
       if (is_note_held()) {
         if (DEBUG_HARMONY) Serial.printf("send_all_notes_off on channel %i! ", channel);
-        debug_notes_held();
+        Serial.printf("send_all_notes_off on channel %i -> ", channel); debug_notes_held();
         send_note_off(get_held_notes());
       } else {
         Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);

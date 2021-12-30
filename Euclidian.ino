@@ -253,9 +253,15 @@ void process_euclidian(int ticks) {
         //debug_patterns();
       }
 
-      if (mutate_harmony_root) {// && current_phrase%4==0) {
-        Serial.printf("mutating harmony_root\n"); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
+      if (is_bpm_on_phrase && mutate_harmony_root) {// && current_phrase%4==0) {
+        randomise_envelopes();
+        Serial.printf("mutating harmony_root and tie_on\n"); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
         harmony.mutate_midi_root_pitch();
+        patterns[TRIGGER_BASS_CH4].tie_on = random(0, 16);
+        harmony.auto_chord_inversion = random(0,1);
+        harmony.auto_chord_type = random(0,1);
+
+        //harmony.mutate_output_modes
       }
       pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
     }
@@ -398,7 +404,7 @@ void initialise_euclidian() {
   make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, TRIGGER_VIBRA); //get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
   make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, TRIGGER_RIDE_BELL); //get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
   make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, TRIGGER_RIDE_CYM); //get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS, 6);  // bass (neutron) offbeat with 6ie of 6
   make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
   make_euclid(&patterns[i++],  LEN,    4, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
   make_euclid(&patterns[i++],  LEN,    4, 5,   STEPS_PER_BEAT,   PATTERN_PAD_PITCH); // root pad

@@ -15,15 +15,15 @@
 #define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 //debug handling
 
-#define DEFAULT_BASS_OFFSET           -2
+#define DEFAULT_BASS_OFFSET          -2
 #define BITBOX_KEYS_OCTAVE_OFFSET     2
-#define DEFAULT_PAD_PITCH_OUT_OFFSET  -1 //1
-#define DEFAULT_PAD_ROOT_OUT_OFFSET   -1 //0   //-2
+#define DEFAULT_PAD_PITCH_OUT_OFFSET  0 //1
+#define DEFAULT_PAD_ROOT_OUT_OFFSET  -1 //0 //0   //-2
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
-#define DEFAULT_SCALE                     7 //0     // 0 = major, 1 = minor...
-#define DEFAULT_AUTO_SCALE_ENABLED        false  // true
+#define DEFAULT_SCALE                     0     // 0 = major, 1 = minor... 7 = hungarian minor
+#define DEFAULT_AUTO_SCALE_ENABLED        false //true  //false
 
 
 // CONFIGURATION: messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron (TODO: probably move this to a dedicated config file)
@@ -164,6 +164,8 @@ int scale_offset[][SCALE_SIZE] = {
   //    C maj is also A minor
 };
 
+
+
 // for use by qsort
 int sort_pitch(const void *cmp1, const void *cmp2)
 {
@@ -218,8 +220,7 @@ class Harmony {
 
     bool auto_progression = DEFAULT_AUTO_PROGRESSION_ENABLED;   // automatically play chords in progression order
     bool auto_scale       = DEFAULT_AUTO_SCALE_ENABLED;   // automatically switch scales every phrase
-    bool auto_chord_type  = true;
-    bool auto_chord_inversion = true;
+
     bool only_note_held   = DEFAULT_BASS_ONLY_WHEN_NOTE_HELD;
 
     int default_chord_progression[4]    =   { 
@@ -242,6 +243,8 @@ class Harmony {
   public:  
  
     int last_note_on;
+    bool auto_chord_type  = true;
+    bool auto_chord_inversion = true;
 
     ChannelState&   channel_state;
     Harmony(ChannelState& channel_state_): channel_state(channel_state_) {
@@ -257,18 +260,22 @@ class Harmony {
 
     void mutate_midi_root_pitch() {
       //Serial.printf("mutating root pitch from %i to %i\n", harmony.r, channel_state.last_note_on);
+      Serial.print("mutate_midi_root_pitch -> "); 
       kill_notes();
-      int new_pitch = MIDI_BASS_ROOT_PITCH + scale_offset[scale_number][random(0,SCALE_SIZE)];
+      int degree = ((channel_state.get_root_note() - MIDI_BASS_ROOT_PITCH) + 7) % 12;
+      //int degree = random(0,SCALE_SIZE);
+      Serial.printf("mutating, got degree %i\n", degree);
+      int new_pitch = MIDI_BASS_ROOT_PITCH + degree; //scale_offset[scale_number][degree];
       set_midi_root_pitch(new_pitch);
-      //Serial.printf("mutating root pitch -- setting to %i aka %s\n", new_pitch, get_note_name(new_pitch).c_str());// from %i to %i\n", harmony.r, channel_state.last_note_on);
+      Serial.printf("mutating root pitch -- setting to %i aka %s\n", new_pitch, get_note_name(new_pitch).c_str());// from %i to %i\n", harmony.r, channel_state.last_note_on);
       //Serial.println();
       
-      /*Serial.printf("new scale %i after mutation, root %i [%s] [ ", scale_number, new_pitch, get_note_name(new_pitch).c_str());
+      Serial.printf("new scale %i after mutation, root %i [%s] [ ", scale_number, new_pitch, get_note_name(new_pitch).c_str());
       for (int i = 0 ; i < SCALE_SIZE ; i++) {
         int n = channel_state.get_root_note() + scale_offset[scale_number][i];
         Serial.printf("%s ", get_note_name(n).c_str());
       }
-      Serial.println("]");*/
+      Serial.println("]");
 
       //channel_state.set_midi_root_pitch(channel_state.last_note_on);
     }
