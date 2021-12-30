@@ -17,6 +17,8 @@
 #define OUT_printf(fmt, ...) do { if (OUT_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define OUT_println(fmt, ...) do { if (OUT_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
+//BITBOX/melody settings
+#define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 
 #define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 #define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)

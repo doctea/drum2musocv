@@ -66,7 +66,7 @@ void bpm_reset_clock (int offset = 0);
 void bpm_update_status( unsigned int received_ticks );
 signed long bpm_clock();
 
-bool playing = false;
+//bool playing = false;
 
 int euclidian_seed_modifier = 0;
 int euclidian_seed_modifier_2 = 0;

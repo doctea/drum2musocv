@@ -65,7 +65,7 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
 // should note be played this step?
 bool query_pattern(pattern_t *p, int step, int offset = 0, int bar = 0) {
   step += bar * STEPS_PER_BAR;
-  int curStep = (step + offset - p->rotation) % p->steps; //wraps beat around if it is higher than the number of steps
+  int curStep = (step + offset /*- p->rotation*/) % p->steps; //wraps beat around if it is higher than the number of steps
   if (curStep < 0) curStep = (p->steps) + curStep; // wrap around if result passes sequence boundary
   //EUC_printf("\r\nquery_pattern querying step %i\r\n", curStep);
   return p->stored[curStep];
@@ -82,14 +82,14 @@ bool query_pattern_note_off(pattern_t *p, int step, int bar = 0) { //, int offse
 
 // rotate the pattern around specifed number of steps -- could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
 void rotate_pattern(pattern_t *p, int rotate) {
-  /*unsigned long rotate_time = millis();
+  unsigned long rotate_time = millis();
   bool stored[p->steps];
   int offset = p->steps - rotate;
   for (int i = 0 ; i < p->steps ; i++) {
     stored[i] = p->stored[abs( (i + offset) % p->steps )];
   }
   memcpy(p->stored, stored, sizeof(stored));
-  pf.l(PF::PF_INTEREST, millis()-rotate_time);*/
+  pf.l(PF::PF_INTEREST, millis()-rotate_time);
 }
 
 // set whether pattern should play
@@ -214,7 +214,7 @@ void process_euclidian(int ticks) {
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
 
-  if (!playing) return;
+  //if (!playing) return;
 
   // TODO: configurable mutation frequency
   // start of phrase or middle of phrase

@@ -256,6 +256,7 @@ class MidiKeysOutput : public ChannelState {
       handle_note_off((byte)pitch);
 
       pitch += offset;
+      if (channel!=3) Serial.printf("Channel %i\tusing offset\t%i\tto reach pitch\t%i\t[ %s ]\n", channel, offset, pitch, get_note_name(pitch).c_str());
 
       //midi_bass_send_note_off(bass_currently_playing, 0, MIDI_CHANNEL_BASS_OUT);
       if (DEBUG_HARMONY) Serial.printf("\t\tactual send_note_off on channel %i for pitch %i [%s] at velocity %i\r\n", channel, pitch, get_note_name(pitch).c_str(), velocity);
@@ -277,7 +278,7 @@ class MidiKeysOutput : public ChannelState {
         debug_notes_held();
         send_note_off(get_held_notes());
       } else {
-        OUT_printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
+        Serial.printf("WARNING: send_all_notes_off but nothing held on channel %i!\r\n", channel);
       }
       
       //MIDIOUT.sendControlChange (MIDI_CC_ALL_NOTES_OFF, 0, channel);   // 123 = kill all notes

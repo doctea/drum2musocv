@@ -15,12 +15,14 @@
 #define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 //debug handling
 
-#define DEFAULT_MELODY_OFFSET   1
-#define DEFAULT_PAD_ROOT_OUT_OFFSET   0 //-2
+#define DEFAULT_BASS_OFFSET           -2
+#define BITBOX_KEYS_OCTAVE_OFFSET     2
+#define DEFAULT_PAD_PITCH_OUT_OFFSET  -1 //1
+#define DEFAULT_PAD_ROOT_OUT_OFFSET   -1 //0   //-2
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
-#define DEFAULT_SCALE                     0      // 0 = major, 1 = minor...
+#define DEFAULT_SCALE                     7 //0     // 0 = major, 1 = minor...
 #define DEFAULT_AUTO_SCALE_ENABLED        false  // true
 
 
@@ -45,10 +47,6 @@
 #define TRIGGER_HARMONY_MELODY    17
 #define TRIGGER_HARMONY_PAD_ROOT  18
 #define TRIGGER_HARMONY_PAD_PITCH 19
-
-//BITBOX/melody settings
-#define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
-#define BITBOX_KEYS_OCTAVE_OFFSET   2
 
 /*
 // deprecated arpegiation settings
@@ -152,6 +150,8 @@ int scale_offset[][SCALE_SIZE] = {
   { 0, 2, 4, 6, 7, 9, 11 },     // lydian
   { 0, 2, 4, 6, 8, 10, (12) },  // whole tone - 6 note scale - flavours for matching melody to chords
   { 0, 3, 5, 6, 7, 10, (12) },  // blues - flavours for matching melody to chords
+  { 0, 2, 3, 6, 7, 8, 11 },     // hungarian minor scale
+
   // minor pent = natural minor but miss out 2nd and 8th
   // major pent = major but miss out 5th and 11th
 
@@ -194,10 +194,10 @@ class Harmony {
 
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT),
+        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT,      DEFAULT_BASS_OFFSET),
 	      MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT,  DEFAULT_PAD_ROOT_OUT_OFFSET),  // with octave offset
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_MELODY_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
+        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_PAD_PITCH_OUT_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 
 #define mko_bass        mko[0]
 #define mko_keys        mko[1]
@@ -258,9 +258,18 @@ class Harmony {
     void mutate_midi_root_pitch() {
       //Serial.printf("mutating root pitch from %i to %i\n", harmony.r, channel_state.last_note_on);
       kill_notes();
-      set_midi_root_pitch(36 + scale_offset[scale_number][random(0,SCALE_SIZE)]);
-      Serial.printf("mutating root pitch -- setting to %i\n", 36 + scale_offset[scale_number][random(0,SCALE_SIZE)]);// from %i to %i\n", harmony.r, channel_state.last_note_on);
+      int new_pitch = MIDI_BASS_ROOT_PITCH + scale_offset[scale_number][random(0,SCALE_SIZE)];
+      set_midi_root_pitch(new_pitch);
+      //Serial.printf("mutating root pitch -- setting to %i aka %s\n", new_pitch, get_note_name(new_pitch).c_str());// from %i to %i\n", harmony.r, channel_state.last_note_on);
+      //Serial.println();
       
+      /*Serial.printf("new scale %i after mutation, root %i [%s] [ ", scale_number, new_pitch, get_note_name(new_pitch).c_str());
+      for (int i = 0 ; i < SCALE_SIZE ; i++) {
+        int n = channel_state.get_root_note() + scale_offset[scale_number][i];
+        Serial.printf("%s ", get_note_name(n).c_str());
+      }
+      Serial.println("]");*/
+
       //channel_state.set_midi_root_pitch(channel_state.last_note_on);
     }
 

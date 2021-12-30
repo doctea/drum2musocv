@@ -47,7 +47,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
       Serial.printf("pin %i: [event %i, count %i, length %i] - switched to demo_mode %i\r\n", pin, event, count, length, demo_mode);
     } else if (pin==BUTTON_PIN_2) {
         Serial.printf("pin %i: [event %i, count %i, length %i] - demo mode is %i\r\n", pin, event, count, length, demo_mode);
-        if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION) {
+        if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL) {
           if (        event==EVENT_RELEASED && length>=2000 ) {
             Serial.printf(">>> Resetting euclidian sequences!\r\n");
             ui_last_action = ACTION_RESET_EUCLIDIAN;
@@ -59,7 +59,7 @@ void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t len
             
           } else if ( event==EVENT_RELEASED && length<=500  ) {
             should_kill = euclidian_set_auto_play(!euclidian_auto_play);
-            Serial.printf(">>> UI Setting auto-play in Euclidian mode to %c!\r\n", euclidian_auto_play ? 'Y' : 'N');
+            Serial.printf(">>> UI Setting auto-play in Euclidian mode to %c!\r\n", !euclidian_auto_play ? 'Y' : 'N');
           }
         }
     }
@@ -89,6 +89,7 @@ bool set_demo_mode(int mode) {
       bool should_reset = ! ((previous_mode==MODE_EUCLIDIAN && demo_mode==MODE_EUCLIDIAN_MUTATION) || (demo_mode==MODE_EUCLIDIAN && previous_mode==MODE_EUCLIDIAN_MUTATION));  // don't reset if we've just switched between 1 and 2
       if (should_reset) {
         should_kill = true;
+        Serial.println("Resetting clock - set_demo_mode!");
         bpm_reset_clock(0);
       }
     }

@@ -216,11 +216,11 @@ void update_pixels_triggers() {
 #ifdef NO_ACTIVE_PIXEL_POSITION
       unsigned long now = millis();
       //Serial.printf("  pixels -- now is %u, last_input_at is %u, last_tick_at is %u, IDLE is %u\r\n", now, last_input_at, last_tick_at, IDLE_PIXEL_TIMEOUT);
-      if ((now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT)
+      if (/*!playing &&*/ (now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT)
           && activeNotes==0
       ) {
 #endif
-        int beats = current_song_position%NUM_LEDS;
+        int beats = current_song_position % NUM_LEDS;
         //Serial.printf("  pixels -- i is %i, beats is %i\r\n", i, beats);
         int steps = current_step;
         if ((i==beats && steps%STEPS_PER_BEAT<2)) {  // only display for first tick / (6 = sixteenth note ?)

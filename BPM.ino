@@ -58,11 +58,12 @@ void debug_print_step_info(char *mode) {
 
 signed long bpm_clock() {
   unsigned long now = millis();
-  if (/*now - last_input_at > IDLE_TIMEOUT && activeNotes==0 && */now - last_tick_at > IDLE_TIMEOUT ) {
+  if (/*now - last_input_at > IDLE_TIMEOUT && activeNotes==0 && */now - last_input_at > IDLE_TIMEOUT ) {
     // internal mode branch
     if (!bpm_internal_mode) {
       // we only just switched from external to internal mode, so need to reset clock?
-      playing = true;
+      //playing = true;
+      //Serial.println("Resetting clock - bpm_clock just switched to internal bpm mode!");
       bpm_reset_clock();
     }
     bpm_internal_mode = true;
@@ -96,7 +97,10 @@ signed long bpm_clock() {
       }
     }
   }
-  if (!playing) return -1;
+  /*if (!playing) {
+    Serial.println("Not playing so BPM clock returning -1!");
+    return -1;
+  }*/
 
   if (received_ticks==0) {
     //handleStart();  // if we've reset our clock, send MIDI start
@@ -190,4 +194,5 @@ void bpm_receive_clock_tick () {
     last_bpm = bpm_current;
   }
 
+  last_input_at = now;
 }

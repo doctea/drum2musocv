@@ -41,7 +41,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
       p = convert_drum_pitch(p);
       douse_trigger(p, 0);
     }*/
-    douse_trigger(get_trigger_for_pitch(p), 0);
+    douse_trigger(get_trigger_for_pitch(p), 127);
     last_input_at = millis();
   }
 }
@@ -137,14 +137,15 @@ void handleClock() {
 void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
-  playing = true;
+  //playing = true;
+  //Serial.println("Resetting clock - received handleStart!");
   bpm_reset_clock(-1);  // -1 so next tick will be start
 }
 void handleContinue() {
   // TODO: continue LFOs
   MIDIOUT.sendContinue();
   kill_envelopes();
-  playing = true;
+  //playing = true;
 }
 void handleStop() {
   MIDIOUT.sendStop();
@@ -155,9 +156,10 @@ void handleStop() {
   //douse_all_triggers(true); // is done in kill_notes
   harmony.kill_notes();
 
+  Serial.println("Resetting clock - received handleStop!");
   bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   last_input_at = millis();
-  playing = false;
+  //playing = false;
   
 //#ifdef ENABLE_PIXELS
 //  kill_notes();
