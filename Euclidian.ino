@@ -4,6 +4,8 @@
 #include "MidiOutput.hpp" // because we need to send MIDI
 #include "BPM.hpp"  // cos we need to know lengths
 
+#include "Profiler.hpp"
+
 //#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
@@ -19,10 +21,14 @@
 
 bpm_status bpm_statuses[NUM_PATTERNS];
 
-float euclidian_density = 0.566666666666f;
+float effective_euclidian_density = 0.566666666666f;
+float max_euclidian_density = 1.2f;
+
+bool euclidian_mutate_density = true;
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
+  //unsigned long time = millis();
 
   if (trigger>=0)   p->trigger = trigger;
   if (tie_on>=0)    p->tie_on = tie_on;
@@ -33,8 +39,8 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (duration >= 0) p->duration = duration;
 
   int original_pulses = p->pulses;
-  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+euclidian_density));
-  EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+euclidian_density));
+  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+effective_euclidian_density));
+  EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+effective_euclidian_density));
 
   EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
 
@@ -53,13 +59,13 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (p->rotation > 0) {
     rotate_pattern(p, p->rotation);
   }
-
+  //pf.l(PF::PF_INTEREST, millis()-time);
 }
 
 // should note be played this step?
 bool query_pattern(pattern_t *p, int step, int offset = 0, int bar = 0) {
   step += bar * STEPS_PER_BAR;
-  int curStep = (step + offset) % p->steps; //wraps beat around if it is higher than the number of steps
+  int curStep = (step + offset /*- p->rotation*/) % p->steps; //wraps beat around if it is higher than the number of steps
   if (curStep < 0) curStep = (p->steps) + curStep; // wrap around if result passes sequence boundary
   //EUC_printf("\r\nquery_pattern querying step %i\r\n", curStep);
   return p->stored[curStep];
@@ -76,12 +82,14 @@ bool query_pattern_note_off(pattern_t *p, int step, int bar = 0) { //, int offse
 
 // rotate the pattern around specifed number of steps -- could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
 void rotate_pattern(pattern_t *p, int rotate) {
+  unsigned long rotate_time = millis();
   bool stored[p->steps];
   int offset = p->steps - rotate;
   for (int i = 0 ; i < p->steps ; i++) {
     stored[i] = p->stored[abs( (i + offset) % p->steps )];
   }
   memcpy(p->stored, stored, sizeof(stored));
+  pf.l(PF::PF_INTEREST, millis()-rotate_time);
 }
 
 // set whether pattern should play
@@ -101,6 +109,11 @@ double randomDouble(double minf, double maxf)
 
 // mutate the pattern according to mode
 void mutate(int pattern){
+  unsigned long mutate_time = millis();
+  if (euclidian_mutate_density) {
+    effective_euclidian_density = constrain((0.7f+(sin(current_phrase)/2.2f)), 0.2f, max_euclidian_density);
+    Serial.printf("mutate euclidian density set to %2.2f!\n", effective_euclidian_density);
+  }
   if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
     mutate_euclidian_total(pattern);
   else if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_SUBTLE)
@@ -114,6 +127,8 @@ void mutate(int pattern){
   } else { //and there's room for more modes too...
 
   }
+  //Serial.printf("mutate took %ims\n", millis()-mutate_time);
+  pf.l(PF::PF_EUCLIDIAN, millis()-mutate_time);
 }
 
 void mutate_euclidian_masked(int pattern) {
@@ -194,11 +209,12 @@ void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
 }
 
 void process_euclidian(int ticks) {
-
   static int last_processed = 0;
   if (ticks == last_processed) return;
 
   if (!euclidian_auto_play && bpm_internal_mode) return;    // dont play if not set to auto play and running off internal bpm
+
+  //if (!playing) return;
 
   // TODO: configurable mutation frequency
   // start of phrase or middle of phrase
@@ -211,14 +227,17 @@ void process_euclidian(int ticks) {
     }
     
     if (euclidian_reset_before_mutate) {
+      unsigned long mutate_time = millis();
       harmony.reset_progression();
       harmony.reset_sequence();
+      pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
     }
 
     bool should_mutate = mutate_enabled;
 
     if (should_mutate) {
       harmony.mutate();
+      unsigned long mutate_time = millis();
 
       unsigned long seed = get_euclidian_seed();
       EUC_printf("Euclidian seed: %i\n", seed);
@@ -233,11 +252,24 @@ void process_euclidian(int ticks) {
 
         //debug_patterns();
       }
+
+      if (is_bpm_on_phrase && mutate_harmony_root) {// && current_phrase%4==0) {
+        randomise_envelopes();
+        Serial.printf("mutating harmony_root and tie_on\n"); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
+        harmony.mutate_midi_root_pitch();
+        patterns[TRIGGER_BASS_CH4].tie_on = random(0, 16);
+        harmony.auto_chord_inversion = random(0,1);
+        harmony.auto_chord_type = random(0,1);
+
+        //harmony.mutate_output_modes
+      }
+      pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
     }
   }
 
   // fills on last bar of phrase if enabled
   if (euclidian_fills_enabled && /*is_bpm_on_phrase &&*/ is_bpm_on_beat && is_bpm_on_step && ((is_bpm_on_bar && current_bar == (BARS_PER_PHRASE - 1)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
+    unsigned long mutate_time = millis();
     EUC_printf("FILLING at bar %i!\r\n", current_bar);
     randomSeed(current_phrase);
     for (int i = 0 ; i < 3 ; i++) {
@@ -251,12 +283,14 @@ void process_euclidian(int ticks) {
       if (patterns[ran].pulses > patterns[ran].steps) patterns[ran].pulses /= 8;
       make_euclid(&patterns[ran]);
     }
+    pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-mutate_time);
   }
 
   // old euclidian trigger loop went here
 
   harmony.process_ties();
 
+  unsigned long euclidian_time = millis();
   for (int i = 0 ; i < NUM_PATTERNS ; i++) {
     //EUC_printf("\r\n>>>>>>>>>>>about to query current_step %i\r\n", current_step);
     if (!patterns[i].active_status || patterns[i].trigger==-1) continue;
@@ -331,13 +365,14 @@ void process_euclidian(int ticks) {
     
     //Serial.printf(">>> finished checking pattern %i for ticks %i\r\n", i, ticks);
   }
+  pf.l(PF::PF_EUCLIDIAN, millis()-euclidian_time);
   
   //EUC_printf("ticks is %i, ticks_per_step/2 is %i, result of mod is %i\n", ticks, TICKS_PER_STEP/2, ticks%TICKS_PER_STEP);
   last_processed = ticks;
 }
 
 void initialise_euclidian() {
-
+  unsigned long euc_time = millis();
   EUC_println("initialise_euclidian():");
 
   EUC_println("resetting all:-");
@@ -353,23 +388,23 @@ void initialise_euclidian() {
   EUC_println("initialising:-");
   //     length, pulses, rotation, duration
   int i = 0;
-  make_euclid(&patterns[i++],  LEN,    4, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
-  make_euclid(&patterns[i++],  LEN,    5, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
-  make_euclid(&patterns[i++],  LEN,    2, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
-  make_euclid(&patterns[i++],  LEN,    3, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
-  make_euclid(&patterns[i++],  LEN,    3, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
-  make_euclid(&patterns[i++],  LEN,    7, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
-  make_euclid(&patterns[i++],  LEN,    9, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
-  make_euclid(&patterns[i++],  LEN/4,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
-  make_euclid(&patterns[i++],  LEN/2,  2, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
-  make_euclid(&patterns[i++],  LEN,    4, 3,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
-  make_euclid(&patterns[i++],  LEN,    16, 0,  0,                get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
-  make_euclid(&patterns[i++],  LEN*2,  1, 1,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
-  make_euclid(&patterns[i++],  LEN*2,  1, 5,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
-  make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
-  make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
-  make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
-  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS);  // bass (neutron) offbeat
+  make_euclid(&patterns[i++],  LEN,    4, 1,   DEFAULT_DURATION, TRIGGER_KICK);// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM));    // kick
+  make_euclid(&patterns[i++],  LEN,    5, 1,   DEFAULT_DURATION, TRIGGER_SIDESTICK); //get_trigger_for_pitch(GM_NOTE_SIDE_STICK));    // stick
+  make_euclid(&patterns[i++],  LEN,    2, 5,   DEFAULT_DURATION, TRIGGER_CLAP); //get_trigger_for_pitch(GM_NOTE_HAND_CLAP));    // clap
+  make_euclid(&patterns[i++],  LEN,    3, 1,   DEFAULT_DURATION, TRIGGER_SNARE); //get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE));   // snare
+  make_euclid(&patterns[i++],  LEN,    3, 3,   DEFAULT_DURATION, TRIGGER_CRASH_1); //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1));    // crash 1
+  make_euclid(&patterns[i++],  LEN,    7, 1,   DEFAULT_DURATION, TRIGGER_TAMB); //get_trigger_for_pitch(GM_NOTE_TAMBOURINE));    // tamb
+  make_euclid(&patterns[i++],  LEN,    9, 1,   DEFAULT_DURATION, TRIGGER_HITOM); //get_trigger_for_pitch(GM_NOTE_HIGH_TOM));    // hi tom!
+  make_euclid(&patterns[i++],  LEN/4,  2, 3,   DEFAULT_DURATION, TRIGGER_LOTOM); //get_trigger_for_pitch(GM_NOTE_LOW_TOM));    // low tom
+  make_euclid(&patterns[i++],  LEN/2,  2, 3,   DEFAULT_DURATION, TRIGGER_PEDALHAT); //get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT));    // pedal hat
+  make_euclid(&patterns[i++],  LEN,    4, 3,   DEFAULT_DURATION, TRIGGER_OPENHAT); //get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT));    // open hat
+  make_euclid(&patterns[i++],  LEN,    16, 0,  0,                TRIGGER_CLOSEDHAT); //get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT)); //DEFAULT_DURATION);   // closed hat
+  make_euclid(&patterns[i++],  LEN*2,  1, 1,   DEFAULT_DURATION, TRIGGER_CRASH_2); //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2));   // crash 2
+  make_euclid(&patterns[i++],  LEN*2,  1, 5,   DEFAULT_DURATION, TRIGGER_SPLASH); //get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL));   // splash
+  make_euclid(&patterns[i++],  LEN*2,  1, 9,   DEFAULT_DURATION, TRIGGER_VIBRA); //get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP));    // vibra
+  make_euclid(&patterns[i++],  LEN*2,  1, 13,  DEFAULT_DURATION, TRIGGER_RIDE_BELL); //get_trigger_for_pitch(GM_NOTE_RIDE_BELL));   // bell
+  make_euclid(&patterns[i++],  LEN*2,  5, 13,  DEFAULT_DURATION, TRIGGER_RIDE_CYM); //get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1));   // cymbal
+  make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT/2, PATTERN_BASS, 6);  // bass (neutron) offbeat with 6ie of 6
   make_euclid(&patterns[i++],  LEN,    4, 3,   STEPS_PER_BEAT-1, PATTERN_MELODY); //NUM_TRIGGERS+NUM_ENVELOPES);  // melody as above
   make_euclid(&patterns[i++],  LEN,    4, 1,   STEPS_PER_BEAT*2, PATTERN_PAD_ROOT); // root pad
   make_euclid(&patterns[i++],  LEN,    4, 5,   STEPS_PER_BEAT,   PATTERN_PAD_PITCH); // root pad
@@ -377,6 +412,7 @@ void initialise_euclidian() {
   //make_euclid(&patterns[16],  LEN,    16, 0);    // bass (neutron)  sixteenth notes
   //make_euclid(&patterns[16],  LEN,    12, 4); //STEPS_PER_BEAT/2);    // bass (neutron)  rolling
   //make_euclid(&patterns[16],  LEN,    12, 4, STEPS_PER_BEAT/2);    // bass (neutron)  rolling*/
+  pf.l(PF::PF_EUCLIDIAN_MUTATE, millis()-euc_time);
 }
 
 
@@ -465,8 +501,12 @@ bool handle_euclidian_ccs(byte channel, byte number, byte value) {
     euclidian_flam_clap = value >0;
     return true;
   } else if (number == CC_EUCLIDIAN_DENSITY) {
-    euclidian_density = ((float)value)/127.0f;
-    EUC_printf("euclidan_density set to %2.2f\n", euclidian_density);
+    max_euclidian_density = effective_euclidian_density = ((float)value)/127.0f;
+    EUC_printf("euclidian_density set to %2.2f\n", effective_euclidian_density);
+    return true;
+  } else if (number == CC_EUCLIDIAN_MUTATE_DENSITY) {
+    euclidian_mutate_density = value>0;
+    Serial.printf("mutate euclidian density set from %i\n", value);
     return true;
   }
   return false;

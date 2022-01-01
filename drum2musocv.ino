@@ -17,6 +17,8 @@
 
 #include "Harmony.hpp"
 
+#include "Profiler.hpp"
+
 #ifdef ENABLE_EEPROM
 #include "Eeprom.h"
 #endif
@@ -25,6 +27,7 @@
 
 // for demo mode
 int last_played_trigger = -1;
+
 
 // for handling clock ---------------------------------------------------------
 // At 120 BPM, 24 clock ticks will last 0.02083 seconds. = 200ms
@@ -113,6 +116,10 @@ void setup() {
 void loop() {
   process_midi();
 
+  for (int i = 0 ; i < 4 ; i++) {
+    limb_count[i] = 0;
+  }
+
 #ifdef ENABLE_BUTTONS
   update_buttons();
 #endif
@@ -121,14 +128,11 @@ void loop() {
   unsigned long now_ms = millis();
   unsigned long delta_ms = now_ms - time_last;
   //Serial.print("now is "); Serial.println(now);
-  if (delta_ms >= (int)estimated_ms_per_tick) {
-    //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
-    Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
-  }
-  
-  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION) {
+
+  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL) {
     //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
-    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION;
+    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL;
+    mutate_harmony_root = demo_mode==MODE_EXPERIMENTAL;
        
     process_euclidian(now);
   } else if (demo_mode==MODE_RANDOM) {
@@ -150,18 +154,31 @@ void loop() {
   // update envelopes by time elapsed
   process_envelopes(now);
 
-#ifdef ENABLE_PIXELS
-  update_pixels(now_ms);
-#endif
-
 #ifdef ENABLE_SCREEN
   if (now_ms - last_updated_screen_at >= PIXEL_REFRESH * 2) {
     //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
+    int screen_time = millis();
     last_updated_screen_at = now_ms;
     screen_update();
     Serial.printf("updated screen in %ims\n", millis() - last_updated_screen_at);
+    pf.l(PF::PF_SCREEN, millis()-screen_time);
   }
+
+#ifdef ENABLE_PIXELS
+    unsigned int pixels_time = millis();
+    update_pixels(now_ms);
+    //if (now_ms%1000==0) Serial.printf("Pixels took %ims\n", millis()-pixels_time);
+    pf.l(PF::PF_PIXELS, millis()-pixels_time);
 #endif
 
   time_last = now_ms;
+  
+  if (millis()-now_ms >= (int)estimated_ms_per_tick) {
+    //Serial.printf("[perf] looped in %ims, estimated_ms_per_tick is %3.3f\r\n", delta_ms, estimated_ms_per_tick);
+    //Serial.printf("[WARNPERF] loop took %ims, longer than estimated_ms_per_tick of %3.3f!\r\n", delta_ms, estimated_ms_per_tick);
+    Serial.printf("[WARNPERF] !!%ims/%3.3f!\r\n", millis()-now_ms, estimated_ms_per_tick);
+    pf.output();
+  }
+  pf.reset();
+
 }

@@ -4,6 +4,8 @@
 
 #include "MidiSetup.hpp"
 
+#include "Profiler.hpp"
+
 float estimated_ms_per_tick = 0.0f;
 
 // utility functions for calculating BPM etc
@@ -45,7 +47,7 @@ bool is_bpm_on_step = false;
 bool is_bpm_on_bar  = false;
 bool is_bpm_on_phrase=false;
 
-double bpm_current = 60.0f; //120.0f;
+double bpm_current = 60.0f; //90.0f; //60.0f; //120.0f;
 double last_bpm = bpm_current;
 
 bool bpm_internal_mode = false;
@@ -62,9 +64,9 @@ static unsigned long last_ticked = 0;
 void bpm_receive_clock_tick ();
 void bpm_reset_clock (int offset = 0);
 void bpm_update_status( unsigned int received_ticks );
-unsigned int bpm_clock();
+signed long bpm_clock();
 
-
+//bool playing = false;
 
 int euclidian_seed_modifier = 0;
 int euclidian_seed_modifier_2 = 0;
@@ -97,7 +99,9 @@ public:
   bool is_bpm_on_bar  = false;
   bool is_bpm_on_phrase=false;
 
+
   void update( unsigned int received_ticks ) {
+    unsigned long bpm_time = millis();
     current_total_step = (received_ticks/TICKS_PER_STEP);
     current_total_beat = current_total_step / STEPS_PER_BEAT;
     current_total_bar  = current_total_beat / BARS_PER_PHRASE;
@@ -115,7 +119,10 @@ public:
       current_song_position = received_ticks/PPQN;  // TODO: need to take into account that song position is set by the DAW sometimes....
       //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
     }
+    
+    pf.l(PF::PF_BPM, millis()-bpm_time);
   }
+
 };
 
 #endif

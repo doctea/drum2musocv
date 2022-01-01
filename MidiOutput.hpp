@@ -1,6 +1,8 @@
 #ifndef MIDIOUTPUT_INCLUDED
 #define MIDIOUTPUT_INCLUDED
 
+#include "UI.h"
+
 #define WORKAROUND_MISSED_NOTEOFFS_DELAY 12  // 8 seems to be about the shortest time we can get away with, altho it still gets confused at times
 #define WORKAROUND_MISSED_NOTEOFFS true     // DANGER -- uses a delay() in order to avoid things fucking up when sending lots of douse_triggers in a loop
   // weirdly, the midimuso seems to miss note offs sent for Harmony outputs if lots of note offs are sent rapidly to the bitbox *drums* output, 
@@ -17,6 +19,8 @@
 #define OUT_printf(fmt, ...) do { if (OUT_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define OUT_println(fmt, ...) do { if (OUT_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
+//BITBOX/melody settings
+#define BITBOX_NOTE_MINIMUM         36  // https://1010music.com/wp-content/uploads/2020/08/bitbox-mk2-1.0.8-user-manual.pdf "MIDI inputs for notes 36 to 51 map to the pads", "EXT1 through EXT4 are assigned notes 55 to 52 for use as Recording triggers"
 
 #define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 #define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)
@@ -35,18 +39,18 @@ int get_muso_pitch_for_trigger(int trigger) {
   return pitch_for_trigger_table[trigger];
 }
 
-// get the output pitch to use for this trigger
+// get the MIDIMUSO output pitch to use for this trigger
 // take into account that some outputs may be missing or moved when in different muso modes and swap them appropriately
 int get_muso_pitch_for_trigger_actual(int trigger) {
-#if MUSO_MODE==MUSO_MODE_2B // pitches mode
+#if MUSO_MODE==MUSO_MODE_2B // single board, in pitches mode
   int gate;
-  if (trigger==0) gate = 3;
-  else if (trigger==1) gate = -1;
-  else if (trigger==5 || trigger==6 || trigger==7) gate = -1;
+  if (trigger==TRIGGER_KICK) gate = 3;
+  else if (trigger==TRIGGER_SIDESTICK) gate = -1;
+  else if (trigger==TRIGGER_TAMB || trigger==TRIGGER_HITOM || trigger==TRIGGER_LOTOM) gate = -1;
   else if (trigger<=NUM_TRIGGERS) {
-    if (trigger>7) 
+    if (trigger>TRIGGER_LOTOM) 
       gate = trigger - 4; 
-    else if (trigger>=2)
+    else if (trigger>=TRIGGER_CLAP)
       gate = trigger - 2;
   }
 
@@ -56,29 +60,63 @@ int get_muso_pitch_for_trigger_actual(int trigger) {
   return -1;
 #elif MUSO_MODE==MUSO_MODE_0B_AND_2A  // multi-board mode -- put kick onto stick to avoid problem with muso board in 0B unexpectedly reacting on channel 1 note on/offs
   int gate = trigger;
-  if (trigger==0) gate = 1;   // kick -> stick
-  else if (trigger==1) gate = -1; // disable stick
+  if      (trigger==TRIGGER_KICK)       gate = 1;   // kick -> stick
+  else if (trigger==TRIGGER_SIDESTICK)  gate = -1; // disable stick
 
   if (gate!=-1)
     return MUSO_NOTE_MINIMUM + gate;
   return -1;
-#else
+#else // single board, in triggers mode 0B
   return MUSO_NOTE_MINIMUM+trigger;
 #endif
 }
+
+#define LEFT_FOOT 0
+#define RIGHT_FOOT 1
+#define LEFT_HAND 2
+#define RIGHT_HAND LEFT_HAND //3
+
+int limb_count[4];
+int limbs[NUM_PATTERNS];
 
 void initialise_pitch_for_trigger_table () {
   for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
     pitch_for_trigger_table[i] = get_muso_pitch_for_trigger_actual(i);
   }
+
+  for (int i = 0 ; i < NUM_PATTERNS ; i++) {
+    limbs[i] = -1;
+  }
+  limbs[TRIGGER_KICK] = RIGHT_FOOT;
+  limbs[TRIGGER_CLAP] = LEFT_HAND;
+  limbs[TRIGGER_SNARE] = LEFT_HAND;
+  limbs[TRIGGER_CLOSEDHAT] = RIGHT_HAND;
+  limbs[TRIGGER_OPENHAT] = RIGHT_HAND;
+  limbs[TRIGGER_PEDALHAT] = LEFT_FOOT;
+  limbs[TRIGGER_CRASH_1] = RIGHT_HAND;
+  limbs[TRIGGER_CRASH_2] = LEFT_HAND;
 }
 
 // functions for sending MIDI out
 
 //static int i = 0;
 void fire_trigger(byte trigger, byte velocity, bool internal = false) {
+  unsigned long trigger_time = millis();
   //OUT_printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
+
+  if (demo_mode==MODE_EXPERIMENTAL) { //enable_limit_limbs) {
+    int limb = limbs[trigger];
+    if (limb>=0) {
+      limb_count[limb]++;
+      //Serial.printf("using limb %i because trigger %i!\n", limb, trigger);
+      if (((limb==LEFT_HAND && limb_count[limb]>2) || (limb!=LEFT_HAND && limb_count[limb]>1))) { 
+        Serial.printf("dropping t %i cause limb %i tired!\n", trigger, limb);
+        return;
+      }
+    }
+  }
+
   byte p = MUSO_NOTE_MINIMUM + trigger;
   byte b = BITBOX_NOTE_MINIMUM + trigger;
   if (
@@ -96,6 +134,7 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
       OUT_printf("fire_trigger(%i) sending bitbox drum pitch %i on channel %i\r\n", b, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
       MIDIOUT.sendNoteOn(b, velocity, MIDI_CHANNEL_BITBOX_DRUMS_OUT);
     }
+    update_envelopes_for_trigger(trigger, velocity, true);
     //OUT_println("sent both midi notes");
   } else if (
     p >= MUSO_NOTE_MAXIMUM &&
@@ -109,6 +148,7 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
     //if (autobass_input.is_note_held()) // todo: make this so that can still play bass when no DAW present...
     //harmony.fire_both(); //bass_note_on_and_next();
     harmony.fire_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
+    //update_envelopes_for_trigger(trigger, velocity, true);
     //else
     //  OUT_println("No note held? is_note_held is false");
   } else {
@@ -117,9 +157,12 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
   if (midiecho_enabled)
     if (internal) echo_fire_trigger(p - MUSO_NOTE_MINIMUM, velocity);
   //OUT_println("finishing fire_trigger");
+  pf.l(PF::PF_MIDI_OUT, millis()-trigger_time);
 }
 
 void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool tied = false) {
+  unsigned long trigger_time = millis();
+
   //OUT_printf("dousing trigger=%i\r\n", t);
   byte p = MUSO_NOTE_MINIMUM + trigger;
   byte b = BITBOX_NOTE_MINIMUM + trigger;
@@ -143,6 +186,7 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
       //MIDIOUT.sendNoteOff(b, v, 0);
       MIDIOUT.sendNoteOff(b, velocity, midi_channel_bitbox_drums_out);
     }
+    update_envelopes_for_trigger(trigger, velocity, false);
     //MIDIOUT.sendNoteOff(b + 12, v, MIDI_CHANNEL_BITBOX_KEYS);
     //OUT_printf("fired a note OFF to bit box: %i\r\n", i);
   } else if (
@@ -159,11 +203,14 @@ void douse_trigger(byte trigger, byte velocity = 0, bool internal = false, bool 
     //harmony.douse_both();
     if (tied) OUT_printf(">>>TIES: douse_trigger so STARTING TIED NOTE ON INSTRUMENT %i!\r\n", trigger - (NUM_TRIGGERS + NUM_ENVELOPES));
     harmony.douse_for(trigger - (NUM_TRIGGERS + NUM_ENVELOPES), tied);
+    //update_envelopes_for_trigger(trigger, velocity, false);
   } else {
     //OUT_printf("WARNING: douse_trigger not doing anything with pitch %i\r\n", p);
   }
   if (midiecho_enabled)
     if (internal) echo_douse_trigger(p - MUSO_NOTE_MINIMUM, velocity);
+
+  pf.l(PF::PF_MIDI_OUT, millis()-trigger_time);
 }
 
 void douse_all_triggers(bool internal = false) {
@@ -180,6 +227,7 @@ void douse_all_triggers(bool internal = false) {
 }
 
 void midi_send_envelope_level(byte envelope, byte level) {
+  unsigned long send_time = millis();
   //Serial.printf("Envelope[%i] in stage %i: sending lvl %i to midi_cc %i!\r\n", envelope, envelopes[envelope].stage, level, envelopes[envelope].midi_cc);
   //if (envelope == ENV_RIDE_CYMBAL) { // hack to use the pitch bend output as an envelope, since my 'cc 74' output seems to have stopped working - could use this to add an extra envelope or LFO etc
 #ifdef MUSO_USE_PITCH_FOR
@@ -191,6 +239,7 @@ void midi_send_envelope_level(byte envelope, byte level) {
 #endif
     MIDIOUT.sendControlChange(envelopes[envelope].midi_cc, level, MUSO_CV_CHANNEL); // send message to midimuso
   }
+  pf.l(PF::PF_MIDI_OUT, millis()-send_time);
 }
 
 void midi_kill_notes_bitbox_drums() {

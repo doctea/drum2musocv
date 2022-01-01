@@ -173,7 +173,8 @@ void update_pixels_triggers() {
         t = get_envelope_for_pixel(i);
         if (t>=0) {
           pixel_type = PIX_ENVELOPE;
-          active = envelopes[t].stage != OFF;
+          //active = envelopes[t].stage != OFF;
+          active = envelopes[t].last_sent_actual_lvl>0; // != OFF;
         }
       }
 
@@ -188,30 +189,38 @@ void update_pixels_triggers() {
           // handling an envelope pixel that is active
           if (envelopes[t].stage==ATTACK) {
             colour = CRGB::Red;
+          } else if (envelopes[i].stage==HOLD) {
+            colour = CRGB::White;
           } else if (envelopes[t].stage==DECAY) {
             colour = CRGB::Yellow;
+          } else if (envelopes[t].stage==SUSTAIN) {
+            colour = CRGB::Orange;
           } else if (envelopes[t].stage==RELEASE) {
-            colour = CRGB::Aqua;
+            colour = CRGB::Crimson;
           } else {
             colour = CRGB::Green;
           }
-          // fade by envelope level relative to velocity
-          colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));
+          
+          //colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].actual_level / (float)envelopes[t].velocity)));// fade by envelope level relative to velocity
+          colour.fadeToBlackBy(255.0 * (1.0-((float)envelopes[t].last_sent_actual_lvl/127.0))); // by the actual level....
         }
       } else {
         //colour = CRGB::Black;
-        colour = leds[p]/4; //CRGB::Black;
+        if (pixel_type==PIX_TRIGGER)
+          colour = leds[p]/4; //CRGB::Black;
+        else 
+          colour = CRGB::Black;
       }
 
 #ifdef ENABLE_PIXEL_POSITION
 #ifdef NO_ACTIVE_PIXEL_POSITION
       unsigned long now = millis();
       //Serial.printf("  pixels -- now is %u, last_input_at is %u, last_tick_at is %u, IDLE is %u\r\n", now, last_input_at, last_tick_at, IDLE_PIXEL_TIMEOUT);
-      if (now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT
+      if (/*!playing &&*/ (now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT)
           && activeNotes==0
       ) {
 #endif
-        int beats = current_song_position%NUM_LEDS;
+        int beats = current_song_position % NUM_LEDS;
         //Serial.printf("  pixels -- i is %i, beats is %i\r\n", i, beats);
         int steps = current_step;
         if ((i==beats && steps%STEPS_PER_BEAT<2)) {  // only display for first tick / (6 = sixteenth note ?)

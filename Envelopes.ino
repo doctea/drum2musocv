@@ -1,6 +1,10 @@
 #include "SinTables.h"
 
+#include "Profiler.hpp"
+
 #include "MidiOutput.hpp"
+
+
 
 void initialise_envelopes() {
   // set up the default envelope states
@@ -14,28 +18,37 @@ void initialise_envelopes() {
   envelopes[ENV_WOBBLY].midi_cc     = MUSO_CC_CV_4;
   envelopes[ENV_RIDE_BELL].midi_cc  = MUSO_CC_CV_1;
   envelopes[ENV_RIDE_CYMBAL].midi_cc       = MUSO_CC_CV_5;
+
+  envelopes[ENV_CRASH].trigger_on       = TRIGGER_CRASH_2;
+  envelopes[ENV_SPLASH].trigger_on      = TRIGGER_SPLASH;
+  envelopes[ENV_WOBBLY].trigger_on      = TRIGGER_VIBRA;
+  envelopes[ENV_RIDE_BELL].trigger_on   = TRIGGER_RIDE_BELL;
+  envelopes[ENV_RIDE_CYMBAL].trigger_on = TRIGGER_RIDE_CYM;
+
 #if MUSO_MODE==MUSO_MODE_0B_AND_2A
   envelopes[ENV_PITCH_1].midi_cc    = MUSO_CC_CV_6;
   envelopes[ENV_PITCH_2].midi_cc    = MUSO_CC_CV_7;
   envelopes[ENV_PITCH_3].midi_cc    = MUSO_CC_CV_8;
   envelopes[ENV_PITCH_4].midi_cc    = MUSO_CC_CV_9;
-  envelopes[ENV_PITCH_1].trigger_on_channel = 1;
-  envelopes[ENV_PITCH_2].trigger_on_channel = 1;
-  envelopes[ENV_PITCH_3].trigger_on_channel = 2;
-  envelopes[ENV_PITCH_4].trigger_on_channel = 2;
+
+  envelopes[ENV_PITCH_1].trigger_on = TRIGGER_PITCH_1_CH1;
+  envelopes[ENV_PITCH_2].trigger_on = TRIGGER_PITCH_1_CH1;
+  envelopes[ENV_PITCH_3].trigger_on = TRIGGER_PITCH_2_CH2;
+  envelopes[ENV_PITCH_4].trigger_on = TRIGGER_PITCH_2_CH2;
 #endif
 
 }
 
 void randomise_envelopes() {
   for (int i = 0 ; i < NUM_ENVELOPES ; i++) { // _EXTENDED if we want to randomise the extended envelopes too?
-    envelopes[i].trigger_on_channel = random(0,4);
+    //envelopes[i].trigger_on = random(0,4);
     envelopes[i].lfo_sync_ratio_hold_and_decay = random(0,127);
     envelopes[i].lfo_sync_ratio_sustain_and_release = random(0,127);
     envelopes[i].attack_length = random(0,127);
     envelopes[i].hold_length = random(0,127);
     envelopes[i].decay_length = random(0,127);
     envelopes[i].sustain_ratio = 1.0/(float)random(0,127);
+    envelopes[i].release_length = random(0,127);
   }
 }
 
@@ -85,9 +98,12 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
     } else if (number==LFO_SYNC_RATIO_SUSTAIN_AND_RELEASE-1) {
       envelopes[env_num].lfo_sync_ratio_sustain_and_release = constrain(1+value,1,128);
     } else if (number==ASSIGN_HARMONY_OUTPUT-1) {
-      if (envelopes[env_num].trigger_on_channel!=TRIGGER_CHANNEL_OFF)
-        update_envelope(env_num, 0, false);
-      envelopes[env_num].trigger_on_channel = value;  // 0 = off, 1-16 = channel, 17 = lfo // % 16;
+      //if (envelopes[env_num].trigger_on!=TRIGGER_CHANNEL_OFF) 
+      envelopes[env_num].loop = bitRead(value,5);          // +32 = loop on/off
+      envelopes[env_num].invert = bitRead(value,6);        // +64 = invert on/off
+      envelopes[env_num].trigger_on = value & 0b00011111;  // mask off the high bits to get the trigger number
+      update_envelope(env_num, 127, false);      
+      //Serial.printf("setting envelope %i to trigger on %i, loop %i invert %i\n", env_num, envelopes[env_num].trigger_on, envelopes[env_num].loop, envelopes[env_num].invert );
     }
     return true;
   }
@@ -95,9 +111,19 @@ bool handle_envelope_ccs(byte channel, byte number, byte value) {
   return false;
 }
 
+void update_envelopes_for_trigger(int trigger, int velocity, bool state) {
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
+    if (envelopes[i].trigger_on==trigger) {
+      //Serial.printf("update_envelopes_for_trigger(trigger %i, env %i, state %i)\n", trigger, i, state);
+      update_envelope(i, (byte)velocity, state);
+    }
+  }
+}
+
 // received a message that the state of the envelope should change (note on/note off etc)
 void update_envelope (byte env_num, byte velocity, bool state) {
   unsigned long now = bpm_clock(); //clock_millis(); 
+  unsigned long env_time = millis();
   if (state == true) { //&& envelopes[env_num].stage==OFF) {  // envelope told to be in 'on' state by note on
     envelopes[env_num].velocity = velocity;
     envelopes[env_num].actual_level = velocity; // TODO: start this at 0 so it can ramp / offset level feature
@@ -143,23 +169,27 @@ void update_envelope (byte env_num, byte velocity, bool state) {
         break;
     }
   }
+  pf.l(PF::PF_ENVELOPES, millis()-env_time);
 }
 
 // process all the envelopes
 void process_envelopes(unsigned long now) {
+  unsigned long envelope_time = millis();
   static unsigned long last_processed = 0;
   if (now==last_processed) return;
   for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
     process_envelope(i, now);
   }
   last_processed = now;
+  //Serial.printf("envelopes processed in %ims\n", millis()-envelope_time);
+  pf.l(PF::PF_ENVELOPES, millis()-envelope_time);
 }
 
 //#define DEBUG_ENVELOPES
 
 // process an envelope (ie update its stage and send updated CC to the midimuso if appropriate)
 void process_envelope(byte i, unsigned long now) {
-  //unsigned long envelope_time = millis();
+  //
     //if (envelopes[i].stage!=OFF) {
     //if (envelopes[i].last_sent_at==0 || abs(now - envelopes[i].last_sent_at)>=CONFIG_THROTTLE_MS) {
     unsigned long elapsed = now - envelopes[i].stage_triggered_at;
@@ -252,7 +282,7 @@ void process_envelope(byte i, unsigned long now) {
         lvl = (byte)(sustain_level);
         
         // go straight to RELEASE if sustain is zero or we're in lfo mode
-        if (envelopes[i].sustain_ratio==0.0f || envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
+        if (envelopes[i].sustain_ratio==0.0f || envelopes[i].loop) { //trigger_on>=TRIGGER_CHANNEL_LFO) {
           envelopes[i].stage_triggered_at = now;
           envelopes[i].stage_start_level = lvl;
           OUT_printf("Leaving SUSTAIN stage with lvl at %i\r\n", lvl);
@@ -327,33 +357,38 @@ void process_envelope(byte i, unsigned long now) {
       } 
     } else {
         // envelope is stopped - restart it if in lfo mode!
-        if (envelopes[i].trigger_on_channel>=TRIGGER_CHANNEL_LFO) {
+        if (envelopes[i].loop) { //trigger_on>=TRIGGER_CHANNEL_LFO) {
           OUT_printf("envelope %i is stopped, restarting\n", i);
-          update_envelope(i, 127, true);
+          update_envelope(i, envelopes[i].velocity, true);
         }
     }
 
-    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED ) {
+    /*if (envelopes[i].trigger_on==TRIGGER_CHANNEL_LFO_MODULATED || envelopes[i].trigger_on==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED ) {
       int modulating_envelope = (i-1==-1) ? NUM_ENVELOPES_EXTENDED-1 : i-1;
       lvl = ((float)lvl) * ((float)envelopes[modulating_envelope].last_sent_lvl/127);
-    }
-    if (envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_INVERTED || envelopes[i].trigger_on_channel==TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED) {
-      lvl = 127-lvl;
-    }
-
+    }*/
 
     envelopes[i].actual_level = lvl;
     
-    if (envelopes[i].last_sent_lvl != lvl) {  // only send a new value if its different to the last value sent for this envelope
+    if (envelopes[i].last_sent_actual_lvl != envelopes[i].invert ? 127-lvl : lvl) {  // only send a new value if its different to the last value sent for this envelope
       //if (envelopes[i].stage==OFF) lvl = 0;   // force level to 0 if the envelope is meant to be OFF
 
-      midi_send_envelope_level(i, lvl); // send message to midimuso
+      /*if (envelopes[i].invert) {
+        lvl = 127-lvl;
+      }*/
+      midi_send_envelope_level(i, envelopes[i].invert ? 127-lvl : lvl); // send message to midimuso
       
       envelopes[i].last_sent_at = now;
       envelopes[i].last_sent_lvl = lvl;
+      envelopes[i].last_sent_actual_lvl = envelopes[i].invert ? 127-lvl : lvl;
+      /*if (envelopes[i].invert)
+        Serial.printf("sending value %i for envelope %i\n", envelopes[i].last_sent_actual_lvl, i);*/
+
+    } else {
+      /*if (envelopes[i].invert)
+        Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);*/
     }
 
-  //Serial.printf("envelope processed in %ims\n", millis()-envelope_time);
 
 }
 
@@ -363,7 +398,7 @@ void fire_envelope_for_channel(int channel, int velocity) {
   //Serial.printf("checking fire_envelope_for_channel %i\r\n", channel);
 
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
-    if (envelopes[i].trigger_on_channel==channel) {
+    if (envelopes[i].trigger_on==channel) {
       //Serial.printf("got fire_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, true);
     }
@@ -374,7 +409,8 @@ void douse_envelope_for_channel(int channel, int velocity) {
   if (channel==0) return;
 
   for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
-    if (envelopes[i].trigger_on_channel==channel) {
+    if (envelopes[i].trigger_on==channel) {
+      //Serial.printf("got douse_for_envelope %i on channel %i\r\n", i, channel);
       update_envelope(i, velocity, false);
     }
   }

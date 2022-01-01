@@ -41,7 +41,7 @@ void handleNoteOff(byte channel, byte pitch, byte velocity) {
       p = convert_drum_pitch(p);
       douse_trigger(p, 0);
     }*/
-    douse_trigger(get_trigger_for_pitch(p), 0);
+    douse_trigger(get_trigger_for_pitch(p), 127);
     last_input_at = millis();
   }
 }
@@ -137,13 +137,15 @@ void handleClock() {
 void handleStart() {
   // TODO: start LFOs?
   MIDIOUT.sendStart();
-  
+  //playing = true;
+  //Serial.println("Resetting clock - received handleStart!");
   bpm_reset_clock(-1);  // -1 so next tick will be start
 }
 void handleContinue() {
   // TODO: continue LFOs
   MIDIOUT.sendContinue();
   kill_envelopes();
+  //playing = true;
 }
 void handleStop() {
   MIDIOUT.sendStop();
@@ -154,8 +156,10 @@ void handleStop() {
   //douse_all_triggers(true); // is done in kill_notes
   harmony.kill_notes();
 
+  Serial.println("Resetting clock - received handleStop!");
   bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
   last_input_at = millis();
+  //playing = false;
   
 //#ifdef ENABLE_PIXELS
 //  kill_notes();
@@ -206,8 +210,11 @@ void process_midi() {
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         harmony.send_note_on_for_channel(MIDI_CHANNEL_BASS_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        update_envelopes_for_trigger(TRIGGER_HARMONY_BASS, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_BASS_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        if(!harmony.is_note_held(MIDI_CHANNEL_BASS_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_BASS, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),
@@ -220,8 +227,11 @@ void process_midi() {
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         harmony.send_note_on_for_channel(MIDI_CHANNEL_BITBOX_KEYS, MIDIIN.getData1(), MIDIIN.getData2());
+        update_envelopes_for_trigger(TRIGGER_HARMONY_MELODY, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_BITBOX_KEYS, MIDIIN.getData1(), MIDIIN.getData2());
+        if(!harmony.is_note_held(MIDI_CHANNEL_BITBOX_KEYS))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_MELODY, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                    MIDIIN.getData1(),
@@ -235,8 +245,11 @@ void process_midi() {
         //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         //Serial.println("MIDI_CHANNEL_PAD_ROOT_IN note ON");
         harmony.send_note_on_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_ROOT, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_ROOT_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        if(!harmony.is_note_held(MIDI_CHANNEL_PAD_ROOT_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_ROOT, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),
@@ -249,8 +262,11 @@ void process_midi() {
       if (MIDIIN.getType()==midi::MidiType::NoteOn) {
         //autobass_input.handle_note_on(MIDIIN.getData1(), MIDIIN.getData2());
         harmony.send_note_on_for_channel(MIDI_CHANNEL_PAD_PITCH_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_PITCH, MIDIIN.getData2(), true);
       } else if (MIDIIN.getType()==midi::MidiType::NoteOff) {
         harmony.send_note_off_for_channel(MIDI_CHANNEL_PAD_PITCH_OUT, MIDIIN.getData1(), MIDIIN.getData2());
+        if(!harmony.is_note_held(MIDI_CHANNEL_PAD_PITCH_OUT))
+          update_envelopes_for_trigger(TRIGGER_HARMONY_PAD_PITCH, MIDIIN.getData2(), false);
       } else {
         MIDIOUT.send(MIDIIN.getType(),
                     MIDIIN.getData1(),

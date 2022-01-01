@@ -36,11 +36,8 @@ enum envelope_types : byte {
 #define ENV_MAX_DECAY     (PPQN*2) //48 // maximum decay stage length
 #define ENV_MAX_RELEASE   (PPQN*4) //96 // maximum release stage length
 
-#define TRIGGER_CHANNEL_OFF 0
-#define TRIGGER_CHANNEL_LFO 17
-#define TRIGGER_CHANNEL_LFO_MODULATED 18
-#define TRIGGER_CHANNEL_LFO_INVERTED 19
-#define TRIGGER_CHANNEL_LFO_MODULATED_AND_INVERTED 20
+#define TRIGGER_CHANNEL_OFF 20
+
 //#define TEST_LFOS
 
 enum stage : byte {
@@ -67,9 +64,9 @@ typedef struct envelope_state {
   byte stage = LFO_SYNC_RATIO;
 #endif*/
 
-  byte velocity;         // triggered velocity
-  byte actual_level;          // right now, the level
-  byte stage_start_level;     // level at start of current stage
+  byte velocity = 127;         // triggered velocity
+  byte actual_level = 0;          // right now, the level
+  byte stage_start_level = 0;     // level at start of current stage
 
   // TODO: int delay_length = 5;                    // D - delay before atack starts
   unsigned int  attack_length   = 0;                // A - attack  - length of stage
@@ -85,11 +82,14 @@ typedef struct envelope_state {
   unsigned long triggered_at = 0; 
   unsigned long last_sent_at = 0;
 
-  int trigger_on_channel = 0; // 0 = disabled, 1-16 = midi channel, 17+ = lfo
+  int trigger_on = 0; // 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->84 = trigger #+invert, 96->116 = trigger #+loop+invert
+  bool loop = false;
+  bool invert = false;
 
   byte midi_cc;
 
-  byte last_sent_lvl;
+  byte last_sent_lvl; // value but not inverted
+  byte last_sent_actual_lvl;  // actual midi value sent
 };
 
 
@@ -109,7 +109,8 @@ void process_envelopes(unsigned long now);
 void randomise_envelopes();
 
 void fire_envelope_for_channel(int channel, int velocity = 127);
-void douse_envelope_for_channel(int channel, int velocity = 0);
+void douse_envelope_for_channel(int channel, int velocity = 127);
 
+void update_envelopes_for_trigger(int trigger, int velocity = 127, bool state = true);
   
 #endif

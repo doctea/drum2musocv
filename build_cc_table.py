@@ -14,7 +14,16 @@ table = {}
 table[CHANNEL] = {}
 table[CHANNEL_EXTENDED] = {}
 
-env_controls = [ 'ATTACK', 'HOLD', 'DECAY', 'SUSTAIN', 'RELEASE', 'HD_VIB', 'SR_VIB', 'TRIGGER_ON_MIDI_CHANNEL' ]
+env_controls = {
+    'Attack': 'Attack time',
+    'Hold': 'Hold after attack time',
+    'Decay': 'Decay time',
+    'Sustain': 'Sustain volume',
+    'Release': 'Release time',
+    'HD Vibrato': 'Hold-Decay phase Vibrato sync rate',
+    'SR Vibrato': 'Sustain-Release phase Vibrato sync rate',
+    'Trigger on': 'Trigger/LFO settings: 0->19 = trigger #, 20 = off, 32->51 = trigger #+loop, 64->83 = trigger #+invert, 96->115 = trigger #+loop+invert'
+}
 
 for line in fileinput.input():
     #print ("got line %s" % line)
@@ -37,10 +46,10 @@ for line in fileinput.input():
     if defname=="ENV_CC_START":
         c = int(x[2])
         for e in range(NUM_ENVS):
-            for s in range(ENV_SPAN):
-                table[CHANNEL][c] = { 'defname': 'Envelope %s %s' % (e, env_controls[s]), 'file': file, 'comment': 'Chan %s'%CHANNEL }
+            for k,v in env_controls.items():
+                table[CHANNEL][c] = { 'defname': 'Envelope %s %s' % (e, k), 'file': file, 'comment': v } #'Chan %s'%CHANNEL }
                 if e < NUM_ENVS_EXTENDED - NUM_ENVS: # do double-duty of completing channel 11 table too
-                    table[CHANNEL_EXTENDED][c] = { 'defname': 'Envelope %s %s' % (e+NUM_ENVS, env_controls[s]), 'file': file, 'comment': 'Extended pitch envelopes on Chan %s'%CHANNEL_EXTENDED }
+                    table[CHANNEL_EXTENDED][c] = { 'defname': 'Envelope %s %s' % (e+NUM_ENVS, k), 'file': file, 'comment': "%s (Extended pitch envelopes on Chan %s)" % (v, CHANNEL_EXTENDED ) }
                 c += 1
         continue
     #print ("got temp defname %s" % defname)

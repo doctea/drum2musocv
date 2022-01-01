@@ -12,7 +12,7 @@ static int channelcount = 0;
 class ChannelState {
 
 private:
-#define HELD_NOTES_MAX (sizeof(held_notes)/sizeof(held_notes[0]))
+#define HELD_NOTES_MAX 10 //(sizeof(held_notes)/sizeof(held_notes[0]))
 
     int midi_root_pitch = MIDI_BASS_ROOT_PITCH;
     //int held_notes_count = 0;
@@ -20,6 +20,7 @@ private:
 
     // track pitches internally
     void push_note (byte pitch) {
+
       if (DEBUG_CHANNELSTATE) Serial.printf("channelstate push_note(%i)\r\n", pitch);
       for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==-1) { // free slot so add this new pitch
@@ -45,7 +46,7 @@ private:
 
       // output debug info about multiple notes off sent
       if (DEBUG_CHANNELSTATE) Serial.printf("   >channel notes_held after push_note: [");
-      for (int i = 0 ; i < 10 ; i++) {
+      for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (DEBUG_CHANNELSTATE) Serial.printf("%s ", get_note_name(held_notes[i]).c_str());
       }
       if (DEBUG_CHANNELSTATE) Serial.println("]");
@@ -104,7 +105,7 @@ private:
     }
 
     int get_held_notes_count() {
-      for (int i = 0 ; i < 10 ; i++) {
+      for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]==-1) {
           return i;
         }
@@ -117,7 +118,7 @@ private:
       int held_notes_count = 0;
     
       bool found = false;
-      for (int i = 0 ; i < 10 ; i++) {
+      for (int i = 0 ; i < HELD_NOTES_MAX ; i++) {
         if (held_notes[i]!=-1) {
           //sprintf(debug_string, "%s, ", get_note_name(held_notes[i]).c_str());
           /*s += i + ":";
@@ -143,8 +144,7 @@ private:
   
   public:  
 
-    int held_notes[10] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-
+    int held_notes[HELD_NOTES_MAX] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
   
     int get_root_note() {
       //Serial.printf("in get_root_note in ChannelState number #%i got: %s\r\n", chanindex, debug_string);
@@ -158,6 +158,7 @@ private:
         return held_notes[0];
       } else {
         //return MIDI_BASS_ROOT_PITCH;
+        //Serial.printf("Root is %i [%s]\n", midi_root_pitch, get_note_name(midi_root_pitch).c_str());
         return midi_root_pitch;
       }
     }
