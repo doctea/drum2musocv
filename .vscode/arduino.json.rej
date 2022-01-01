@@ -1,0 +1,12 @@
+--- .vscode/arduino.json
++++ .vscode/arduino.json
+@@ -1,7 +1,7 @@
+ {
+     "sketch": "drum2musocv.ino",
+     "configuration": "usbstack=arduino,debug=off",
+-    "board": "Seeeduino:samd:arduino_zero_bamble",
++    "board": "Seeeduino:samd:zero_bamble",
+     "output": "../ArduinoOutput",
+-    "port": "COM3"
++    "port": "COM16"
+ }
