@@ -15,10 +15,11 @@ enum PF {
 };
 
 class profiler {
+
+public:
     unsigned long time[PF::PF_MAX];
     unsigned long count[PF::PF_MAX];
 
-public:
     void reset() {
         for (int i = 0 ; i < PF::PF_MAX; i ++) {
            time[i] = 0;

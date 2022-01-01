@@ -3,6 +3,7 @@
 
 #include "BPM.hpp"
 #include "UI.h"
+#include "Harmony.hpp"
 
 #define USE_SPI_DMA
 #define ARDUINO_SAMD_ZERO
@@ -90,6 +91,8 @@ void initialise_screen() {
 }
 
 void screen_update() {
+  static int last_time;
+  unsigned long screen_time = millis();
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);     // Start at top-left corner
@@ -97,7 +100,7 @@ void screen_update() {
   char output[32];
 
   sprintf(output, "%2i:%i:%i:%2i ", current_phrase, current_bar, current_beat, current_step);
-  display.write(output);
+  display.print(output);
   
   sprintf(output, "Mode: %s\n", 
     demo_mode==MODE_STANDBY ? "stby" : 
@@ -105,20 +108,19 @@ void screen_update() {
     demo_mode==MODE_EUCLIDIAN_MUTATION ? "EuMu" : 
     demo_mode==MODE_RANDOM ? "RnDm" : 
     "????");
-  display.write(output);
+  display.print(output);
 
   display.setTextSize(2);
   
   sprintf(output, "%cBPM: %3.1f\n", bpm_internal_mode?'i':'e', bpm_current);
-  display.write(output);
+  display.print(output);
 
   //display.setTextSize(1);
+  display.printf("%ims\n", last_time); //pf.time[PF::PF_SCREEN]);
 
-  display.write(harmony.get_bass_info());
-  display.write("\n");
-  display.setTextSize(1);
-  display.write(harmony.get_bass_info_2());
-  display.write("\n");
+  display.printf(harmony.get_bass_info());
+  //display.setTextSize(1);
+  //display.println(harmony.get_bass_info_2());
 
   static uint8_t last[128];
 
@@ -127,6 +129,10 @@ void screen_update() {
   if (!memcmp(&last, display.getBuffer(), sizeof(display.getBuffer()))) {
     display.display();
   }
+  last_time = millis()-screen_time;
+  
+
+
 }
 
 void testdrawline() {

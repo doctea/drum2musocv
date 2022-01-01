@@ -158,7 +158,7 @@ void loop() {
   if (now_ms - last_updated_screen_at >= PIXEL_REFRESH * 2) {
     //Serial.printf("updating screen - last_updated_screen_at is %i, now_ms is %i\n", last_updated_screen_at, now_ms);
     int screen_time = millis();
-    last_updated_screen_at = now_ms;
+    last_updated_screen_at = screen_time;
     screen_update();
     Serial.printf("updated screen in %ims\n", millis() - last_updated_screen_at);
     pf.l(PF::PF_SCREEN, millis()-screen_time);
