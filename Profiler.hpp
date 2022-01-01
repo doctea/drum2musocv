@@ -9,6 +9,7 @@ enum PF {
     PF_BPM,
     PF_ENVELOPES,
     PF_MIDI_OUT,
+    PF_SCREEN,
     PF_INTEREST,
     PF_MAX
 };
@@ -37,6 +38,7 @@ public:
         Serial.printf("BPM:%i@%i | ", count[PF::PF_BPM], time[PF::PF_BPM]); 
         Serial.printf("ENV:%i@%i | ", count[PF::PF_ENVELOPES], time[PF::PF_ENVELOPES]); 
         Serial.printf("MDO:%i@%i | ", count[PF::PF_MIDI_OUT], time[PF::PF_MIDI_OUT]); 
+        Serial.printf("SCR:%i@%i | ", count[PF::PF_SCREEN], time[PF_SCREEN]);
         Serial.printf("INT:%i@%i | ", count[PF::PF_INTEREST], time[PF::PF_INTEREST]); 
         Serial.printf(" ]\n");
     }

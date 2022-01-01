@@ -163,6 +163,7 @@ void loop() {
     Serial.printf("updated screen in %ims\n", millis() - last_updated_screen_at);
     pf.l(PF::PF_SCREEN, millis()-screen_time);
   }
+#endif
 
 #ifdef ENABLE_PIXELS
     unsigned int pixels_time = millis();
