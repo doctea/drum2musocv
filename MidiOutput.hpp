@@ -1,6 +1,8 @@
 #ifndef MIDIOUTPUT_INCLUDED
 #define MIDIOUTPUT_INCLUDED
 
+#include "UI.h"
+
 #define WORKAROUND_MISSED_NOTEOFFS_DELAY 12  // 8 seems to be about the shortest time we can get away with, altho it still gets confused at times
 #define WORKAROUND_MISSED_NOTEOFFS true     // DANGER -- uses a delay() in order to avoid things fucking up when sending lots of douse_triggers in a loop
   // weirdly, the midimuso seems to miss note offs sent for Harmony outputs if lots of note offs are sent rapidly to the bitbox *drums* output, 
@@ -69,10 +71,30 @@ int get_muso_pitch_for_trigger_actual(int trigger) {
 #endif
 }
 
+#define LEFT_FOOT 0
+#define RIGHT_FOOT 1
+#define LEFT_HAND 2
+#define RIGHT_HAND LEFT_HAND //3
+
+int limb_count[4];
+int limbs[NUM_PATTERNS];
+
 void initialise_pitch_for_trigger_table () {
   for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
     pitch_for_trigger_table[i] = get_muso_pitch_for_trigger_actual(i);
   }
+
+  for (int i = 0 ; i < NUM_PATTERNS ; i++) {
+    limbs[i] = -1;
+  }
+  limbs[TRIGGER_KICK] = RIGHT_FOOT;
+  limbs[TRIGGER_CLAP] = LEFT_HAND;
+  limbs[TRIGGER_SNARE] = LEFT_HAND;
+  limbs[TRIGGER_CLOSEDHAT] = RIGHT_HAND;
+  limbs[TRIGGER_OPENHAT] = RIGHT_HAND;
+  limbs[TRIGGER_PEDALHAT] = LEFT_FOOT;
+  limbs[TRIGGER_CRASH_1] = RIGHT_HAND;
+  limbs[TRIGGER_CRASH_2] = LEFT_HAND;
 }
 
 // functions for sending MIDI out
@@ -82,6 +104,19 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
   unsigned long trigger_time = millis();
   //OUT_printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
+
+  if (demo_mode==MODE_EXPERIMENTAL) { //enable_limit_limbs) {
+    int limb = limbs[trigger];
+    if (limb>=0) {
+      limb_count[limb]++;
+      //Serial.printf("using limb %i because trigger %i!\n", limb, trigger);
+      if (((limb==LEFT_HAND && limb_count[limb]>2) || (limb!=LEFT_HAND && limb_count[limb]>1))) { 
+        Serial.printf("dropping t %i cause limb %i tired!\n", trigger, limb);
+        return;
+      }
+    }
+  }
+
   byte p = MUSO_NOTE_MINIMUM + trigger;
   byte b = BITBOX_NOTE_MINIMUM + trigger;
   if (

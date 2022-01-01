@@ -95,6 +95,10 @@ void setup() {
 void loop() {
   process_midi();
 
+  for (int i = 0 ; i < 4 ; i++) {
+    limb_count[i] = 0;
+  }
+
 #ifdef ENABLE_BUTTONS
   update_buttons();
 #endif
