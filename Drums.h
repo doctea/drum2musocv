@@ -1,6 +1,8 @@
 #ifndef DRUMS_INCLUDED
 #define DRUMS_INCLUDED
 
+#include "Config.h"
+
 #define TRIGGER_IS_ON   true
 #define TRIGGER_IS_OFF  false
 
@@ -59,7 +61,7 @@
 
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
 // for mode 0B (11 gates, 5 CVs + pitch bend)
-#define DEFAULT_MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
+//#define DEFAULT_MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
 int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_GATE_CHANNEL   (midi_channel_muso_gate)
 #define MUSO_NOTE_MINIMUM   60
@@ -79,9 +81,6 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_MODE_1B  2
 #define MUSO_MODE_2B  3
 #define MUSO_MODE_0B_AND_2A	4
-//#define MUSO_MODE     MUSO_MODE_0B      // define this for single midimuso, all-gates mode
-//#define MUSO_MODE     MUSO_MODE_0B      // define this for single midimuso, two-pitch-outputs mode
-#define MUSO_MODE	MUSO_MODE_0B_AND_2A   // define this for dual midimuso, one in all-gates mode, one in two-pitch-outputs mode
 // todo: work out and explain wtf is going on here and how the different modes work in the code
 
 //#if MUSO_MODE==MUSO_MODE_0B
@@ -125,10 +124,9 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MUSO_CC_CV_7  94    // extended envelope, used for the midi note-triggered envelopes
 #define MUSO_CC_CV_8  73    // extended envelope, used for the midi note-triggered envelopes
 #define MUSO_CC_CV_9  72    // extended envelope, used for the midi note-triggered envelopes
-#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
+#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5        // because my CV5 output doesn't work!
 
 #define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
-
 
 #define MIDI_CC_ALL_NOTES_OFF 123
 

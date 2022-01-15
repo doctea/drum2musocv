@@ -13,7 +13,6 @@
 #include "BPM.hpp"
 #include "Envelopes.h"
 
-#define DEFAULT_DURATION (STEPS_PER_BEAT / STEPS_PER_BEAT)
 
 // bass, melody
 

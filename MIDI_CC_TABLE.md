@@ -11,7 +11,7 @@
 `10` | `Harmony.hpp` | `10` | `CC_CHANNEL_PAD_ROOT` | ` output 2: set the MIDI channel to output the pad root on (default 1)` |
 `10` | `Harmony.hpp` | `11` | `CC_MELODY_ROOT` | ` set the MIDI note to use as the root pitch, 48=C4` |
 `10` | `Harmony.hpp` | `12` | `CC_CHANNEL_BASS_OUT` | ` output 0: set the MIDI channel to output the bass on (default 4)` |
-`10` | `Harmony.hpp` | `13` | `CC_CHANNEL_BITBOX_KEYS` | ` output 1: set the MIDI channel to output the chords on (default 3)` |
+`10` | `Harmony.hpp` | `13` | `CC_CHANNEL_BITBOX_KEYS` | ` output 1: value received on this CC sets the MIDI channel to output the chords on (default 3)` |
 `10` | `UI.ino` | `14` | `CC_CHANNEL_BITBOX_DRUMS_OUT` | ` set the MIDI channel to output the shadow drum triggers (default 11)` |
 `10` | `UI.ino` | `15` | `CC_CHANNEL_GATE_OUT` | ` set the MIDI channel to output the Muso drum triggers (default 16)` |
 `10` | `Euclidian.h` | `16` | `CC_EUCLIDIAN_SET_AUTO_PLAY` | ` enable/disable autoplaying on internal BPM` |
@@ -27,7 +27,7 @@
 `10` | `Euclidian.h` | `26` | `CC_EUCLIDIAN_SET_MAXIMUM_PATTERN` | ` highest number pattern to automutate` |
 `10` | `Euclidian.h` | `27` | `CC_EUCLIDIAN_SEED_USE_PHRASE` | ` increment seed according to BPM phrase (ie automutate)` |
 `10` | `Euclidian.h` | `28` | `CC_EUCLIDIAN_FILLS` | ` enable/disable fills on last bar of phrase, 0=off` |
-`10` | `Harmony.hpp` | `29` | `CC_HARMONY_MELODY_MODE` | ` output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord` |
+`10` | `Harmony.hpp` | `29` | `CC_HARMONY_MELODY_MODE` | ` output 1: value received on this CC sets the mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord` |
 `10` | `Harmony.hpp` | `30` | `CC_HARMONY_MUTATE_MODE` | ` overall harmony mutation mode, 0=None, 1=Randomise` |
 `10` | `Harmony.hpp` | `31` | `CC_AUTO_PROGRESSION` | ` enable/disable playing auto chord progression` |
 `10` | `Euclidian.h` | `32` | `Euclidian on/off for pattern 0` | `` |

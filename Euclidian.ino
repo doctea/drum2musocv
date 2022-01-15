@@ -24,7 +24,7 @@ bpm_status bpm_statuses[NUM_PATTERNS];
 float effective_euclidian_density = 0.566666666666f;
 float max_euclidian_density = 1.2f;
 
-bool euclidian_mutate_density = true;
+bool euclidian_mutate_density = DEFAULT_EUCLIDIAN_MUTATE_DENSITY;
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters

@@ -7,7 +7,7 @@ Drums.h:#define MUSO_CC_CV_6  93    // extended envelope, used for the midi note
 Drums.h:#define MUSO_CC_CV_7  94    // extended envelope, used for the midi note-triggered envelopes
 Drums.h:#define MUSO_CC_CV_8  73    // extended envelope, used for the midi note-triggered envelopes
 Drums.h:#define MUSO_CC_CV_9  72    // extended envelope, used for the midi note-triggered envelopes
-Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5
+Drums.h:#define MUSO_USE_PITCH_FOR  MUSO_CC_CV_5        // because my CV5 output doesn't work!
 Drums.h:#define MUSO_CV_CHANNEL     1   // channel to output CV CC's (ie envelopes to MidiMuso on this channel)
 Drums.h:#define MIDI_CC_ALL_NOTES_OFF 123
 Envelopes.h:#define ENV_CC_SPAN   8   // how many CCs to reserve per-envelope
@@ -35,12 +35,12 @@ Harmony.hpp:#define CC_AUTO_CHORD_INVERSION     106   // enable/disable playing 
 Harmony.hpp:#define CC_MELODY_SCALE             108   // choose scale to use, 0=major, 1=natural minor, 2=melodic minor, 3=harmonic minor, 4=lydian, 5=whole tone, 6=blues
 Harmony.hpp:#define CC_MELODY_AUTO_SCALE        109   // enable/disable automatic changing of scale every phrase
 Harmony.hpp:#define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
-Harmony.hpp:#define CC_HARMONY_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+Harmony.hpp:#define CC_HARMONY_ONLY_NOTE_HELD   18    // cc to set bass to only play in external mode if note is held
 Harmony.hpp:#define CC_CHANNEL_BASS_OUT         12    // output 0: set the MIDI channel to output the bass on (default 4)
 Harmony.hpp:#define CC_BASS_MELODY_MODE         2     // output 0: set mode to use for the bass output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 Harmony.hpp:#define CC_BASS_SET_TIE_ON          6     // output 0: set which steps the Euclidian bass should tie on
-Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: set the MIDI channel to output the chords on (default 3)
-Harmony.hpp:#define CC_HARMONY_MELODY_MODE      29    // output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+Harmony.hpp:#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: value received on this CC sets the MIDI channel to output the chords on (default 3)
+Harmony.hpp:#define CC_HARMONY_MELODY_MODE      29    // output 1: value received on this CC sets the mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 Harmony.hpp:#define CC_MELODY_OCTAVE_OFFSET     107   // output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
 Harmony.hpp:#define CC_CHANNEL_PAD_ROOT         10    // output 2: set the MIDI channel to output the pad root on (default 1)
 Harmony.hpp:#define CC_PAD_ROOT_MELODY_MODE     112   // output 2: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
@@ -55,21 +55,21 @@ UI.h:#define CC_DEMO_MODE  19        // choose playback mode - 0=None, 1=Euclidi
 UI.ino:#define CC_CHANNEL_BITBOX_DRUMS_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
 UI.ino:#define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
+Config.h:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11   // for mirroring drum triggers to the bitbox pads
+Config.h:#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
+Config.h:#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
+Config.h:#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS    3 // bass output, but shifted an octave
+Config.h:#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
 Envelopes.h:#define MIDI_CHANNEL_EXTENDED_ENVELOPES   11  // channel to receive extended envelope info on 
 Harmony.hpp:#define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 Harmony.hpp:#define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 Harmony.hpp:#define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords
-Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
-Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
-Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_IN    1
-Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_IN   2
-Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
-Harmony.hpp:#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
+Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_IN    1   //DEFAULT_MIDI_CHANNEL_PAD_ROOT_IN
+Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_IN   2   //DEFAULT_MIDI_CHANNEL_PAD_PITCH_IN
 Harmony.hpp:#define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())       // output 0
 Harmony.hpp:#define MIDI_CHANNEL_BITBOX_KEYS    (harmony.get_midi_channel_bitbox_keys())    // output 1
 Harmony.hpp:#define MIDI_CHANNEL_PAD_ROOT_OUT   (harmony.get_midi_channel_pads_root())      // output 2
 Harmony.hpp:#define MIDI_CHANNEL_PAD_PITCH_OUT  (harmony.get_midi_channel_pads_pitch())     // output 3
-MidiOutput.hpp:#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11  // for the mirroring of drums
 MidiOutput.hpp:#define MIDI_CHANNEL_BITBOX_DRUMS_OUT (midi_channel_bitbox_drums_out)
 
 Envelopes.h:#define TRIGGER_CHANNEL_OFF 20

@@ -15,27 +15,26 @@
 #define HARM_println(fmt, ...)  do { if (HARM_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 //debug handling
 
-#define DEFAULT_BASS_OFFSET          -2
-#define BITBOX_KEYS_OCTAVE_OFFSET     2
+/*#define DEFAULT_BASS_OFFSET          -2
+#define DEFAULT_BITBOX_KEYS_OCTAVE_OFFSET     2
 #define DEFAULT_PAD_PITCH_OUT_OFFSET  0 //1
 #define DEFAULT_PAD_ROOT_OUT_OFFSET  -1 //0 //0   //-2
 
 #define DEFAULT_AUTO_PROGRESSION_ENABLED  true   // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD  false  // 
 #define DEFAULT_SCALE                     0     // 0 = major, 1 = minor... 7 = hungarian minor
-#define DEFAULT_AUTO_SCALE_ENABLED        false //true  //false
-
+#define DEFAULT_AUTO_SCALE_ENABLED        false //true  //false*/
 
 // CONFIGURATION: messages targeted to channel _IN will be relayed on channel _OUT -- for passing through messages to Neutron (TODO: probably move this to a dedicated config file)
 #define MIDI_CHANNEL_BASS_IN        8     // channel to receive direct bass playing
 #define MIDI_CHANNEL_BASS_AUTO_IN   9     // channel to receive automatic bass notes
 #define MIDI_CHANNEL_MELODY_IN      3     // channel to receive direct melody/chords
-#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
-#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
-#define MIDI_CHANNEL_PAD_ROOT_IN    1
-#define MIDI_CHANNEL_PAD_PITCH_IN   2
-#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
-#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
+//#define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
+//#define DEFAULT_MIDI_CHANNEL_BITBOX_KEYS 3 // bass output, but shifted an octave
+#define MIDI_CHANNEL_PAD_ROOT_IN    1   //DEFAULT_MIDI_CHANNEL_PAD_ROOT_IN
+#define MIDI_CHANNEL_PAD_PITCH_IN   2   //DEFAULT_MIDI_CHANNEL_PAD_PITCH_IN
+//#define DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT   1
+//#define DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT  2
 
 // channels that the outputs use
 #define MIDI_CHANNEL_BASS_OUT       (harmony.get_midi_channel_bass_out())       // output 0
@@ -104,7 +103,7 @@ ChannelState autobass_input = ChannelState();   // global tracking notes that ar
 #define CC_MELODY_AUTO_SCALE        109   // enable/disable automatic changing of scale every phrase
 
 #define CC_MELODY_ROOT              11    // set the MIDI note to use as the root pitch, 48=C4
-#define CC_HARMONY_ONLY_NOTE_HELD      18    // cc to set bass to only play in external mode if note is held
+#define CC_HARMONY_ONLY_NOTE_HELD   18    // cc to set bass to only play in external mode if note is held
 
 ///////////////////// output-specific harmony settings /////////////////////
 //// output 0 (bass)
@@ -114,8 +113,8 @@ ChannelState autobass_input = ChannelState();   // global tracking notes that ar
 // not implemented: output 0 octave offset
 
 //// output 1 (bitbox)
-#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: set the MIDI channel to output the chords on (default 3)
-#define CC_HARMONY_MELODY_MODE      29    // output 1: set mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
+#define CC_CHANNEL_BITBOX_KEYS      13    // output 1: value received on this CC sets the MIDI channel to output the chords on (default 3)
+#define CC_HARMONY_MELODY_MODE      29    // output 1: value received on this CC sets the mode to use for the chords output - 0=None, 1=Single note, 2=Chord, 3=Arpeggiate chord
 #define CC_MELODY_OCTAVE_OFFSET     107   // output 1: octave offset for melody, 0=-2, 1=-1, 2=0, 3=+1, 4=+2, 5=+3
 // not implemented: output 1 tie-on 
 
@@ -196,8 +195,8 @@ class Harmony {
 
     static int const NUM_MKO = 4;
     MidiKeysOutput mko[NUM_MKO] = {
-        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT,      DEFAULT_BASS_OFFSET),
-	      MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
+        MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BASS_OUT,      DEFAULT_BASS_OCTAVE_OFFSET),
+	      MidiKeysOutput(DEFAULT_MIDI_CHANNEL_BITBOX_KEYS,   DEFAULT_BITBOX_KEYS_OCTAVE_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::CHORD),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT,  DEFAULT_PAD_ROOT_OUT_OFFSET),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_PAD_PITCH_OUT_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 
