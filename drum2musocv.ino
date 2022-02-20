@@ -108,10 +108,10 @@ void loop() {
   unsigned long delta_ms = now_ms - time_last;
   //Serial.print("now is "); Serial.println(now);
 
-  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL) {
+  if (demo_mode==MODE_EUCLIDIAN || demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL || demo_mode==MODE_ARTSETC) {
     //if (now%10) Serial.printf("demo_mode 1 looped at tick %i\r\n", now);
-    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL;
-    mutate_harmony_root = demo_mode==MODE_EXPERIMENTAL;
+    mutate_enabled = demo_mode==MODE_EUCLIDIAN_MUTATION || demo_mode==MODE_EXPERIMENTAL || demo_mode==MODE_ARTSETC;
+    mutate_harmony_root = demo_mode==MODE_EXPERIMENTAL || demo_mode==MODE_ARTSETC;
        
     process_euclidian(now);
   } else if (demo_mode==MODE_RANDOM) {

@@ -63,6 +63,8 @@ int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
 int euclidian_mutate_minimum_pattern = DEFAULT_MUTATE_MINIMUM_PATTERN; // default 1 so that kick never mutates
 int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
 
+float max_euclidian_density = 1.2f;
+
 bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
 
 bool mutate_harmony_root    = false;

@@ -49,7 +49,7 @@
             "defines": [
                 "__SKETCH_NAME__=\"\"\"drum2musocv.ino\"\"\"",
                 "F_CPU=48000000L",
-                "ARDUINO=10813",
+                "ARDUINO=10819",
                 "ARDUINO_SEEED_ZERO",
                 "ARDUINO_ARCH_SAMD",
                 "__SAMD21G18A__",

@@ -9,9 +9,10 @@
 #define MODE_STANDBY            0
 #define MODE_EUCLIDIAN          1
 #define MODE_EUCLIDIAN_MUTATION 2
-#define MODE_RANDOM             3
-#define MODE_EXPERIMENTAL       4
-#define NUM_DEMO_MODES          5
+#define MODE_EXPERIMENTAL       3
+#define MODE_ARTSETC            4
+#define MODE_RANDOM             5
+#define NUM_DEMO_MODES          6
 
 #define UI_BUTTON_PRESSED_INDICATOR_INTERVAL  500 // duration to show on the pixels that a button has been pressed
 

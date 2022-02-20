@@ -104,13 +104,13 @@ void fire_trigger(byte trigger, byte velocity, bool internal = false) {
   //OUT_printf("firing trigger=%i, v=%i\r\n", t, v);
   // t = trigger number, p = keyboard note
 
-  if (demo_mode==MODE_EXPERIMENTAL) { //enable_limit_limbs) {
+  if (demo_mode==MODE_EXPERIMENTAL || demo_mode==MODE_ARTSETC) { //enable_limit_limbs) {
     int limb = limbs[trigger];
     if (limb>=0) {
       limb_count[limb]++;
       //Serial.printf("using limb %i because trigger %i!\n", limb, trigger);
       if (((limb==LEFT_HAND && limb_count[limb]>2) || (limb!=LEFT_HAND && limb_count[limb]>1))) { 
-        Serial.printf("dropping t %i cause limb %i tired!\n", trigger, limb);
+        //Serial.printf("dropping t %i cause limb %i tired!\n", trigger, limb);
         return;
       }
     }

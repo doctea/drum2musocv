@@ -22,7 +22,6 @@
 bpm_status bpm_statuses[NUM_PATTERNS];
 
 float effective_euclidian_density = 0.566666666666f;
-float max_euclidian_density = 1.2f;
 
 bool euclidian_mutate_density = DEFAULT_EUCLIDIAN_MUTATE_DENSITY;
 
@@ -38,8 +37,10 @@ void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1,
   if (rotation >= 0) p->rotation = rotation;
   if (duration >= 0) p->duration = duration;
 
+#define MINIMUM_DENSITY 0.0f  // 0.10f
+
   int original_pulses = p->pulses;
-  p->pulses = ((float)p->pulses) * (1.5f*(0.10f+effective_euclidian_density));
+  p->pulses = ((float)p->pulses) * (1.5f*(MINIMUM_DENSITY+effective_euclidian_density));
   EUC_printf("changed %i to %i according to density %2.2f\n", original_pulses, p->pulses, 1.5*(0.10f+effective_euclidian_density));
 
   EUC_printf("in make_euclid (steps = %2i, pulses = %2i, rotation = %2i, duration = %i)\r\n", p->steps, p->pulses, p->rotation, p->duration);
@@ -80,7 +81,7 @@ bool query_pattern_note_off(pattern_t *p, int step, int bar = 0) { //, int offse
   return query_pattern(p, step, (int)p->duration * -1);
 }
 
-// rotate the pattern around specifed number of steps -- could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
+// rotate the pattern around specifed number of steps -- TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
 void rotate_pattern(pattern_t *p, int rotate) {
   unsigned long rotate_time = millis();
   bool stored[p->steps];
@@ -112,7 +113,7 @@ void mutate(int pattern){
   unsigned long mutate_time = millis();
   if (euclidian_mutate_density) {
     effective_euclidian_density = constrain((0.7f+(sin(current_phrase)/2.2f)), 0.2f, max_euclidian_density);
-    Serial.printf("mutate euclidian density set to %2.2f!\n", effective_euclidian_density);
+    Serial.printf("effective euclidian density set to %2.2f!\n", effective_euclidian_density);
   }
   if (euclidian_mutate_mode == EUCLIDIAN_MUTATE_MODE_TOTAL)
     mutate_euclidian_total(pattern);
@@ -208,6 +209,8 @@ void mask_patterns (pattern_t *target, pattern_t *op_pattern) {
   }
 }
 
+unsigned int mutation_count = 0;
+double bpm_delta = 1.0f;
 void process_euclidian(int ticks) {
   static int last_processed = 0;
   if (ticks == last_processed) return;
@@ -221,7 +224,7 @@ void process_euclidian(int ticks) {
   if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
 
     // always reset even if not in mutate mode, so that fills work
-    if (euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
+    if ((demo_mode!=MODE_ARTSETC || demo_mode==MODE_ARTSETC && mutation_count%4==0) && euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
       EUC_println("Resetting euclidian before mutation!");
       initialise_euclidian();
     }
@@ -234,8 +237,9 @@ void process_euclidian(int ticks) {
     }
 
     bool should_mutate = mutate_enabled;
-
+    
     if (should_mutate) {
+      mutation_count++;
       harmony.mutate();
       unsigned long mutate_time = millis();
 
@@ -255,11 +259,28 @@ void process_euclidian(int ticks) {
 
       if (is_bpm_on_phrase && mutate_harmony_root) {// && current_phrase%4==0) {
         randomise_envelopes();
-        Serial.printf("mutating harmony_root and tie_on\n"); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
+        Serial.printf("mutation_count %i: mutating harmony_root and tie_on\n", mutation_count); //from %i to %i\n", harmony.channel_state.get_root_note(), harmony.channel_state.last_note_on);
         harmony.mutate_midi_root_pitch();
         patterns[TRIGGER_BASS_CH4].tie_on = random(0, 16);
         harmony.auto_chord_inversion = random(0,1);
         harmony.auto_chord_type = random(0,1);
+
+        if (demo_mode==MODE_ARTSETC && mutation_count%4==0) {
+          MidiKeysOutput* mko = harmony.get_mko(1);
+          mko->set_octave_offset(random(-2,2));
+          
+          Serial.printf("Set octave offset on #1 (midi %i) to %i!\n", 
+            mko->get_midi_channel(), 
+            mko->get_octave_offset()
+          );
+        }
+
+        if (demo_mode==MODE_ARTSETC && mutation_count%8==0) {
+          bpm_current += bpm_delta;
+          if (bpm_current>90.0) bpm_delta = -1.0f; else if (bpm_current<30.0) bpm_delta = 1.0f;
+          //bpm_current = 30.0f;
+          Serial.printf("Set BPM to %0.2f\n", bpm_current);
+        }
 
         //harmony.mutate_output_modes
       }

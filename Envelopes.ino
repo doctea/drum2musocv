@@ -40,15 +40,16 @@ void initialise_envelopes() {
 }
 
 void randomise_envelopes() {
-  for (int i = 0 ; i < NUM_ENVELOPES ; i++) { // _EXTENDED if we want to randomise the extended envelopes too?
+  for (int i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) { // _EXTENDED if we want to randomise the extended envelopes too?
     //envelopes[i].trigger_on = random(0,4);
     envelopes[i].lfo_sync_ratio_hold_and_decay = random(0,127);
     envelopes[i].lfo_sync_ratio_sustain_and_release = random(0,127);
-    envelopes[i].attack_length = random(0,127);
+    envelopes[i].attack_length = random(0,64);
     envelopes[i].hold_length = random(0,127);
     envelopes[i].decay_length = random(0,127);
-    envelopes[i].sustain_ratio = 1.0/(float)random(0,127);
+    envelopes[i].sustain_ratio = 1.0/(float)random(64,127);
     envelopes[i].release_length = random(0,127);
+    envelopes[i].invert = random(0,10) < 2;
   }
 }
 

@@ -257,6 +257,10 @@ class Harmony {
       }
     }
 
+    MidiKeysOutput* get_mko(int idx) {
+      return &mko[idx];
+    }
+
     void mutate_midi_root_pitch() {
       //Serial.printf("mutating root pitch from %i to %i\n", harmony.r, channel_state.last_note_on);
       Serial.print("mutate_midi_root_pitch -> "); 

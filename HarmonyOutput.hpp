@@ -309,15 +309,19 @@ class MidiKeysOutput : public ChannelState {
       handle_all_notes_off();
     }
 
+    int get_octave_offset() {
+      return octave_offset;
+    }
     void set_octave_offset(int offset) {
+      if (octave_offset!=offset) 
+        send_all_notes_off();
+
       octave_offset = offset;
-      //send_note_off(held_notes);
-      if (octave_offset==offset) return;
-      
-      send_all_notes_off();
-      //handle_all_notes_off();
     }
 
+    int get_midi_channel() {
+      return channel;
+    }
     // set the midi channel for this output
     void set_midi_channel(int chan) {
       //send_note_off(held_notes);

@@ -37,8 +37,8 @@
 #define DEFAULT_DURATION (STEPS_PER_BEAT / STEPS_PER_BEAT)
 
 // for drum trigger output MIDI channels
-#define DEFAULT_MUSO_GATE_CHANNEL       16   // channel to output triggers (ie gate triggers to notes on this channel)
-#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT 11   // for mirroring drum triggers to the bitbox pads
+#define DEFAULT_MUSO_GATE_CHANNEL           16   // channel to output triggers (ie gate triggers to notes on this channel)
+#define DEFAULT_MIDI_CHANNEL_BITBOX_OUT     11   // for mirroring drum triggers to the bitbox pads
 
 // for Harmony
 #define DEFAULT_BASS_OCTAVE_OFFSET          -2
@@ -53,7 +53,7 @@
 #define DEFAULT_MIDI_CHANNEL_BASS_OUT       4   //2     // channel to output bass notes on
 
 // Harmony settings
-#define DEFAULT_AUTO_PROGRESSION_ENABLED    true  // automatically play chords in progression order?
+#define DEFAULT_AUTO_PROGRESSION_ENABLED    false //true  // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD    false // 
 #define DEFAULT_SCALE                       0     // 0 = major, 1 = minor... 7 = hungarian minor
 #define DEFAULT_AUTO_SCALE_ENABLED          true  //false   // true to increment scale on phrase change
