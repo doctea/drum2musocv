@@ -132,6 +132,7 @@ void handleClock() {
   //MIDIOUT.sendClock();  // do this in clock_tick now so we can control subdivisions
   
   bpm_receive_clock_tick();
+  last_input_at = millis();
 }
 
 void handleStart() {

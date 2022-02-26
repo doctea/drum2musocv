@@ -2,5 +2,6 @@
     "port": "COM25",
     "configuration": "usbstack=arduino,debug=off",
     "board": "Seeeduino:samd:zero_bamble",
-    "sketch": "drum2musocv.ino"
+    "sketch": "drum2musocv.ino",
+    "output": "../ArduinoOutput"
 }

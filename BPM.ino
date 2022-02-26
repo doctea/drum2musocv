@@ -72,10 +72,10 @@ signed long bpm_clock() {
     double ms_per_tick = (60.0f / (double)(bpm_current * (double)PPQN));
     double delta_ticks = (double)delta_ms / (1000.0f*ms_per_tick);
     if ((int)delta_ticks>0) {
-      received_ticks += delta_ticks;
-  
       bpm_update_status(received_ticks);
       last_ticked = now;
+
+      received_ticks += delta_ticks;
 
       if (is_bpm_on_step) {
         debug_print_step_info("INT");
@@ -107,9 +107,13 @@ signed long bpm_clock() {
     MIDIOUT.sendStart();
   }
 
-  if (received_ticks%cc_value_clock_tick_ratio==0) {
+  /*if (received_ticks%cc_value_clock_tick_ratio==0) {
+    Serial.printf("about to tick for %i because clock_tick_ratio %i\t", received_ticks, cc_value_clock_tick_ratio);*/
     midi_send_clock(received_ticks);
-  }
+    /*Serial.println("");
+  } else {
+    Serial.printf("didn't tick for %i because clock_tick_ratio %i\n", received_ticks, cc_value_clock_tick_ratio);
+  }*/
   pf.l(PF::PF_BPM, millis()-now);
   return received_ticks;
 }
@@ -182,7 +186,6 @@ void bpm_receive_clock_tick () {
   }
 
   bpm_update_status(received_ticks);
-
 
   if (is_bpm_on_step) {
     push_beat(now - last_beat_at);

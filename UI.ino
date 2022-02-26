@@ -119,17 +119,20 @@ bool handle_ui_ccs(int channel, int number, int value) {
     return true;
   } else if (number==CC_CHANNEL_BITBOX_DRUMS_OUT) {
     if (MIDI_CHANNEL_BITBOX_DRUMS_OUT==value) return true;
+
+    Serial.printf("handle_ui_ccs received cc %i value %i\n", number, value);
     
     midi_kill_notes_bitbox_drums();
-    kill_envelopes(); // todo: only kill the envelopes going out to bitbox (ie shadow triggers)
+    //kill_envelopes(); // todo: only kill the envelopes going out to bitbox (ie shadow triggers)
     MIDI_CHANNEL_BITBOX_DRUMS_OUT = value;
     return true;
   } else if (number==CC_CHANNEL_GATE_OUT) {
     if (midi_channel_muso_gate==value) return true;
     
     midi_kill_notes_muso_drums();
-    kill_envelopes(); // todo: only kill the envelopes going out to muso (ie cv)
+    //kill_envelopes(); // todo: only kill the envelopes going out to muso (ie cv)
     midi_channel_muso_gate = value;
+    return true;
   }
 
   return false;
