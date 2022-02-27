@@ -15,10 +15,10 @@ void bpm_update_status( unsigned int received_ticks ) {
   current_phrase  =  (received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) / BARS_PER_PHRASE;
   //Serial.printf("bpm_update_status: current_phrase is %i from received_ticks %i\r\n", current_phrase, received_ticks);
 
-  is_bpm_on_beat   = (0==received_ticks%PPQN);
-  is_bpm_on_step   = (0==received_ticks%TICKS_PER_STEP);
-  is_bpm_on_bar    = is_bpm_on_beat && current_beat == 0;
-  is_bpm_on_phrase = is_bpm_on_bar && (current_bar % BARS_PER_PHRASE) == 0;
+  is_bpm_on_beat   = 0==received_ticks || (0==received_ticks%PPQN);
+  is_bpm_on_step   = 0==received_ticks || (0==received_ticks%TICKS_PER_STEP);
+  is_bpm_on_bar    = 0==received_ticks || (is_bpm_on_beat && current_beat == 0);
+  is_bpm_on_phrase = 0==received_ticks || (is_bpm_on_bar && (current_bar % BARS_PER_PHRASE) == 0);
   if (is_bpm_on_beat) {
     current_song_position = received_ticks/PPQN;  // TODO: need to take into account that song position is set by the DAW sometimes....
     //Serial.printf("current_beat is %i, current song position is %i\r\n", current_beat, current_song_position);
@@ -57,6 +57,12 @@ void debug_print_step_info(char *mode) {
 }
 
 signed long bpm_clock() {
+
+  if (received_ticks==0) {
+    //handleStart();  // if we've reset our clock, send MIDI start
+    MIDIOUT.sendStart();
+  }
+
   unsigned long now = millis();
   if (/*now - last_input_at > IDLE_TIMEOUT && activeNotes==0 && */now - last_tick_at > IDLE_TIMEOUT ) {
     // internal mode branch
@@ -85,7 +91,7 @@ signed long bpm_clock() {
     // external clock branched
     if (bpm_internal_mode) {
       // we only just switched from internal to external, so need to reset clock?
-      bpm_reset_clock(-1);
+      bpm_reset_clock(0);
     }
     bpm_internal_mode = false;
     static int last_tick;
@@ -102,13 +108,10 @@ signed long bpm_clock() {
     return -1;
   }*/
 
-  if (received_ticks==0) {
-    //handleStart();  // if we've reset our clock, send MIDI start
-    MIDIOUT.sendStart();
-  }
 
   /*if (received_ticks%cc_value_clock_tick_ratio==0) {
     Serial.printf("about to tick for %i because clock_tick_ratio %i\t", received_ticks, cc_value_clock_tick_ratio);*/
+  if (bpm_internal_mode)
     midi_send_clock(received_ticks);
     /*Serial.println("");
   } else {
@@ -175,6 +178,8 @@ double bpm_calculate_current () {
 
 
 void bpm_receive_clock_tick () {
+  midi_send_clock(received_ticks);
+
   received_ticks++;
   unsigned long now = millis();
 

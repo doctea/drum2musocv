@@ -120,7 +120,7 @@ void handleSongPosition(unsigned int steps) {
   song_position = steps/4;  
   
   received_ticks = steps * TICKS_PER_STEP;    // this should work with the BPM handling...?
-  bpm_update_status(received_ticks-1);
+  bpm_update_status(received_ticks);
 
   //Serial.printf("Received song position of %i received_ticks which is %i steps ", received_ticks, steps);
   //Serial.printf("(current_step=%i) (and so should be song phrase %i?)\r\n",  current_step, current_phrase); //(received_ticks/(TICKS_PER_STEP*STEPS_PER_BEAT*BEATS_PER_BAR)) / BARS_PER_PHRASE;);
@@ -140,7 +140,7 @@ void handleStart() {
   MIDIOUT.sendStart();
   //playing = true;
   //Serial.println("Resetting clock - received handleStart!");
-  bpm_reset_clock(-1);  // -1 so next tick will be start
+  bpm_reset_clock(0);  // -1 so next tick will be start
 }
 void handleContinue() {
   // TODO: continue LFOs
@@ -158,7 +158,7 @@ void handleStop() {
   harmony.kill_notes();
 
   Serial.println("Resetting clock - received handleStop!");
-  bpm_reset_clock(-1);  // -1 to make sure next tick is treated as first step of beat
+  bpm_reset_clock(0);  // -1 to make sure next tick is treated as first step of beat
   last_input_at = millis();
   //playing = false;
   
