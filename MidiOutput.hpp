@@ -284,9 +284,7 @@ void midi_send_clock(unsigned long received_ticks) {
 
   //Serial.println("midi_send_clock()");
   if (received_ticks != last_clock_ticked) {
-#ifdef ENABLE_CLOCK_TRIGGER
-  process_clock_triggers(received_ticks);
-#endif
+
     /*if (received_ticks%cc_value_clock_tick_ratio==0) {
       if (DEBUG_CLOCK) Serial.printf("midi_send_clock(%i) with delta %ims\n", received_ticks, millis()-last_clock_ticked_millis);*/
       MIDIOUT.sendClock();
