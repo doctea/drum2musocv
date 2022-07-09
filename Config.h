@@ -56,4 +56,4 @@
 #define DEFAULT_AUTO_PROGRESSION_ENABLED    false //true  // automatically play chords in progression order?
 #define DEFAULT_BASS_ONLY_WHEN_NOTE_HELD    false // 
 #define DEFAULT_SCALE                       0     // 0 = major, 1 = minor... 7 = hungarian minor
-#define DEFAULT_AUTO_SCALE_ENABLED          true  //false   // true to increment scale on phrase change
+#define DEFAULT_AUTO_SCALE_ENABLED          false  //false   // true to increment scale on phrase change

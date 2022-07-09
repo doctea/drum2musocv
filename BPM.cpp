@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "BPM.hpp"
 
 #include "MidiInput.hpp"
