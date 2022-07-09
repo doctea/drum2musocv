@@ -10,9 +10,9 @@
             "includePath": [
                 "c:/Users/docte/Documents/Arduino/drum2musocv/include",
                 "c:/Users/docte/Documents/Arduino/drum2musocv/src",
-                "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDI Library/src",
                 "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/USB-MIDI/src",
                 "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDIUSB/src",
+                "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDI Library/src",
                 ""
             ],
             "browse": {
@@ -20,9 +20,9 @@
                 "path": [
                     "c:/Users/docte/Documents/Arduino/drum2musocv/include",
                     "c:/Users/docte/Documents/Arduino/drum2musocv/src",
-                    "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDI Library/src",
                     "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/USB-MIDI/src",
                     "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDIUSB/src",
+                    "c:/Users/docte/Documents/Arduino/drum2musocv/.pio/libdeps/seeed_zero/MIDI Library/src",
                     ""
                 ]
             },
