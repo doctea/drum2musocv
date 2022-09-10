@@ -1,3 +1,4 @@
+#include <Arduino.h>
 
 #include <DebounceEvent.h>
 
@@ -9,19 +10,17 @@
 #define CC_CHANNEL_BITBOX_DRUMS_OUT 14    // set the MIDI channel to output the shadow drum triggers (default 11) 
 #define CC_CHANNEL_GATE_OUT   15    // set the MIDI channel to output the Muso drum triggers (default 16)
 
-#ifdef ENABLE_BUTTONS
-DebounceEvent button1 = DebounceEvent(BUTTON_PIN_1, handleButtonPressed, BUTTON_PUSHBUTTON, 50);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
-DebounceEvent button2 = DebounceEvent(BUTTON_PIN_2, handleButtonPressed, BUTTON_PUSHBUTTON, 50); // | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
+int ui_last_action = ACTION_NONE;
+short demo_mode = 0;
+unsigned long button_pressed_at = 0;
 
+#ifdef ENABLE_BUTTONS
 void setup_buttons() {
   //button = 
   //pinMode (BUTTON_PIN_2, INPUT_PULLUP);
 }
 
-void update_buttons() {
-  button1.loop();
-  button2.loop();
-}
+bool set_demo_mode(int mode);
 
 bool first_ignored = false;
 void handleButtonPressed(uint8_t pin, uint8_t event, uint8_t count, uint16_t length) {
@@ -136,4 +135,12 @@ bool handle_ui_ccs(int channel, int number, int value) {
   }
 
   return false;
+}
+
+DebounceEvent button1 = DebounceEvent(BUTTON_PIN_1, handleButtonPressed, BUTTON_PUSHBUTTON, 50);// | BUTTON_DEFAULT_LOW );// | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
+DebounceEvent button2 = DebounceEvent(BUTTON_PIN_2, handleButtonPressed, BUTTON_PUSHBUTTON, 50); // | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP);  // may need to change these if using different circuit;
+
+void update_buttons() {
+  button1.loop();
+  button2.loop();
 }

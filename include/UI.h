@@ -5,7 +5,6 @@
 #define BUTTON_PIN_1 A0
 #define BUTTON_PIN_2 8
 
-
 #define MODE_STANDBY            0
 #define MODE_EUCLIDIAN          1
 #define MODE_EUCLIDIAN_MUTATION 2
@@ -22,12 +21,9 @@
 
 #define CC_DEMO_MODE  19        // choose playback mode - 0=None, 1=Euclidian, 2=Euclidian with mutation, 3=Random triggers
 
-short demo_mode = 0;
-
-unsigned long button_pressed_at = 0;
-
-int ui_last_action = ACTION_NONE;
-
+extern short demo_mode;
+extern unsigned long button_pressed_at;
+extern int ui_last_action;
 
 void setup_buttons();
 void update_buttons();

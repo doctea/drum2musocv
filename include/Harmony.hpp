@@ -91,7 +91,7 @@ namespace HARMONY {
 #include "BPM.hpp"
 #include "ChannelState.hpp"
 
-ChannelState autobass_input = ChannelState();   // global tracking notes that are held on incoming bass channel
+extern ChannelState autobass_input;   // global tracking notes that are held on incoming bass channel
 
 
 ///////////////////// overall harmony settings /////////////////////
@@ -135,58 +135,18 @@ ChannelState autobass_input = ChannelState();   // global tracking notes that ar
 
 
 #define CHORD_PROGRESSION_LENGTH  ((int)(sizeof(chord_progression)/sizeof(chord_progression[0])))      // how many chords in progression
-#define NUM_SCALES                (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
+//#define NUM_SCALES                (sizeof(scale_offset) / sizeof(scale_offset[0]))      // how many scales we know about in total
 #define NUM_SEQUENCES             (sizeof(sequence) / sizeof(sequence[0]))              // how many sequences we know about in total
 #define HARM_SEQUENCE_LENGTH      ((int)(sizeof(sequence[0])/sizeof(sequence[0][0])))   // how many notes in arps
 
-#define SCALE_SIZE  7
+#define SCALE_SIZE 7
+#define NUM_SCALES 8
 
-int scale_offset[][SCALE_SIZE] = {
-  { 0, 2, 4, 5, 7, 9, 11 },     // major scale
-  { 0, 2, 3, 5, 7, 8, 10 },     // natural minor scale
-  { 0, 2, 3, 5, 7, 9, 11 },     // melodic minor scale 
-  { 0, 2, 3, 5, 7, 8, 11 },     // harmonic minor scale
-  { 0, 2, 4, 6, 7, 9, 11 },     // lydian
-  { 0, 2, 4, 6, 8, 10, (12) },  // whole tone - 6 note scale - flavours for matching melody to chords
-  { 0, 3, 5, 6, 7, 10, (12) },  // blues - flavours for matching melody to chords
-  { 0, 2, 3, 6, 7, 8, 11 },     // hungarian minor scale
-
-  // minor pent = natural minor but miss out 2nd and 8th
-  // major pent = major but miss out 5th and 11th
-
-  // mode of C - use chord but use the scale of
-  // dorian D E F G A B C D
-  //         2 1 2 2 2 2 2 
-  // 6 modes per scale
-
-  // relative major/minor are modes of each other
-  //    C maj is also A minor
-};
-
-
+extern int scale_offset[NUM_SCALES][SCALE_SIZE];
 
 // for use by qsort
-int sort_pitch(const void *cmp1, const void *cmp2)
-{
-  // Need to cast the void * to int *
-  int a = *((int *)cmp1);
-  int b = *((int *)cmp2);
-  // The comparison
-  //if (a==b==-1) return 0;
-  if (b==-1 && a>b) return -1;
-  if (a==-1 && b>a) return 1;
-  
-  return a < b ? 
-          -1 : // a > b
-          (a > b ? 
-              1 : // a < b
-              0); // equal
-}
-
-void sort_pitches(int pitches[], int len) {
-  qsort(pitches, len, sizeof(pitches[0]), sort_pitch);
-}
-
+int sort_pitch(const void *cmp1, const void *cmp2);
+void sort_pitches(int pitches[], int len);
 
 // track the current harmony state and send MIDI as appropriate when triggered
 class Harmony {
@@ -200,10 +160,10 @@ class Harmony {
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_ROOT_OUT,  DEFAULT_PAD_ROOT_OUT_OFFSET),  // with octave offset
         MidiKeysOutput(DEFAULT_MIDI_CHANNEL_PAD_PITCH_OUT, DEFAULT_PAD_PITCH_OUT_OFFSET).set_melody_mode(HARMONY::MELODY_MODE::ARPEGGIATE)  // with octave offset
     }; 
-#define mko_bass        mko[0]
-#define mko_keys        mko[1]
-#define mko_pads_root   mko[2]
-#define mko_pads_pitch  mko[3]
+    #define mko_bass        mko[0]
+    #define mko_keys        mko[1]
+    #define mko_pads_root   mko[2]
+    #define mko_pads_pitch  mko[3]
 
     int scale_number = DEFAULT_SCALE;   // index of the current scale we're in
     int chord_number = 0;               // index of the current chord degree that we're playing (0-6, well actually can be negative or go beyond that to access lower&higher octaves)
@@ -959,6 +919,6 @@ class Harmony {
 };
 
 // for use globally
-Harmony harmony = Harmony(autobass_input);
+extern Harmony harmony;
 
 #endif

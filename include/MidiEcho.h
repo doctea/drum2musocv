@@ -11,17 +11,11 @@ void echo_douse_trigger(int trigger, int velocity);
 bool handle_midiecho_ccs(int channel, int number, int value);
 void initialise_pitch_for_triggers();
 
-bool midiecho_enabled = true;
+extern bool midiecho_enabled;
 
-int pitch_for_trigger[NUM_TRIGGERS + NUM_ENVELOPES];
+extern int pitch_for_trigger[NUM_TRIGGERS + NUM_ENVELOPES];
 
-void debug_pitch_for_trigger() {
-  Serial.printf("=== trigger-pitch mapping for mode %i ===\r\n", MUSO_MODE);
-  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
-    Serial.printf("   trigger[%i] = pitch %i\r\n", i, pitch_for_trigger[i]);
-  }
-  Serial.printf("^^^ trigger-pitch mappings ^^^");
-}
+void debug_pitch_for_trigger();
 
 //String get_note_name(int pitch);
 

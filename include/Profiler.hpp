@@ -1,6 +1,8 @@
 #ifndef PROFILER_INCLUDED
 #define PROFILER_INCLUDED
 
+#include "Arduino.h"
+
 enum PF {
     PF_PIXELS,
     PF_EUCLIDIAN,
@@ -42,6 +44,6 @@ public:
     }
 };
 
-profiler pf = profiler();
+extern profiler pf;
 
 #endif

@@ -58,24 +58,24 @@ enum mutate_modes : int {
   EUCLIDIAN_MUTATE_MODE_MASKED = 4,
   EUCLIDIAN_MUTATE_MODE_MAX = 5
 };
-int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
+extern int euclidian_mutate_mode;
 
-int euclidian_mutate_minimum_pattern = DEFAULT_MUTATE_MINIMUM_PATTERN; // default 1 so that kick never mutates
-int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
+extern int euclidian_mutate_minimum_pattern;
+extern int euclidian_mutate_maximum_pattern;
 
-float max_euclidian_density = 1.2f;
+extern float max_euclidian_density;
 
-bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
+extern bool euclidian_reset_before_mutate;
 
-bool mutate_harmony_root    = false;
-bool mutate_enabled         = false;
-bool mask_enabled           = false;
-bool euclidian_fills_enabled = true;
+extern bool mutate_harmony_root;
+extern bool mutate_enabled;
+extern bool mask_enabled;
+extern bool euclidian_fills_enabled;
 
-bool euclidian_auto_play    = true;
+extern bool euclidian_auto_play;
 
-bool euclidian_shuffle_hats = false; //true;
-bool euclidian_flam_clap    = false; //true;
+extern bool euclidian_shuffle_hats;
+extern bool euclidian_flam_clap;
 
 typedef struct {
   bool active_status = true;
@@ -86,13 +86,17 @@ typedef struct {
   int tie_on = 0;
 } pattern_t;
 
-pattern_t patterns[NUM_PATTERNS];
-
+extern pattern_t patterns[NUM_PATTERNS];
 
 void initialise_euclidian();
 bool handle_euclidian_ccs(byte channel, byte number, byte value);
 bool euclidian_set_auto_play (bool enable = true);
 void process_euclidian(int ticks);
-
+void rotate_pattern(pattern_t *p, int rotate);
+void mutate_euclidian_total(int pattern);
+void mutate_euclidian(int pattern);
+void mutate_euclidian_masked(int pattern);
+void mutate_euclidian_acidbanger(int pattern);
+void mask_patterns (pattern_t *target, pattern_t *op_pattern);
 
 #endif

@@ -2,10 +2,55 @@
 
 #include "BPM.hpp"
 
+#include "MidiSetup.hpp"
 #include "MidiInput.hpp"
 #include "Profiler.hpp"
 
+#include "MidiOutput.hpp"
+
+float estimated_ms_per_tick = 0.0f;
+
+int last_tick = -1;
+
 bpm_status bpm = bpm_status();
+
+bool is_bpm_on_beat = false;
+bool is_bpm_on_step = false;
+bool is_bpm_on_bar  = false;
+bool is_bpm_on_phrase=false;
+
+bool bpm_internal_mode = true;
+
+double bpm_current = 60.0f; //90.0f; //60.0f; //120.0f;
+double last_bpm = bpm_current;
+
+int euclidian_seed_modifier = 0;
+int euclidian_seed_modifier_2 = 0;
+bool euclidian_seed_use_phrase      = true;
+
+uint8_t cc_value_clock_tick_ratio = DEFAULT_CLOCK_TICK_RATIO; 
+
+unsigned long received_ticks = 0;
+unsigned long last_tick_received_at = 0;
+unsigned long last_tick_at = 0;   // not sure if this is necessary/duplicate?
+unsigned long first_tick_received_at = 0;
+
+// for telling the rest of the program about what step and beat we're on
+int current_total_step = 0;
+int current_total_beat = 0;
+int current_total_bar  = 0;
+int current_step = 0; 
+int current_beat = 0; 
+int current_bar  = 0;
+int current_phrase = 0;
+int current_song_position = 0;
+
+unsigned int song_position; // number of beats in total
+
+int last_beat_stamp[last_beat_sample_size];
+int ph = 0;
+unsigned long last_beat_at = 0;
+unsigned long last_ticked = 0;
 
 void bpm_update_status( unsigned int received_ticks ) {
   current_total_step = (received_ticks/TICKS_PER_STEP);
@@ -33,6 +78,8 @@ void bpm_reset_clock (int offset) {
   last_tick_received_at = 0;
   first_tick_received_at = 0;
   last_ticked = millis();
+
+  last_tick = -1;
   
   memset(last_beat_stamp,0,sizeof(last_beat_stamp));  // clear the bpm calculator history
 
@@ -57,6 +104,7 @@ void debug_print_step_info(char *mode) {
     Serial.println("");
 #endif
 }
+
 
 signed long bpm_clock() {
 
@@ -96,7 +144,7 @@ signed long bpm_clock() {
       bpm_reset_clock(0);
     }
     bpm_internal_mode = false;
-    static int last_tick;
+    //static int last_tick = -1;
     if (last_tick!=received_ticks) {
       bpm_update_status(received_ticks);
       last_tick = received_ticks;

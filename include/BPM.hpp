@@ -6,7 +6,7 @@
 
 #include "Profiler.hpp"
 
-float estimated_ms_per_tick = 0.0f;
+extern float estimated_ms_per_tick;
 
 // utility functions for calculating BPM etc
 
@@ -23,41 +23,41 @@ float estimated_ms_per_tick = 0.0f;
 //#define DEFAULT_CLOCK_TICK_RATIO    1      // use this to send standard MIDI clock at 24 PPQN
 ////#define DEFAULT_CLOCK_TICK_RATIO  PPQN   // or use this to only send 1 clock tick per beat
 
-byte cc_value_clock_tick_ratio = DEFAULT_CLOCK_TICK_RATIO; 
+extern uint8_t cc_value_clock_tick_ratio; // = DEFAULT_CLOCK_TICK_RATIO; 
 
-unsigned long received_ticks = 0;
-unsigned long last_tick_received_at = 0;
-unsigned long last_tick_at = 0;   // not sure if this is necessary/duplicate?
-unsigned long first_tick_received_at = 0;
+extern unsigned long received_ticks;
+extern unsigned long last_tick_received_at;
+extern unsigned long last_tick_at;   // not sure if this is necessary/duplicate?
+extern unsigned long first_tick_received_at;
 
 // for telling the rest of the program about what step and beat we're on
-int current_total_step = 0;
-int current_total_beat = 0;
-int current_total_bar  = 0;
-int current_step = 0; 
-int current_beat = 0; 
-int current_bar  = 0;
-int current_phrase = 0;
-int current_song_position = 0;
+extern int current_total_step;
+extern int current_total_beat;
+extern int current_total_bar;
+extern int current_step;
+extern int current_beat;
+extern int current_bar;
+extern int current_phrase;
+extern int current_song_position;
 
-unsigned int song_position; // number of beats in total
+extern unsigned int song_position; // number of beats in total
 
-bool is_bpm_on_beat = false;
-bool is_bpm_on_step = false;
-bool is_bpm_on_bar  = false;
-bool is_bpm_on_phrase=false;
+extern bool is_bpm_on_beat;
+extern bool is_bpm_on_step;
+extern bool is_bpm_on_bar;
+extern bool is_bpm_on_phrase;
 
-double bpm_current = 60.0f; //90.0f; //60.0f; //120.0f;
-double last_bpm = bpm_current;
+extern double bpm_current;
+extern double last_bpm;
 
-bool bpm_internal_mode = false;
+extern bool bpm_internal_mode;
 
 // stuff for calculating BPM
 #define last_beat_sample_size 4
-int last_beat_stamp[last_beat_sample_size];
-int ph = 0;
-unsigned long last_beat_at = 0;
-static unsigned long last_ticked = 0;
+extern int last_beat_stamp[last_beat_sample_size];
+extern int ph;
+extern unsigned long last_beat_at;
+extern unsigned long last_ticked;
 
 
 // prototypes
@@ -68,17 +68,13 @@ signed long bpm_clock();
 
 //bool playing = false;
 
-int euclidian_seed_modifier = 0;
-int euclidian_seed_modifier_2 = 0;
-bool euclidian_seed_use_phrase      = true;
+extern int euclidian_seed_modifier;
+extern int euclidian_seed_modifier_2;
+extern bool euclidian_seed_use_phrase;
 
-unsigned int get_euclidian_seed() {
-  int seed = euclidian_seed_modifier;
-  if (euclidian_seed_modifier_2 > 0)  seed *= (256 + euclidian_seed_modifier_2 * 2);
-  if (euclidian_seed_use_phrase)      seed += current_phrase + 1;
-  if (seed == 0) seed = 1;
-  return seed;
-}
+unsigned int get_euclidian_seed();
+
+extern int last_tick;
 
 double bpm_calculate_current ();
 

@@ -1,4 +1,6 @@
+#include <Arduino.h>
 
+#include "MidiSetup.hpp"
 
 void NOISY_DEBUG(long t, int d) {
 #ifdef USB_NATIVE
@@ -14,7 +16,7 @@ void NOISY_DEBUG(long t, int d) {
   }
 }
 
-void NUMBER_DEBUG(byte channel, byte data1, byte data2) {
+void NUMBER_DEBUG(uint8_t channel, uint8_t data1, uint8_t data2) {
 #ifdef USB_NATIVE
   Serial.print("NUMBER_DEBUG: ");
   Serial.print("channel ");

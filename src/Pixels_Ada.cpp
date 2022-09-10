@@ -22,6 +22,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#include "Drums.h"
 
 // How many leds in your strip?
 #define NUM_LEDS 16 //128

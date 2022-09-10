@@ -14,6 +14,7 @@
 #include "ChannelState.hpp"
 #include "MidiSetup.hpp"
 #include "Envelopes.h"
+#include "MidiSetup.hpp"
 
 // for providing multiple MIDI key outputs ie bass and harmony
 //  todo: properly handle multiple notes being on at the same time for tracking chords

@@ -2,6 +2,17 @@
 
 #include "MidiEcho.h"
 
+int pitch_for_trigger[NUM_TRIGGERS + NUM_ENVELOPES];
+bool midiecho_enabled = true;
+
+void debug_pitch_for_trigger() {
+  Serial.printf("=== trigger-pitch mapping for mode %i ===\r\n", MUSO_MODE);
+  for (int i = 0 ; i < NUM_TRIGGERS ; i++) {
+    Serial.printf("   trigger[%i] = pitch %i\r\n", i, pitch_for_trigger[i]);
+  }
+  Serial.printf("^^^ trigger-pitch mappings ^^^");
+}
+
 void initialise_pitch_for_triggers() {
   int t = 0;
   pitch_for_trigger[t++] = GM_NOTE_ELECTRIC_BASS_DRUM;  //Electric Bass Drum - C5 72  // mode 0B = gate 1 = pin D1      / in mode 2B = pitch gate 1 / in mode 1B = pitch gate 1

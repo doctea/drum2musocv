@@ -1,3 +1,4 @@
 __offcuts/*
 collect_presets.sh
 .pio/*
+.vscode/*

@@ -1,10 +1,11 @@
+#include <Arduino.h>
 #include "SinTables.h"
-
 #include "Profiler.hpp"
-
 #include "MidiOutput.hpp"
+#include "Envelopes.h"
 
-
+uint8_t cc_value_sync_modifier = 24;  // initial global clock sync modifier -- number of real ticks per 24 pseudoticks ?
+envelope_state envelopes[NUM_ENVELOPES_EXTENDED];
 
 void initialise_envelopes() {
   // set up the default envelope states
@@ -170,19 +171,6 @@ void update_envelope (byte env_num, byte velocity, bool state) {
     }
   }
   pf.l(PF::PF_ENVELOPES, millis()-env_time);
-}
-
-// process all the envelopes
-void process_envelopes(unsigned long now) {
-  unsigned long envelope_time = millis();
-  static unsigned long last_processed = 0;
-  if (now==last_processed) return;
-  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
-    process_envelope(i, now);
-  }
-  last_processed = now;
-  //Serial.printf("envelopes processed in %ims\n", millis()-envelope_time);
-  pf.l(PF::PF_ENVELOPES, millis()-envelope_time);
 }
 
 //#define DEBUG_ENVELOPES
@@ -388,9 +376,23 @@ void process_envelope(byte i, unsigned long now) {
       /*if (envelopes[i].invert)
         Serial.printf("not sending for envelope %i cos already sent %i\n", i, envelopes[i].last_sent_actual_lvl);*/
     }
-
-
 }
+
+
+
+// process all the envelopes
+void process_envelopes(unsigned long now) {
+  unsigned long envelope_time = millis();
+  static unsigned long last_processed = 0;
+  if (now==last_processed) return;
+  for (byte i = 0 ; i < NUM_ENVELOPES_EXTENDED ; i++) {
+    process_envelope(i, now);
+  }
+  last_processed = now;
+  //Serial.printf("envelopes processed in %ims\n", millis()-envelope_time);
+  pf.l(PF::PF_ENVELOPES, millis()-envelope_time);
+}
+
 
 // trigger any envelopes that have been told to respond to given channel
 void fire_envelope_for_channel(int channel, int velocity) {

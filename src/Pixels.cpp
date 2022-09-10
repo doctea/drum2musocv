@@ -10,6 +10,8 @@
 #include "Euclidian.h"
 #include "MidiInput.hpp"
 
+#include "Pixels.h"
+
 #define ENABLE_PIXEL_POSITION
 //#define NO_IDLE_PIXEL_POSITION // unused
 #define REVERSE_LEDS           // if pixel strips should be reversed
@@ -148,21 +150,21 @@ void update_pixels_triggers() {
       int pixel_type = PIX_NONE; //PIX_TRIGGER;
       bool active = false;
 
-#ifdef REVERSE_LEDS
-      int p = NUM_LEDS - i - 1;
-      if (p >= STRIP_LENGTH) {
-        // reverse for the second strip
-        p = NUM_LEDS - (p % STRIP_LENGTH) - 1;
-      } else {
-        p = STRIP_LENGTH - p - 1;
-      }
-#else
-      int p = i;
-      if (p >= STRIP_LENGTH) {
-        // reverse for the second strip
-        p = STRIP_LENGTH + (p % STRIP_LENGTH);
-      } 
-#endif
+      #ifdef REVERSE_LEDS
+            int p = NUM_LEDS - i - 1;
+            if (p >= STRIP_LENGTH) {
+              // reverse for the second strip
+              p = NUM_LEDS - (p % STRIP_LENGTH) - 1;
+            } else {
+              p = STRIP_LENGTH - p - 1;
+            }
+      #else
+            int p = i;
+            if (p >= STRIP_LENGTH) {
+              // reverse for the second strip
+              p = STRIP_LENGTH + (p % STRIP_LENGTH);
+            } 
+      #endif
 
       // determine if this pixel is active and what type, and set 't' to the trigger or envelope
       int t = get_trigger_for_pixel(i);
@@ -212,14 +214,14 @@ void update_pixels_triggers() {
           colour = CRGB::Black;
       }
 
-#ifdef ENABLE_PIXEL_POSITION
-#ifdef NO_ACTIVE_PIXEL_POSITION
-      unsigned long now = millis();
-      //Serial.printf("  pixels -- now is %u, last_input_at is %u, last_tick_at is %u, IDLE is %u\r\n", now, last_input_at, last_tick_at, IDLE_PIXEL_TIMEOUT);
-      if (/*!playing &&*/ (now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT)
-          && activeNotes==0
-      ) {
-#endif
+      #ifdef ENABLE_PIXEL_POSITION
+        #ifdef NO_ACTIVE_PIXEL_POSITION
+              unsigned long now = millis();
+              //Serial.printf("  pixels -- now is %u, last_input_at is %u, last_tick_at is %u, IDLE is %u\r\n", now, last_input_at, last_tick_at, IDLE_PIXEL_TIMEOUT);
+              if (/*!playing &&*/ (now - last_input_at > IDLE_PIXEL_TIMEOUT && now - last_tick_at > IDLE_PIXEL_TIMEOUT)
+                  && activeNotes==0
+              ) {
+        #endif
         int beats = current_song_position % NUM_LEDS;
         //Serial.printf("  pixels -- i is %i, beats is %i\r\n", i, beats);
         int steps = current_step;
@@ -234,13 +236,13 @@ void update_pixels_triggers() {
         if (p==0) {
           //Serial.println("pixel loop");
         }
-#ifdef NO_ACTIVE_PIXEL_POSITION
-      } /*else {
-        Serial.printf("isn't idle?  now is %u, last_input_at is %u, last_tick_at is %u, ", now, last_input_at, last_tick_at);
-        Serial.printf("pixel_timeout is %u, activeNotes is %i\r\n", IDLE_PIXEL_TIMEOUT, activeNotes);
-      }*/
-#endif
-#endif
+        #ifdef NO_ACTIVE_PIXEL_POSITION
+              } /*else {
+                Serial.printf("isn't idle?  now is %u, last_input_at is %u, last_tick_at is %u, ", now, last_input_at, last_tick_at);
+                Serial.printf("pixel_timeout is %u, activeNotes is %i\r\n", IDLE_PIXEL_TIMEOUT, activeNotes);
+              }*/
+        #endif
+      #endif  
 
       if (button_pressed_at > now - UI_BUTTON_PRESSED_INDICATOR_INTERVAL) {
         // use i instead of p 
@@ -260,8 +262,6 @@ void update_pixels_triggers() {
     if (changed)
       FastLED.show();
 }
-
-
 
 #endif
 #endif

@@ -1,6 +1,8 @@
 // from https://forum.arduino.cc/index.php?topic=69723.0 with thanks
 // only skimmed before i yoinked, might be a faster/more accurate version in the thread
 
+#include "Arduino.h"
+
 #ifndef SINTABLES_INCLUDED
 #define SINTABLES_INCLUDED TRUE
 

@@ -1,29 +1,57 @@
 // based on example code/pseudocode from https://www.computermusicdesign.com/simplest-euclidean-rhythm-algorithm-explained/
 
+#include "MidiSetup.hpp"
+
 #include "Euclidian.h"
 #include "MidiOutput.hpp" // because we need to send MIDI
 #include "BPM.hpp"  // cos we need to know lengths
+
 
 #include "Profiler.hpp"
 
 //#define EUC_DEBUG
 
 #ifdef EUC_DEBUG
-#define EUC_DEBUG 1
+  #define EUC_DEBUG 1
 #else
-#define EUC_DEBUG 0
+  #define EUC_DEBUG 0
 #endif
 
 // https://stackoverflow.com/questions/1644868/define-macro-for-debug-printing-in-c/1644898#1644898
 #define EUC_printf(fmt, ...) do { if (EUC_DEBUG) Serial.printf((fmt), ##__VA_ARGS__); } while (0)
 #define EUC_println(fmt, ...) do { if (EUC_DEBUG) Serial.println((fmt), ##__VA_ARGS__); } while (0)
 
-
 bpm_status bpm_statuses[NUM_PATTERNS];
-
 float effective_euclidian_density = 0.566666666666f;
-
 bool euclidian_mutate_density = DEFAULT_EUCLIDIAN_MUTATE_DENSITY;
+pattern_t patterns[NUM_PATTERNS];
+
+int euclidian_mutate_mode = EUCLIDIAN_MUTATE_MODE_TOTAL;
+
+int euclidian_mutate_minimum_pattern = DEFAULT_MUTATE_MINIMUM_PATTERN; // default 1 so that kick never mutates
+int euclidian_mutate_maximum_pattern = NUM_PATTERNS;
+
+float max_euclidian_density = 1.2f;
+
+bool euclidian_reset_before_mutate  = DEFAULT_RESET_BEFORE_MUTATE;
+
+bool mutate_harmony_root    = false;
+bool mutate_enabled         = false;
+bool mask_enabled           = false;
+bool euclidian_fills_enabled = true;
+
+bool euclidian_auto_play    = true;
+
+bool euclidian_shuffle_hats = false; //true;
+bool euclidian_flam_clap    = false; //true;
+
+unsigned int get_euclidian_seed() {
+  int seed = euclidian_seed_modifier;
+  if (euclidian_seed_modifier_2 > 0)  seed *= (256 + euclidian_seed_modifier_2 * 2);
+  if (euclidian_seed_use_phrase)      seed += current_phrase + 1;
+  if (seed == 0) seed = 1;
+  return seed;
+}
 
 void make_euclid(pattern_t *p, int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, int trigger = -1, int tie_on = -1) {
   // fill pattern_t according to parameters
@@ -224,7 +252,7 @@ void process_euclidian(int ticks) {
   if (is_bpm_on_beat && is_bpm_on_step && (is_bpm_on_phrase || (is_bpm_on_bar && current_bar == (BARS_PER_PHRASE / 2)))) { //(received_ticks / PPQN) % (SEQUENCE_LENGTH_STEPS / 2) == 0) { // commented part mutates every 2 bars
 
     // always reset even if not in mutate mode, so that fills work
-    if ((demo_mode!=MODE_ARTSETC || demo_mode==MODE_ARTSETC && mutation_count%4==0) && euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
+    if ((demo_mode!=MODE_ARTSETC || (demo_mode==MODE_ARTSETC) && mutation_count%4==0) && euclidian_reset_before_mutate && (mutate_enabled || euclidian_fills_enabled)) {
       EUC_println("Resetting euclidian before mutation!");
       initialise_euclidian();
     }

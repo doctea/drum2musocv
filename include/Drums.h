@@ -62,7 +62,8 @@
 // the midimuso-cv12 gate and cv output mappings - taken from http://midimuso.co.uk/wp-content/uploads/2017/08/CV_12_ORAC_Manual.pdf
 // for mode 0B (11 gates, 5 CVs + pitch bend)
 //#define DEFAULT_MUSO_GATE_CHANNEL   16   // channel to output triggers (ie gate triggers to notes on this channel)
-int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
+extern int midi_channel_muso_gate;
+
 #define MUSO_GATE_CHANNEL   (midi_channel_muso_gate)
 #define MUSO_NOTE_MINIMUM   60
 #define MUSO_NOTE_GATE_1    60    
@@ -131,6 +132,6 @@ int midi_channel_muso_gate = DEFAULT_MUSO_GATE_CHANNEL;
 #define MIDI_CC_ALL_NOTES_OFF 123
 
 // tracking what triggers are currently active, for the sake of pixel output 
-int trigger_status[NUM_TRIGGERS];
+extern int trigger_status[NUM_TRIGGERS];
 
 #endif
