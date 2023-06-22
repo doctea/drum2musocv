@@ -1,5 +1,7 @@
 # drum2musocv
 
+* Note that I am on the way to replacing this functionality in my system with the [Microlidian](https://github.com/doctea/Microlidian) project instead.
+
 * A USB MIDI interface, originally for adapting the [MidiMuso Orac CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum channel/notes and providing triggerable ADSR envelopes), but now with many added features.
 
 * In active development... very likely to be bugs or things that can be very much improved.  Check back for updates or contact me if you're trying to use this!
