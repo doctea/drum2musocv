@@ -4,7 +4,7 @@
 
 * A USB MIDI interface, originally for adapting the [MidiMuso Orac CV-12](http://midimuso.co.uk/index.php/cv-12/) to be used as a drum machine (mapping GM drum channel/notes and providing triggerable ADSR envelopes), but now with many added features.
 
-* In active development... very likely to be bugs or things that can be very much improved.  Check back for updates or contact me if you're trying to use this!
+* ~~In active development...~~ very likely to be bugs or things that can be very much improved.  Check back for updates or contact me if you're trying to use this!
 
 * Currently targets [Arduino Zero clones](https://www.banggood.com/Geekcreit-SAMD21-M0-Module-32-bit-ARM-Cortex-M0-Core-Development-Board-p-1176168.html)/[Seeeduino Cortex M0+ boards](https://www.seeedstudio.com/Seeeduino-Cortex-M0-p-4070.html), originally started out on an Arduino Uno (probably possible to make it work on a Uno again or other MCUs).
 
